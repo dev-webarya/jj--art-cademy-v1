@@ -17,7 +17,6 @@ public interface UserMapper {
     @Mapping(target = "roles", ignore = true)
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "phoneNumber", ignore = true) // Handled manually or by standard setter
-    @Mapping(target = "managedStore", ignore = true) // Handled by service
     @Mapping(target = "enabled", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -27,8 +26,6 @@ public interface UserMapper {
 
     @Mapping(target = "email", source = "email")
     @Mapping(target = "roles", source = "roles", qualifiedByName = "rolesToRoleNames")
-    @Mapping(target = "assignedStoreId", source = "managedStore.id")
-    @Mapping(target = "assignedStoreName", source = "managedStore.name")
     UserResponse toResponse(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -36,7 +33,6 @@ public interface UserMapper {
     @Mapping(target = "email", source = "email")
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "roles", ignore = true)
-    @Mapping(target = "managedStore", ignore = true) // Handled by service
     @Mapping(target = "enabled", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

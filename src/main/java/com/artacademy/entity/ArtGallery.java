@@ -16,9 +16,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "products")
-// --- FIX: Soft Delete Configuration ---
-@SQLDelete(sql = "UPDATE products SET deleted = true WHERE id = ?")
+@Table(name = "art_galleries")
+// --- Soft Delete Configuration ---
+@SQLDelete(sql = "UPDATE art_galleries SET deleted = true WHERE id = ?")
 @SQLRestriction("deleted = false")
 public class ArtGallery {
 

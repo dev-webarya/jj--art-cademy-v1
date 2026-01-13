@@ -57,10 +57,6 @@ public class User implements UserDetails {
     @Builder.Default
     private boolean deleted = false;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assigned_store_id")
-    private Store managedStore;
-
     @CreationTimestamp
     @Column(updatable = false)
     private Instant createdAt;

@@ -37,7 +37,7 @@ public class ArtMaterialsCategory {
     @Builder.Default
     private Set<ArtMaterialsCategory> subcategories = new HashSet<>();
 
-    @OneToMany(mappedBy = "artMaterialsCategory", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     @Builder.Default
     private Set<ArtMaterials> artMaterials = new HashSet<>();
 

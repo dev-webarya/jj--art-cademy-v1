@@ -3,14 +3,12 @@ package com.artacademy.service.impl;
 import com.artacademy.dto.request.UserRequest;
 import com.artacademy.dto.response.UserResponse;
 import com.artacademy.entity.Role;
-import com.artacademy.entity.Store;
 import com.artacademy.entity.User;
 import com.artacademy.exception.DuplicateResourceException;
 import com.artacademy.exception.InvalidRequestException;
 import com.artacademy.exception.ResourceNotFoundException;
 import com.artacademy.mapper.UserMapper;
 import com.artacademy.repository.RoleRepository;
-import com.artacademy.repository.StoreRepository;
 import com.artacademy.repository.UserRepository;
 import com.artacademy.service.UserService;
 import com.artacademy.specification.UserSpecification;
@@ -37,7 +35,6 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final StoreRepository storeRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final UserSpecification userSpecification;
@@ -67,28 +64,18 @@ public class UserServiceImpl implements UserService {
         if (userRequest.getRoles() == null || userRequest.getRoles().isEmpty()) {
             user.getRoles().add(findRoleByName("ROLE_CUSTOMER"));
         } else {
-            // Restriction: Only Admin can assign Admin/Manager roles
+            // Restriction: Only Admin can assign Admin role
             boolean tryingToAssignPrivileged = userRequest.getRoles().stream()
-                    .anyMatch(r -> r.contains("ADMIN") || r.contains("MANAGER"));
+                    .anyMatch(r -> r.contains("ADMIN"));
 
             if (tryingToAssignPrivileged && !isAdmin) {
-                throw new AccessDeniedException("Only Admins can create Store Managers or other Admins.");
+                throw new AccessDeniedException("Only Admins can create other Admins.");
             }
 
             Set<Role> roles = userRequest.getRoles().stream()
                     .map(this::findRoleByName)
                     .collect(Collectors.toSet());
             user.setRoles(roles);
-        }
-
-        // 4. Store Assignment Logic (Admin Only)
-        if (userRequest.getAssignedStoreId() != null) {
-            if (!isAdmin) {
-                throw new AccessDeniedException("Only Admins can assign users to stores.");
-            }
-            Store store = storeRepository.findById(userRequest.getAssignedStoreId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Store", "id", userRequest.getAssignedStoreId()));
-            user.setManagedStore(store);
         }
 
         user.setEnabled(true);
@@ -140,15 +127,6 @@ public class UserServiceImpl implements UserService {
             existingUser.setRoles(roles);
         }
 
-        // Update Store Assignment (Admin Only)
-        if (userRequest.getAssignedStoreId() != null) {
-            if (!isAdmin)
-                throw new AccessDeniedException("Only Admins can change store assignments.");
-            Store store = storeRepository.findById(userRequest.getAssignedStoreId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Store", "id", userRequest.getAssignedStoreId()));
-            existingUser.setManagedStore(store);
-        }
-
         return userMapper.toResponse(userRepository.save(existingUser));
     }
 
@@ -196,7 +174,7 @@ public class UserServiceImpl implements UserService {
             currentUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         }
 
-        // Roles and Store Assignments are deliberately IGNORED here for security.
+        // Roles are deliberately IGNORED here for security.
 
         return userMapper.toResponse(userRepository.save(currentUser));
     }

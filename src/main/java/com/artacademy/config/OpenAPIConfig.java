@@ -9,6 +9,7 @@ import jakarta.annotation.PostConstruct;
 import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 
 @Configuration
@@ -16,7 +17,9 @@ public class OpenAPIConfig {
 
     @PostConstruct
     public void configureSpringDoc() {
+        // Ignore types that cause schema generation issues
         SpringDocUtils.getConfig().addRequestWrapperToIgnore(Authentication.class);
+        SpringDocUtils.getConfig().addRequestWrapperToIgnore(Pageable.class);
     }
 
     @Bean
@@ -32,8 +35,8 @@ public class OpenAPIConfig {
         SecurityRequirement securityRequirement = new SecurityRequirement().addList(securitySchemeName);
 
         return new OpenAPI()
-                .info(new Info().title("Jewellery App API")
-                        .description("Backend API for the Jewellery App service.")
+                .info(new Info().title("Art Academy API")
+                        .description("Backend API for the Art Academy e-commerce service.")
                         .version("v1.0"))
                 .addSecurityItem(securityRequirement)
                 .components(new Components().addSecuritySchemes(securitySchemeName, securityScheme));

@@ -1,0 +1,25 @@
+package com.artacademy.dto.response;
+
+import lombok.Data;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.UUID;
+
+@Data
+public class ArtExhibitionResponseDto {
+    private UUID id;
+    private String name;
+    private String description;
+    private boolean isActive;
+    private UUID categoryId;
+    private String categoryName;
+    private String imageUrl;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private String location;
+    private Integer artistCount;
+    private Integer artworksCount;
+    private Instant createdAt;
+    private Instant updatedAt;
+}

@@ -19,8 +19,4 @@ public class UserResponse {
     private String email;
     private String phoneNumber;
     private Set<String> roles;
-
-    // New fields for Store info
-    private UUID assignedStoreId;
-    private String assignedStoreName;
 }

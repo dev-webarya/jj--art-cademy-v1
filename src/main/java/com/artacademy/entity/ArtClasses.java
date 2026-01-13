@@ -56,7 +56,7 @@ public class ArtClasses {
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "category_id")
-        private Category category;
+        private ArtClassesCategory category;
 
         @Column(nullable = false)
         private String imageUrl;

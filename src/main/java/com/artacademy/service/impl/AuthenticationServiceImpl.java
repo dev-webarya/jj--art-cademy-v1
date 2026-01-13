@@ -15,7 +15,7 @@ import com.artacademy.repository.RoleRepository;
 import com.artacademy.repository.UserRepository;
 import com.artacademy.security.JwtService;
 import com.artacademy.service.AuthenticationService;
-import com.artacademy.service.notification.JewelleryNotificationService;
+import com.artacademy.service.notification.ArtNotificationService;
 import com.artacademy.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +47,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final EmailOtpRepository emailOtpRepository;
 
     // --- INTEGRATION: Notification Service ---
-    private final JewelleryNotificationService notificationService;
+    private final ArtNotificationService notificationService;
 
     private static final String DEFAULT_ROLE = "ROLE_CUSTOMER";
     private static final String ADMIN_ROLE = "ROLE_ADMIN";

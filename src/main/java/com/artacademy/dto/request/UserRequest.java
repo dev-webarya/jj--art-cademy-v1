@@ -7,7 +7,6 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.Set;
-import java.util.UUID;
 
 @Data
 public class UserRequest {
@@ -29,7 +28,4 @@ public class UserRequest {
     private String password;
 
     private Set<String> roles;
-
-    // New field to assign a manager to a store
-    private UUID assignedStoreId;
 }
