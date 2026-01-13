@@ -1,0 +1,18 @@
+package com.artacademy.security.annotations;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * Security annotation for public endpoints that don't require authentication.
+ * Use this for catalog browsing, public reviews, etc.
+ */
+@Target({ ElementType.METHOD, ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+@PreAuthorize("permitAll()")
+public @interface PublicEndpoint {
+}
