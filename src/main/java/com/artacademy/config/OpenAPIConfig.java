@@ -9,7 +9,6 @@ import jakarta.annotation.PostConstruct;
 import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 
 @Configuration
@@ -19,7 +18,8 @@ public class OpenAPIConfig {
     public void configureSpringDoc() {
         // Ignore types that cause schema generation issues
         SpringDocUtils.getConfig().addRequestWrapperToIgnore(Authentication.class);
-        SpringDocUtils.getConfig().addRequestWrapperToIgnore(Pageable.class);
+        // Pageable is no longer ignored to allow Swagger to generate pagination
+        // controls
     }
 
     @Bean

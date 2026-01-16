@@ -9,11 +9,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Component
 @RequiredArgsConstructor
@@ -23,6 +26,21 @@ public class DataSeeder implements CommandLineRunner {
         private final RoleRepository roleRepository;
         private final UserRepository userRepository;
         private final PasswordEncoder passwordEncoder;
+
+        private final ArtWorksRepository artWorksRepository;
+        private final ArtWorksCategoryRepository artWorksCategoryRepository;
+
+        private final ArtMaterialsRepository artMaterialsRepository;
+        private final ArtMaterialsCategoryRepository artMaterialsCategoryRepository;
+
+        private final ArtClassesRepository artClassesRepository;
+        private final ArtClassesCategoryRepository artClassesCategoryRepository;
+
+        private final ArtExhibitionRepository artExhibitionRepository;
+        private final ArtExhibitionCategoryRepository artExhibitionCategoryRepository;
+
+        private final ArtGalleryRepository artGalleryRepository;
+        private final ArtGalleryCategoryRepository artGalleryCategoryRepository;
 
         @Override
         @Transactional
@@ -43,6 +61,13 @@ public class DataSeeder implements CommandLineRunner {
 
                 // 4. Onboard Sample Customers
                 seedCustomers(roles.get("ROLE_CUSTOMER"));
+
+                // 5. Seed Art Entities
+                seedArtWorks();
+                seedArtMaterials();
+                seedArtClasses();
+                seedArtExhibitions();
+                seedArtGalleries();
 
                 log.info("--- Data Seeding Completed Successfully ---");
         }
@@ -91,5 +116,537 @@ public class DataSeeder implements CommandLineRunner {
                                 .roles(new HashSet<>(Set.of(customerRole)))
                                 .isEnabled(true)
                                 .build());
+        }
+
+        private void seedArtWorks() {
+                log.info("[Phase 4] Seeding Art Works...");
+                if (artWorksRepository.count() > 0)
+                        return;
+
+                // Create 6 categories for ArtWorks
+                ArtWorksCategory paintingCat = artWorksCategoryRepository.save(ArtWorksCategory.builder()
+                                .name("Paintings")
+                                .build());
+
+                ArtWorksCategory sculptureCat = artWorksCategoryRepository.save(ArtWorksCategory.builder()
+                                .name("Sculptures")
+                                .build());
+
+                ArtWorksCategory photographyCat = artWorksCategoryRepository.save(ArtWorksCategory.builder()
+                                .name("Photography")
+                                .build());
+
+                ArtWorksCategory digitalArtCat = artWorksCategoryRepository.save(ArtWorksCategory.builder()
+                                .name("Digital Art")
+                                .build());
+
+                ArtWorksCategory mixedMediaCat = artWorksCategoryRepository.save(ArtWorksCategory.builder()
+                                .name("Mixed Media")
+                                .build());
+
+                ArtWorksCategory printsCat = artWorksCategoryRepository.save(ArtWorksCategory.builder()
+                                .name("Prints & Editions")
+                                .build());
+
+                // Seed 2 artworks per category = 12 total
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artWorksRepository.save(ArtWorks.builder()
+                                        .name("Abstract Painting " + i)
+                                        .description("A beautiful abstract painting featuring vibrant colors and bold strokes #"
+                                                        + i)
+                                        .basePrice(BigDecimal.valueOf(1500 + i * 250))
+                                        .artistName("Maria Santos")
+                                        .ArtMedium("Oil on Canvas")
+                                        .size("24x36")
+                                        .views(100 + i * 10)
+                                        .likes(50 + i * 5)
+                                        .category(paintingCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Painting+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artWorksRepository.save(ArtWorks.builder()
+                                        .name("Modern Sculpture " + i)
+                                        .description("Contemporary bronze sculpture with abstract human form #" + i)
+                                        .basePrice(BigDecimal.valueOf(3500 + i * 500))
+                                        .artistName("David Chen")
+                                        .ArtMedium("Bronze")
+                                        .size("12x12x24")
+                                        .views(80 + i * 10)
+                                        .likes(40 + i * 5)
+                                        .category(sculptureCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Sculpture+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artWorksRepository.save(ArtWorks.builder()
+                                        .name("Urban Landscape " + i)
+                                        .description("Fine art photography capturing city life and architecture #" + i)
+                                        .basePrice(BigDecimal.valueOf(800 + i * 150))
+                                        .artistName("Elena Rodriguez")
+                                        .ArtMedium("Digital Print on Canvas")
+                                        .size("20x30")
+                                        .views(150 + i * 20)
+                                        .likes(75 + i * 10)
+                                        .category(photographyCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Photography+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artWorksRepository.save(ArtWorks.builder()
+                                        .name("Digital Dreams " + i)
+                                        .description("AI-enhanced digital artwork exploring surreal landscapes #" + i)
+                                        .basePrice(BigDecimal.valueOf(600 + i * 100))
+                                        .artistName("Alex Kim")
+                                        .ArtMedium("Digital NFT + Print")
+                                        .size("4K Resolution")
+                                        .views(200 + i * 30)
+                                        .likes(100 + i * 15)
+                                        .category(digitalArtCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=DigitalArt+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artWorksRepository.save(ArtWorks.builder()
+                                        .name("Collage Composition " + i)
+                                        .description("Mixed media collage combining vintage papers and acrylics #" + i)
+                                        .basePrice(BigDecimal.valueOf(1200 + i * 200))
+                                        .artistName("Sophie Turner")
+                                        .ArtMedium("Mixed Media on Board")
+                                        .size("18x24")
+                                        .views(60 + i * 10)
+                                        .likes(30 + i * 5)
+                                        .category(mixedMediaCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=MixedMedia+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artWorksRepository.save(ArtWorks.builder()
+                                        .name("Limited Edition Print " + i)
+                                        .description("Signed and numbered limited edition giclée print #" + i)
+                                        .basePrice(BigDecimal.valueOf(350 + i * 50))
+                                        .artistName("Various Artists")
+                                        .ArtMedium("Giclée on Paper")
+                                        .size("16x20")
+                                        .views(300 + i * 50)
+                                        .likes(150 + i * 25)
+                                        .category(printsCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Print+" + i)
+                                        .build());
+                });
+        }
+
+        private void seedArtMaterials() {
+                log.info("[Phase 5] Seeding Art Materials...");
+                if (artMaterialsRepository.count() > 0)
+                        return;
+
+                // Create 6 categories for ArtMaterials
+                ArtMaterialsCategory brushCat = artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
+                                .name("Brushes")
+                                .build());
+
+                ArtMaterialsCategory paintCat = artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
+                                .name("Paints")
+                                .build());
+
+                ArtMaterialsCategory canvasCat = artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
+                                .name("Canvases & Surfaces")
+                                .build());
+
+                ArtMaterialsCategory drawingCat = artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
+                                .name("Drawing Supplies")
+                                .build());
+
+                ArtMaterialsCategory toolsCat = artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
+                                .name("Art Tools & Accessories")
+                                .build());
+
+                ArtMaterialsCategory paperCat = artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
+                                .name("Paper & Sketchbooks")
+                                .build());
+
+                // Seed 2 materials per category = 12 total
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artMaterialsRepository.save(ArtMaterials.builder()
+                                        .name("Professional Brush Set " + i)
+                                        .description("Premium synthetic brushes for oil and acrylic painting, set of 10")
+                                        .basePrice(BigDecimal.valueOf(45 + i * 10))
+                                        .discount(10)
+                                        .stock(BigDecimal.valueOf(100))
+                                        .category(brushCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Brush+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artMaterialsRepository.save(ArtMaterials.builder()
+                                        .name("Acrylic Paint Set " + i)
+                                        .description("24-color professional grade acrylic paint set")
+                                        .basePrice(BigDecimal.valueOf(65 + i * 15))
+                                        .discount(5)
+                                        .stock(BigDecimal.valueOf(75))
+                                        .category(paintCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Paint+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artMaterialsRepository.save(ArtMaterials.builder()
+                                        .name("Stretched Canvas Pack " + i)
+                                        .description("Pack of 5 pre-stretched cotton canvases, various sizes")
+                                        .basePrice(BigDecimal.valueOf(55 + i * 10))
+                                        .discount(0)
+                                        .stock(BigDecimal.valueOf(50))
+                                        .category(canvasCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Canvas+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artMaterialsRepository.save(ArtMaterials.builder()
+                                        .name("Graphite Pencil Set " + i)
+                                        .description("Professional graphite pencils, 2H to 8B, set of 12")
+                                        .basePrice(BigDecimal.valueOf(25 + i * 5))
+                                        .discount(15)
+                                        .stock(BigDecimal.valueOf(120))
+                                        .category(drawingCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Pencil+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artMaterialsRepository.save(ArtMaterials.builder()
+                                        .name("Artist Palette Knife Set " + i)
+                                        .description("Set of 5 stainless steel palette knives for impasto techniques")
+                                        .basePrice(BigDecimal.valueOf(35 + i * 8))
+                                        .discount(0)
+                                        .stock(BigDecimal.valueOf(60))
+                                        .category(toolsCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Tools+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artMaterialsRepository.save(ArtMaterials.builder()
+                                        .name("Watercolor Sketchbook " + i)
+                                        .description("A4 cold press watercolor sketchbook, 200gsm, 50 sheets")
+                                        .basePrice(BigDecimal.valueOf(20 + i * 5))
+                                        .discount(0)
+                                        .stock(BigDecimal.valueOf(90))
+                                        .category(paperCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Paper+" + i)
+                                        .build());
+                });
+        }
+
+        private void seedArtClasses() {
+                log.info("[Phase 6] Seeding Art Classes...");
+                if (artClassesRepository.count() > 0)
+                        return;
+
+                // Create 6 categories for ArtClasses
+                ArtClassesCategory workshopCat = artClassesCategoryRepository.save(ArtClassesCategory.builder()
+                                .name("Workshops")
+                                .build());
+
+                ArtClassesCategory onlineCat = artClassesCategoryRepository.save(ArtClassesCategory.builder()
+                                .name("Online Courses")
+                                .build());
+
+                ArtClassesCategory privateCat = artClassesCategoryRepository.save(ArtClassesCategory.builder()
+                                .name("Private Lessons")
+                                .build());
+
+                ArtClassesCategory groupCat = artClassesCategoryRepository.save(ArtClassesCategory.builder()
+                                .name("Group Sessions")
+                                .build());
+
+                ArtClassesCategory masterCat = artClassesCategoryRepository.save(ArtClassesCategory.builder()
+                                .name("Masterclasses")
+                                .build());
+
+                ArtClassesCategory kidsCat = artClassesCategoryRepository.save(ArtClassesCategory.builder()
+                                .name("Kids & Teen Classes")
+                                .build());
+
+                // Seed 2 classes per category = 12 total
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artClassesRepository.save(ArtClasses.builder()
+                                        .name("Watercolor Weekend Workshop " + i)
+                                        .description("Intensive 2-day workshop covering watercolor fundamentals and advanced techniques")
+                                        .basePrice(BigDecimal.valueOf(150 + i * 25))
+                                        .proficiency("Beginner")
+                                        .category(workshopCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Workshop+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artClassesRepository.save(ArtClasses.builder()
+                                        .name("Digital Art Fundamentals " + i)
+                                        .description("8-week online course covering digital illustration, tools and techniques")
+                                        .basePrice(BigDecimal.valueOf(299 + i * 50))
+                                        .proficiency("Intermediate")
+                                        .category(onlineCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Online+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artClassesRepository.save(ArtClasses.builder()
+                                        .name("One-on-One Portrait Sessions " + i)
+                                        .description("Personalized 2-hour private lessons focused on portrait techniques")
+                                        .basePrice(BigDecimal.valueOf(120 + i * 20))
+                                        .proficiency("All Levels")
+                                        .category(privateCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Private+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artClassesRepository.save(ArtClasses.builder()
+                                        .name("Plein Air Painting Group " + i)
+                                        .description("Weekly outdoor painting sessions with a group of 8-12 artists")
+                                        .basePrice(BigDecimal.valueOf(75 + i * 15))
+                                        .proficiency("Intermediate")
+                                        .category(groupCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Group+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artClassesRepository.save(ArtClasses.builder()
+                                        .name("Oil Painting Masterclass " + i)
+                                        .description("Intensive 4-week masterclass with renowned artist, limited to 6 students")
+                                        .basePrice(BigDecimal.valueOf(599 + i * 100))
+                                        .proficiency("Advanced")
+                                        .category(masterCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Master+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artClassesRepository.save(ArtClasses.builder()
+                                        .name("Young Artists Program " + i)
+                                        .description("Fun and engaging art classes for kids aged 8-15, weekly sessions")
+                                        .basePrice(BigDecimal.valueOf(45 + i * 10))
+                                        .proficiency("Beginner")
+                                        .category(kidsCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Kids+" + i)
+                                        .build());
+                });
+        }
+
+        private void seedArtExhibitions() {
+                log.info("[Phase 7] Seeding Art Exhibitions...");
+                if (artExhibitionRepository.count() > 0)
+                        return;
+
+                // Create 6 categories for ArtExhibitions
+                ArtExhibitionCategory modernCat = artExhibitionCategoryRepository.save(ArtExhibitionCategory.builder()
+                                .name("Modern Art")
+                                .build());
+
+                ArtExhibitionCategory classicalCat = artExhibitionCategoryRepository
+                                .save(ArtExhibitionCategory.builder()
+                                                .name("Classical Art")
+                                                .build());
+
+                ArtExhibitionCategory contemporaryCat = artExhibitionCategoryRepository
+                                .save(ArtExhibitionCategory.builder()
+                                                .name("Contemporary")
+                                                .build());
+
+                ArtExhibitionCategory photographyCat = artExhibitionCategoryRepository
+                                .save(ArtExhibitionCategory.builder()
+                                                .name("Photography")
+                                                .build());
+
+                ArtExhibitionCategory sculptureCat = artExhibitionCategoryRepository
+                                .save(ArtExhibitionCategory.builder()
+                                                .name("Sculpture")
+                                                .build());
+
+                ArtExhibitionCategory interactiveCat = artExhibitionCategoryRepository
+                                .save(ArtExhibitionCategory.builder()
+                                                .name("Interactive & Digital")
+                                                .build());
+
+                // Seed 2 exhibitions per category = 12 total
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artExhibitionRepository.save(ArtExhibition.builder()
+                                        .name("Future Vision " + i)
+                                        .description("An exhibition exploring futuristic themes and abstract expressionism")
+                                        .startDate(LocalDate.now().plusDays(i * 10))
+                                        .endDate(LocalDate.now().plusDays(i * 10 + 30))
+                                        .location("Gallery Hall A-" + i)
+                                        .artistCount(12 + i)
+                                        .ArtworksCount(45 + i * 5)
+                                        .artExhibitionCategory(modernCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Modern+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artExhibitionRepository.save(ArtExhibition.builder()
+                                        .name("Renaissance Masters " + i)
+                                        .description("Celebrating the timeless masterpieces of the Renaissance era")
+                                        .startDate(LocalDate.now().plusDays(i * 15))
+                                        .endDate(LocalDate.now().plusDays(i * 15 + 45))
+                                        .location("Historic Wing " + i)
+                                        .artistCount(8 + i)
+                                        .ArtworksCount(30 + i * 3)
+                                        .artExhibitionCategory(classicalCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Classical+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artExhibitionRepository.save(ArtExhibition.builder()
+                                        .name("New Voices " + i)
+                                        .description("Emerging artists showcase their provocative contemporary works")
+                                        .startDate(LocalDate.now().plusDays(i * 5))
+                                        .endDate(LocalDate.now().plusDays(i * 5 + 21))
+                                        .location("East Gallery " + i)
+                                        .artistCount(20 + i * 2)
+                                        .ArtworksCount(60 + i * 10)
+                                        .artExhibitionCategory(contemporaryCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Contemporary+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artExhibitionRepository.save(ArtExhibition.builder()
+                                        .name("Through the Lens " + i)
+                                        .description("Documentary and fine art photography from around the world")
+                                        .startDate(LocalDate.now().plusDays(i * 20))
+                                        .endDate(LocalDate.now().plusDays(i * 20 + 28))
+                                        .location("Photo Center " + i)
+                                        .artistCount(15 + i)
+                                        .ArtworksCount(80 + i * 10)
+                                        .artExhibitionCategory(photographyCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Photo+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artExhibitionRepository.save(ArtExhibition.builder()
+                                        .name("Form & Space " + i)
+                                        .description("Three-dimensional artworks exploring form, texture and space")
+                                        .startDate(LocalDate.now().plusDays(i * 12))
+                                        .endDate(LocalDate.now().plusDays(i * 12 + 35))
+                                        .location("Sculpture Garden " + i)
+                                        .artistCount(10 + i)
+                                        .ArtworksCount(25 + i * 5)
+                                        .artExhibitionCategory(sculptureCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Sculpture+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artExhibitionRepository.save(ArtExhibition.builder()
+                                        .name("Digital Frontiers " + i)
+                                        .description("Immersive digital installations and interactive art experiences")
+                                        .startDate(LocalDate.now().plusDays(i * 8))
+                                        .endDate(LocalDate.now().plusDays(i * 8 + 42))
+                                        .location("Tech Pavilion " + i)
+                                        .artistCount(8 + i)
+                                        .ArtworksCount(15 + i * 3)
+                                        .artExhibitionCategory(interactiveCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Digital+" + i)
+                                        .build());
+                });
+        }
+
+        private void seedArtGalleries() {
+                log.info("[Phase 8] Seeding Art Galleries...");
+                if (artGalleryRepository.count() > 0)
+                        return;
+
+                // Create 6 categories for ArtGalleries
+                ArtGalleryCategory downtownCat = artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
+                                .name("Downtown")
+                                .build());
+
+                ArtGalleryCategory artsDistrictCat = artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
+                                .name("Arts District")
+                                .build());
+
+                ArtGalleryCategory waterfrontCat = artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
+                                .name("Waterfront")
+                                .build());
+
+                ArtGalleryCategory historicCat = artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
+                                .name("Historic Quarter")
+                                .build());
+
+                ArtGalleryCategory suburbanCat = artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
+                                .name("Suburban")
+                                .build());
+
+                ArtGalleryCategory universityCat = artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
+                                .name("University District")
+                                .build());
+
+                // Seed 2 galleries per category = 12 total
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artGalleryRepository.save(ArtGallery.builder()
+                                        .name("The Grand Gallery " + i)
+                                        .description("Premier art destination in the heart of downtown, featuring world-class exhibitions")
+                                        .artGalleryCategory(downtownCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Downtown+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artGalleryRepository.save(ArtGallery.builder()
+                                        .name("Studio Collective " + i)
+                                        .description("Artist-run gallery space showcasing emerging and mid-career artists")
+                                        .artGalleryCategory(artsDistrictCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=ArtsDistrict+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artGalleryRepository.save(ArtGallery.builder()
+                                        .name("Harbor View Gallery " + i)
+                                        .description("Scenic waterfront gallery specializing in marine and landscape art")
+                                        .artGalleryCategory(waterfrontCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Waterfront+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artGalleryRepository.save(ArtGallery.builder()
+                                        .name("Heritage Art House " + i)
+                                        .description("Historic building converted to gallery, focusing on classical and traditional art")
+                                        .artGalleryCategory(historicCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Historic+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artGalleryRepository.save(ArtGallery.builder()
+                                        .name("Community Arts Center " + i)
+                                        .description("Family-friendly gallery with educational programs and local artist showcases")
+                                        .artGalleryCategory(suburbanCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=Suburban+" + i)
+                                        .build());
+                });
+
+                IntStream.rangeClosed(1, 2).forEach(i -> {
+                        artGalleryRepository.save(ArtGallery.builder()
+                                        .name("Campus Art Museum " + i)
+                                        .description("University-affiliated museum featuring academic collections and student works")
+                                        .artGalleryCategory(universityCat)
+                                        .imageUrl("https://via.placeholder.com/300?text=University+" + i)
+                                        .build());
+                });
         }
 }
