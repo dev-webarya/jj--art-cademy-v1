@@ -20,6 +20,15 @@ public class ArtOrderResponseDto {
     private String billingAddress;
     private List<ArtOrderItemDto> items;
     private List<ArtOrderStatusHistoryDto> statusHistory;
+
+    // Shipment tracking fields
+    private String trackingNumber;
+    private String carrier;
+    private String trackingUrl;
+    private Instant shippedAt;
+    private Instant estimatedDelivery;
+    private Instant deliveredAt;
+
     private Instant createdAt;
     private Instant updatedAt;
 

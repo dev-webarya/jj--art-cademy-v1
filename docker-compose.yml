@@ -10,13 +10,12 @@ services:
     ports:
       - "${SERVER_PORT:-8095}:8095"
     restart: always
-    depends_on:
-      mongodb:
-        condition: service_healthy
+    # Removing 'depends_on' because we are connecting to external Atlas DB
     environment:
       - SERVER_PORT=8095
-      # MongoDB Configuration
-      - MONGODB_URI=mongodb://mongodb:27017/artacademy
+
+      # MongoDB Configuration - Points to Atlas via .env now
+      - MONGODB_URI=${MONGODB_URI}
       - MONGODB_DATABASE=${MONGODB_DATABASE:-artacademy}
 
       # JWT Security Configuration
@@ -42,30 +41,6 @@ services:
     networks:
       - artacademy-network
 
-  # ==============================
-  # 2. MongoDB Database
-  # ==============================
-  mongodb:
-    image: mongo:7.0
-    container_name: artacademy-mongodb
-    restart: always
-    environment:
-      - MONGO_INITDB_DATABASE=${MONGODB_DATABASE:-artacademy}
-    ports:
-      - "${MONGODB_PORT:-27017}:27017"
-    volumes:
-      - mongodb_data:/data/db
-    healthcheck:
-      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - artacademy-network
-
 networks:
   artacademy-network:
     driver: bridge
-
-volumes:
-  mongodb_data:

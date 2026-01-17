@@ -2,6 +2,7 @@ package com.artacademy.service;
 
 import com.artacademy.dto.request.ArtCartCheckoutRequestDto;
 import com.artacademy.dto.request.ArtOrderRequestDto;
+import com.artacademy.dto.request.ShipmentRequestDto;
 import com.artacademy.dto.response.ArtOrderResponseDto;
 import com.artacademy.enums.OrderStatus;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,16 @@ public interface ArtOrderService {
     Page<ArtOrderResponseDto> getMyOrders(Pageable pageable);
 
     ArtOrderResponseDto updateStatus(String id, OrderStatus status, String notes);
+
+    /**
+     * Ship an order - adds tracking info and sets status to SHIPPED
+     */
+    ArtOrderResponseDto shipOrder(String orderId, ShipmentRequestDto shipmentRequest);
+
+    /**
+     * Mark order as delivered
+     */
+    ArtOrderResponseDto markDelivered(String orderId);
 
     /**
      * Rollback order - used when payment fails.

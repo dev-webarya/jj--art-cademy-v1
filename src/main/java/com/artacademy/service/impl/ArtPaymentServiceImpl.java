@@ -4,12 +4,14 @@ import com.artacademy.dto.request.ArtPaymentRequestDto;
 import com.artacademy.dto.response.ArtPaymentResponseDto;
 import com.artacademy.entity.ArtOrder;
 import com.artacademy.entity.ArtPayment;
+import com.artacademy.entity.User;
 import com.artacademy.enums.OrderStatus;
 import com.artacademy.enums.PaymentStatus;
 import com.artacademy.exception.ResourceNotFoundException;
 import com.artacademy.mapper.ArtPaymentMapper;
 import com.artacademy.repository.ArtOrderRepository;
 import com.artacademy.repository.ArtPaymentRepository;
+import com.artacademy.repository.UserRepository;
 import com.artacademy.service.ArtOrderService;
 import com.artacademy.service.ArtPaymentService;
 import com.razorpay.Order;
@@ -19,6 +21,8 @@ import com.razorpay.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -35,6 +39,7 @@ public class ArtPaymentServiceImpl implements ArtPaymentService {
     private final ArtOrderRepository orderRepository;
     private final ArtOrderService orderService;
     private final ArtPaymentMapper paymentMapper;
+    private final UserRepository userRepository;
 
     @Value("${razorpay.key.id:rzp_test_placeholder}")
     private String razorpayKeyId;
@@ -45,11 +50,13 @@ public class ArtPaymentServiceImpl implements ArtPaymentService {
     public ArtPaymentServiceImpl(ArtPaymentRepository paymentRepository,
             ArtOrderRepository orderRepository,
             ArtOrderService orderService,
-            ArtPaymentMapper paymentMapper) {
+            ArtPaymentMapper paymentMapper,
+            UserRepository userRepository) {
         this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
         this.orderService = orderService;
         this.paymentMapper = paymentMapper;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -58,6 +65,9 @@ public class ArtPaymentServiceImpl implements ArtPaymentService {
 
         ArtOrder order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new ResourceNotFoundException("ArtOrder", "id", request.getOrderId()));
+
+        // Security check: verify user owns this order or is admin/manager
+        verifyOrderOwnership(order);
 
         // Check if payment already exists for this order
         if (paymentRepository.findByOrderId(order.getId()).isPresent()) {
@@ -163,10 +173,32 @@ public class ArtPaymentServiceImpl implements ArtPaymentService {
 
     @Override
     public ArtPaymentResponseDto getPaymentByOrderId(String orderId) {
+        ArtOrder order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("ArtOrder", "id", orderId));
+
+        // Security check: verify user owns this order or is admin/manager
+        verifyOrderOwnership(order);
+
         ArtPayment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtPayment", "orderId", orderId));
         ArtPaymentResponseDto response = paymentMapper.toDto(payment);
         response.setRazorpayKeyId(razorpayKeyId);
         return response;
+    }
+
+    private void verifyOrderOwnership(ArtOrder order) {
+        User currentUser = getCurrentUser();
+        boolean isAdminOrManager = currentUser.getRoles().contains("ROLE_ADMIN")
+                || currentUser.getRoles().contains("ROLE_MANAGER");
+
+        if (!isAdminOrManager && !order.getUserId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You do not have permission to access this order's payment");
+        }
+    }
+
+    private User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }

@@ -51,6 +51,14 @@ public class ArtOrder {
     @Builder.Default
     private List<ArtOrderStatusHistory> statusHistory = new ArrayList<>();
 
+    // Shipment tracking fields
+    private String trackingNumber;
+    private String carrier; // e.g., "FedEx", "DHL", "BlueDart"
+    private String trackingUrl;
+    private Instant shippedAt;
+    private Instant estimatedDelivery;
+    private Instant deliveredAt;
+
     @CreatedDate
     private Instant createdAt;
 

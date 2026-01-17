@@ -2,6 +2,7 @@ package com.artacademy.service.impl;
 
 import com.artacademy.dto.request.ArtCartCheckoutRequestDto;
 import com.artacademy.dto.request.ArtOrderRequestDto;
+import com.artacademy.dto.request.ShipmentRequestDto;
 import com.artacademy.dto.response.ArtOrderResponseDto;
 import com.artacademy.entity.*;
 import com.artacademy.enums.ArtItemType;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -70,7 +72,7 @@ public class ArtOrderServiceImpl implements ArtOrderService {
 
         ArtOrder savedOrder = orderRepository.save(order);
         log.info("Order created with number: {}", savedOrder.getOrderNumber());
-        return orderMapper.toDto(savedOrder);
+        return enrichWithUserEmail(orderMapper.toDto(savedOrder), user.getEmail());
     }
 
     @Override
@@ -105,14 +107,28 @@ public class ArtOrderServiceImpl implements ArtOrderService {
 
         ArtOrder savedOrder = orderRepository.save(order);
         log.info("Cart checkout complete, order number: {}", savedOrder.getOrderNumber());
-        return orderMapper.toDto(savedOrder);
+        return enrichWithUserEmail(orderMapper.toDto(savedOrder), user.getEmail());
     }
 
     @Override
     public ArtOrderResponseDto getById(String id) {
         ArtOrder order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtOrder", "id", id));
-        return orderMapper.toDto(order);
+
+        // Security check: verify user owns this order or is admin/manager
+        User currentUser = getCurrentUser();
+        boolean isAdminOrManager = currentUser.getRoles().contains("ROLE_ADMIN")
+                || currentUser.getRoles().contains("ROLE_MANAGER");
+
+        if (!isAdminOrManager && !order.getUserId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You do not have permission to access this order");
+        }
+
+        ArtOrderResponseDto dto = orderMapper.toDto(order);
+        // Fetch user email for the response
+        userRepository.findById(order.getUserId())
+                .ifPresent(user -> dto.setUserEmail(user.getEmail()));
+        return dto;
     }
 
     @Override
@@ -120,15 +136,16 @@ public class ArtOrderServiceImpl implements ArtOrderService {
             BigDecimal maxPrice, LocalDateTime startDate, LocalDateTime endDate, String userId, Pageable pageable) {
         // For simplicity, filter by status if provided, otherwise return all
         if (status != null) {
-            return orderRepository.findByStatus(status, pageable).map(orderMapper::toDto);
+            return orderRepository.findByStatus(status, pageable).map(this::toDtoWithEmail);
         }
-        return orderRepository.findAll(pageable).map(orderMapper::toDto);
+        return orderRepository.findAll(pageable).map(this::toDtoWithEmail);
     }
 
     @Override
     public Page<ArtOrderResponseDto> getMyOrders(Pageable pageable) {
         User user = getCurrentUser();
-        return orderRepository.findByUserId(user.getId(), pageable).map(orderMapper::toDto);
+        return orderRepository.findByUserId(user.getId(), pageable)
+                .map(order -> enrichWithUserEmail(orderMapper.toDto(order), user.getEmail()));
     }
 
     @Override
@@ -145,7 +162,7 @@ public class ArtOrderServiceImpl implements ArtOrderService {
             deductStock(order);
         }
 
-        return orderMapper.toDto(orderRepository.save(order));
+        return toDtoWithEmail(orderRepository.save(order));
     }
 
     @Override
@@ -165,6 +182,53 @@ public class ArtOrderServiceImpl implements ArtOrderService {
         order.addStatusHistory(OrderStatus.CANCELLED, "Order cancelled: " + reason);
         orderRepository.save(order);
         log.info("Order {} rolled back successfully", orderId);
+    }
+
+    @Override
+    public ArtOrderResponseDto shipOrder(String orderId, ShipmentRequestDto shipmentRequest) {
+        log.info("Shipping order {}", orderId);
+        ArtOrder order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("ArtOrder", "id", orderId));
+
+        // Validate order is in PROCESSING status
+        if (order.getStatus() != OrderStatus.PROCESSING) {
+            throw new IllegalStateException(
+                    "Order must be in PROCESSING status to ship. Current status: " + order.getStatus());
+        }
+
+        // Set shipment details
+        order.setTrackingNumber(shipmentRequest.getTrackingNumber());
+        order.setCarrier(shipmentRequest.getCarrier());
+        order.setTrackingUrl(shipmentRequest.getTrackingUrl());
+        order.setShippedAt(java.time.Instant.now());
+        order.setEstimatedDelivery(shipmentRequest.getEstimatedDelivery());
+
+        // Update status
+        order.setStatus(OrderStatus.SHIPPED);
+        order.addStatusHistory(OrderStatus.SHIPPED,
+                "Order shipped via " + shipmentRequest.getCarrier() + ". Tracking: "
+                        + shipmentRequest.getTrackingNumber());
+
+        return toDtoWithEmail(orderRepository.save(order));
+    }
+
+    @Override
+    public ArtOrderResponseDto markDelivered(String orderId) {
+        log.info("Marking order {} as delivered", orderId);
+        ArtOrder order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("ArtOrder", "id", orderId));
+
+        // Validate order is in SHIPPED status
+        if (order.getStatus() != OrderStatus.SHIPPED) {
+            throw new IllegalStateException(
+                    "Order must be in SHIPPED status to mark as delivered. Current status: " + order.getStatus());
+        }
+
+        order.setDeliveredAt(java.time.Instant.now());
+        order.setStatus(OrderStatus.DELIVERED);
+        order.addStatusHistory(OrderStatus.DELIVERED, "Order delivered successfully");
+
+        return toDtoWithEmail(orderRepository.save(order));
     }
 
     private ArtOrderItem createOrderItem(String itemId, ArtItemType itemType, Integer quantity, String variantId) {
@@ -303,5 +367,23 @@ public class ArtOrderServiceImpl implements ArtOrderService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    /**
+     * Convert order to DTO with user email populated
+     */
+    private ArtOrderResponseDto toDtoWithEmail(ArtOrder order) {
+        ArtOrderResponseDto dto = orderMapper.toDto(order);
+        userRepository.findById(order.getUserId())
+                .ifPresent(user -> dto.setUserEmail(user.getEmail()));
+        return dto;
+    }
+
+    /**
+     * Enrich existing DTO with user email
+     */
+    private ArtOrderResponseDto enrichWithUserEmail(ArtOrderResponseDto dto, String email) {
+        dto.setUserEmail(email);
+        return dto;
     }
 }
