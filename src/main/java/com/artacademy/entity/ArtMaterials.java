@@ -36,6 +36,21 @@ public class ArtMaterials {
     private BigDecimal stock; // count for item
 
     @Builder.Default
+    private java.util.List<MaterialVariant> variants = new java.util.ArrayList<>();
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MaterialVariant {
+        private String id;
+        private String size; // e.g. "A4", "10x12 inches"
+        private BigDecimal price;
+        private BigDecimal discountPrice;
+        private BigDecimal stock;
+    }
+
+    @Builder.Default
     private boolean isActive = true;
 
     // Soft Delete Flag

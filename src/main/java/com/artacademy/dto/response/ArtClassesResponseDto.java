@@ -11,6 +11,8 @@ public class ArtClassesResponseDto {
     private String name;
     private String description;
     private BigDecimal basePrice;
+    private BigDecimal discountPrice;
+    private Integer durationWeeks;
     private boolean isActive;
     private String proficiency;
     private String categoryId;

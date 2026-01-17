@@ -194,6 +194,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .description("A beautiful abstract painting featuring vibrant colors and bold strokes #"
                                                         + i)
                                         .basePrice(BigDecimal.valueOf(1500 + i * 250))
+                                        .discountPrice(BigDecimal.valueOf(1400 + i * 250))
                                         .artistName("Maria Santos")
                                         .artMedium("Oil on Canvas")
                                         .size("24x36")
@@ -318,6 +319,21 @@ public class DataSeeder implements CommandLineRunner {
                                         .basePrice(BigDecimal.valueOf(45 + i * 10))
                                         .discount(10)
                                         .stock(BigDecimal.valueOf(100))
+                                        .variants(List.of(
+                                                        ArtMaterials.MaterialVariant.builder()
+                                                                        .id("var-s-" + i)
+                                                                        .size("Small Set")
+                                                                        .price(BigDecimal.valueOf(45 + i * 10))
+                                                                        .discountPrice(BigDecimal.valueOf(40 + i * 10))
+                                                                        .stock(BigDecimal.valueOf(50))
+                                                                        .build(),
+                                                        ArtMaterials.MaterialVariant.builder()
+                                                                        .id("var-l-" + i)
+                                                                        .size("Large Set")
+                                                                        .price(BigDecimal.valueOf(85 + i * 10))
+                                                                        .discountPrice(BigDecimal.valueOf(75 + i * 10))
+                                                                        .stock(BigDecimal.valueOf(50))
+                                                                        .build()))
                                         .categoryId(brushCat.getId())
                                         .imageUrl("https://via.placeholder.com/300?text=Brush+" + i)
                                         .build());
@@ -420,6 +436,8 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("Watercolor Weekend Workshop " + i)
                                         .description("Intensive 2-day workshop covering watercolor fundamentals and advanced techniques")
                                         .basePrice(BigDecimal.valueOf(150 + i * 25))
+                                        .discountPrice(BigDecimal.valueOf(130 + i * 25))
+                                        .durationWeeks(2 + i)
                                         .proficiency("Beginner")
                                         .categoryId(workshopCat.getId())
                                         .imageUrl("https://via.placeholder.com/300?text=Workshop+" + i)

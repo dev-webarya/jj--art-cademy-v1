@@ -56,8 +56,11 @@ public class ArtOrderServiceImpl implements ArtOrderService {
         BigDecimal total = BigDecimal.ZERO;
 
         for (ArtOrderRequestDto.ArtOrderItemDto itemDto : request.getItems()) {
-            ArtOrderItem orderItem = createOrderItem(itemDto.getItemId(), itemDto.getItemType(),
-                    itemDto.getQuantity());
+            ArtOrderItem orderItem = createOrderItem(
+                    itemDto.getItemId(),
+                    itemDto.getItemType(),
+                    itemDto.getQuantity(),
+                    itemDto.getItemVariantId());
             order.getItems().add(orderItem);
             total = total.add(orderItem.getSubtotal());
         }
@@ -164,28 +167,48 @@ public class ArtOrderServiceImpl implements ArtOrderService {
         log.info("Order {} rolled back successfully", orderId);
     }
 
-    private ArtOrderItem createOrderItem(String itemId, ArtItemType itemType, Integer quantity) {
+    private ArtOrderItem createOrderItem(String itemId, ArtItemType itemType, Integer quantity, String variantId) {
         String itemName;
         String imageUrl;
         BigDecimal unitPrice;
+        String variantName = null;
 
         if (itemType == ArtItemType.ARTWORK) {
             ArtWorks artwork = artWorksRepository.findByIdAndDeletedFalse(itemId)
                     .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", itemId));
             itemName = artwork.getName();
             imageUrl = artwork.getImageUrl();
-            unitPrice = artwork.getBasePrice();
+            unitPrice = (artwork.getDiscountPrice() != null
+                    && artwork.getDiscountPrice().compareTo(BigDecimal.ZERO) > 0)
+                            ? artwork.getDiscountPrice()
+                            : artwork.getBasePrice();
         } else {
             ArtMaterials material = artMaterialsRepository.findByIdAndDeletedFalse(itemId)
                     .orElseThrow(() -> new ResourceNotFoundException("ArtMaterials", "id", itemId));
             itemName = material.getName();
             imageUrl = material.getImageUrl();
-            if (material.getDiscount() != null && material.getDiscount() > 0) {
-                BigDecimal discount = BigDecimal.valueOf(material.getDiscount())
-                        .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
-                unitPrice = material.getBasePrice().subtract(material.getBasePrice().multiply(discount));
+
+            if (variantId != null) {
+                ArtMaterials.MaterialVariant variant = material.getVariants().stream()
+                        .filter(v -> v.getId().equals(variantId))
+                        .findFirst()
+                        .orElseThrow(() -> new ResourceNotFoundException("MaterialVariant", "id", variantId));
+
+                variantName = variant.getSize();
+                itemName = itemName + " (" + variantName + ")";
+
+                unitPrice = (variant.getDiscountPrice() != null
+                        && variant.getDiscountPrice().compareTo(BigDecimal.ZERO) > 0)
+                                ? variant.getDiscountPrice()
+                                : variant.getPrice();
             } else {
-                unitPrice = material.getBasePrice();
+                if (material.getDiscount() != null && material.getDiscount() > 0) {
+                    BigDecimal discount = BigDecimal.valueOf(material.getDiscount())
+                            .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+                    unitPrice = material.getBasePrice().subtract(material.getBasePrice().multiply(discount));
+                } else {
+                    unitPrice = material.getBasePrice();
+                }
             }
         }
 
@@ -197,6 +220,8 @@ public class ArtOrderServiceImpl implements ArtOrderService {
                 .imageUrl(imageUrl)
                 .unitPrice(unitPrice)
                 .quantity(quantity)
+                .itemVariantId(variantId)
+                .itemVariantName(variantName)
                 .build();
     }
 
@@ -207,8 +232,19 @@ public class ArtOrderServiceImpl implements ArtOrderService {
                 ArtMaterials material = artMaterialsRepository.findByIdAndDeletedFalse(item.getItemId())
                         .orElse(null);
                 if (material != null) {
-                    BigDecimal newStock = material.getStock().subtract(BigDecimal.valueOf(item.getQuantity()));
-                    material.setStock(newStock.max(BigDecimal.ZERO));
+                    if (item.getItemVariantId() != null) {
+                        // Find and update variant
+                        material.getVariants().stream()
+                                .filter(v -> v.getId().equals(item.getItemVariantId()))
+                                .findFirst()
+                                .ifPresent(v -> {
+                                    BigDecimal newStock = v.getStock().subtract(BigDecimal.valueOf(item.getQuantity()));
+                                    v.setStock(newStock.max(BigDecimal.ZERO));
+                                });
+                    } else {
+                        BigDecimal newStock = material.getStock().subtract(BigDecimal.valueOf(item.getQuantity()));
+                        material.setStock(newStock.max(BigDecimal.ZERO));
+                    }
                     artMaterialsRepository.save(material);
                 }
             }
@@ -231,8 +267,19 @@ public class ArtOrderServiceImpl implements ArtOrderService {
                 ArtMaterials material = artMaterialsRepository.findById(item.getItemId())
                         .orElse(null);
                 if (material != null && !material.isDeleted()) {
-                    BigDecimal restoredStock = material.getStock().add(BigDecimal.valueOf(item.getQuantity()));
-                    material.setStock(restoredStock);
+                    if (item.getItemVariantId() != null) {
+                        // Find and update variant
+                        material.getVariants().stream()
+                                .filter(v -> v.getId().equals(item.getItemVariantId()))
+                                .findFirst()
+                                .ifPresent(v -> {
+                                    BigDecimal newStock = v.getStock().add(BigDecimal.valueOf(item.getQuantity()));
+                                    v.setStock(newStock);
+                                });
+                    } else {
+                        BigDecimal restoredStock = material.getStock().add(BigDecimal.valueOf(item.getQuantity()));
+                        material.setStock(restoredStock);
+                    }
                     artMaterialsRepository.save(material);
                 }
             }

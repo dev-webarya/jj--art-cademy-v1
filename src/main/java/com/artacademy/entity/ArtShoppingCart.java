@@ -52,7 +52,8 @@ public class ArtShoppingCart {
         // Check if item already exists
         ArtCartItem existing = items.stream()
                 .filter(i -> i.getItemId().equals(item.getItemId())
-                        && i.getItemType() == item.getItemType())
+                        && i.getItemType() == item.getItemType()
+                        && java.util.Objects.equals(i.getItemVariantId(), item.getItemVariantId()))
                 .findFirst()
                 .orElse(null);
 

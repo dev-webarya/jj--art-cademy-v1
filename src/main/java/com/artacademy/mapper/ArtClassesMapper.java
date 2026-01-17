@@ -15,7 +15,7 @@ public interface ArtClassesMapper {
     @Mapping(target = "updatedAt", ignore = true)
     ArtClasses toEntity(ArtClassesRequestDto dto);
 
-    @Mapping(target = "categoryName", ignore = true) // Would need separate category lookup
+    // categoryName is populated in the entity by the service, so we map it directly
     ArtClassesResponseDto toDto(ArtClasses entity);
 
     @Mapping(target = "id", ignore = true)

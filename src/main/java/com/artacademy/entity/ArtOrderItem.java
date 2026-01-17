@@ -26,6 +26,9 @@ public class ArtOrderItem {
 
     private String imageUrl;
 
+    private String itemVariantId;
+    private String itemVariantName;
+
     private BigDecimal unitPrice;
 
     private Integer quantity;

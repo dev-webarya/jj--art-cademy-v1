@@ -19,6 +19,10 @@ public class ArtClassesRequestDto {
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
     private BigDecimal basePrice;
 
+    private BigDecimal discountPrice;
+
+    private Integer durationWeeks;
+
     @NotBlank(message = "Proficiency level is required")
     private String proficiency;
 

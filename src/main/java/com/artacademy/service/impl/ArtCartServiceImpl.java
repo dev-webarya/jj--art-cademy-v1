@@ -50,29 +50,60 @@ public class ArtCartServiceImpl implements ArtCartService {
         String itemName;
         String imageUrl;
         BigDecimal unitPrice;
+        String variantId = null;
+        String variantName = null;
 
         if (request.getItemType() == ArtItemType.ARTWORK) {
             ArtWorks artwork = artWorksRepository.findByIdAndDeletedFalse(request.getItemId())
                     .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", request.getItemId()));
             itemName = artwork.getName();
             imageUrl = artwork.getImageUrl();
-            unitPrice = artwork.getBasePrice();
+            // Use discount price if available
+            unitPrice = (artwork.getDiscountPrice() != null
+                    && artwork.getDiscountPrice().compareTo(BigDecimal.ZERO) > 0)
+                            ? artwork.getDiscountPrice()
+                            : artwork.getBasePrice();
         } else {
             ArtMaterials material = artMaterialsRepository.findByIdAndDeletedFalse(request.getItemId())
                     .orElseThrow(() -> new ResourceNotFoundException("ArtMaterials", "id", request.getItemId()));
             itemName = material.getName();
             imageUrl = material.getImageUrl();
-            // Apply discount if any
-            if (material.getDiscount() != null && material.getDiscount() > 0) {
-                BigDecimal discount = BigDecimal.valueOf(material.getDiscount())
-                        .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
-                unitPrice = material.getBasePrice().subtract(material.getBasePrice().multiply(discount));
+
+            if (request.getItemVariantId() != null) {
+                // Find specific variant
+                ArtMaterials.MaterialVariant variant = material.getVariants().stream()
+                        .filter(v -> v.getId().equals(request.getItemVariantId()))
+                        .findFirst()
+                        .orElseThrow(() -> new ResourceNotFoundException("MaterialVariant", "id",
+                                request.getItemVariantId()));
+
+                variantId = variant.getId();
+                variantName = variant.getSize();
+                itemName = itemName + " (" + variant.getSize() + ")";
+
+                // Use variant discount price if available
+                unitPrice = (variant.getDiscountPrice() != null
+                        && variant.getDiscountPrice().compareTo(BigDecimal.ZERO) > 0)
+                                ? variant.getDiscountPrice()
+                                : variant.getPrice();
             } else {
-                unitPrice = material.getBasePrice();
+                // Fallback to legacy logic
+                if (material.getDiscount() != null && material.getDiscount() > 0) {
+                    BigDecimal discount = BigDecimal.valueOf(material.getDiscount())
+                            .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+                    unitPrice = material.getBasePrice().subtract(material.getBasePrice().multiply(discount));
+                } else {
+                    unitPrice = material.getBasePrice();
+                }
             }
         }
 
         // Use the cart's addItem method which handles duplicates
+        // Note: Logic in cart.addItem might need update to differentiating variants of
+        // same item?
+        // Current logic probably checks itemId only. We need to check itemId +
+        // variantId.
+        // For now, construct the item.
         ArtCartItem newItem = ArtCartItem.builder()
                 .itemId(request.getItemId())
                 .itemType(request.getItemType())
@@ -80,7 +111,14 @@ public class ArtCartServiceImpl implements ArtCartService {
                 .imageUrl(imageUrl)
                 .unitPrice(unitPrice)
                 .quantity(request.getQuantity())
+                .itemVariantId(variantId)
+                .itemVariantName(variantName)
                 .build();
+
+        // IMPORTANT: We need to ensure cart.addItem handles variants!
+        // If ArtShoppingCart.addItem compares only itemId, we might overwrite different
+        // variants.
+        // We should check ArtShoppingCart.java next.
         cart.addItem(newItem);
 
         return cartMapper.toDto(cartRepository.save(cart));

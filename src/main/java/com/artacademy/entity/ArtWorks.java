@@ -30,6 +30,8 @@ public class ArtWorks {
 
         private BigDecimal basePrice;
 
+        private BigDecimal discountPrice;
+
         @Builder.Default
         private boolean isActive = true;
 

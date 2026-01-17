@@ -15,7 +15,7 @@ public interface ArtMaterialsMapper {
     @Mapping(target = "updatedAt", ignore = true)
     ArtMaterials toEntity(ArtMaterialsRequestDto dto);
 
-    @Mapping(target = "categoryName", ignore = true) // Would need separate category lookup
+    // categoryName is populated in the entity by the service, so we map it directly
     ArtMaterialsResponseDto toDto(ArtMaterials entity);
 
     @Mapping(target = "id", ignore = true)
@@ -24,4 +24,9 @@ public interface ArtMaterialsMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateEntity(ArtMaterialsRequestDto dto, @MappingTarget ArtMaterials entity);
+
+    // Variant mappings
+    ArtMaterials.MaterialVariant toVariantEntity(com.artacademy.dto.request.MaterialVariantRequestDto dto);
+
+    com.artacademy.dto.response.MaterialVariantResponseDto toVariantDto(ArtMaterials.MaterialVariant entity);
 }

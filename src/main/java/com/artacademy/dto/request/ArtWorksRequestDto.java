@@ -19,6 +19,8 @@ public class ArtWorksRequestDto {
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
     private BigDecimal basePrice;
 
+    private BigDecimal discountPrice;
+
     @NotBlank(message = "Artist name is required")
     private String artistName;
 

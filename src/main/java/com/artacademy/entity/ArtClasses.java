@@ -30,6 +30,10 @@ public class ArtClasses {
 
         private BigDecimal basePrice;
 
+        private BigDecimal discountPrice;
+
+        private Integer durationWeeks;
+
         @Builder.Default
         private boolean isActive = true;
 

@@ -13,6 +13,7 @@ public class ArtMaterialsResponseDto {
     private BigDecimal basePrice;
     private Integer discount;
     private BigDecimal stock;
+    private java.util.List<MaterialVariantResponseDto> variants;
     private boolean isActive;
     private String categoryId;
     private String categoryName;

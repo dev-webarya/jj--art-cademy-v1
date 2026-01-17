@@ -82,6 +82,8 @@ public class ArtOrder {
                     .imageUrl(cartItem.getImageUrl())
                     .unitPrice(cartItem.getUnitPrice())
                     .quantity(cartItem.getQuantity())
+                    .itemVariantId(cartItem.getItemVariantId())
+                    .itemVariantName(cartItem.getItemVariantName())
                     .build();
             items.add(orderItem);
         }

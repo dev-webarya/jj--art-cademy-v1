@@ -1,9 +1,6 @@
 package com.artacademy.dto.request;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -16,17 +13,18 @@ public class ArtMaterialsRequestDto {
 
     private String description;
 
-    @NotNull(message = "Base price is required")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
+    // Base price is now optional or used as default/display price
+    // @NotNull(message = "Base price is required")
+    // Commented out NotNull to allow empty basePrice if variants are present, but
+    // validation logic might be needed in service or custom validator.
+    // For now, keeping legacy fields but adding variants.
     private BigDecimal basePrice;
 
-    @NotNull(message = "Discount is required")
-    @Min(value = 0, message = "Discount cannot be negative")
     private Integer discount;
 
-    @NotNull(message = "Stock is required")
-    @DecimalMin(value = "0.0", message = "Stock cannot be negative")
     private BigDecimal stock;
+
+    private java.util.List<MaterialVariantRequestDto> variants;
 
     private boolean isActive = true;
 
