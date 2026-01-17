@@ -1,28 +1,28 @@
 package com.artacademy.model;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 
-@Entity
+@Document(collection = "token_deny_list")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "token_deny_list")
 public class TokenDenyList {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(nullable = false, unique = true)
+    @Indexed(unique = true)
     private String jti; // The unique identifier of the JWT
 
-    @Column(nullable = false)
-    private Instant expiryDate; // The original expiry date of the token
+    @Indexed(expireAfter = "0s")
+    private Instant expiryDate; // The original expiry date of the token - MongoDB TTL will auto-delete
 }

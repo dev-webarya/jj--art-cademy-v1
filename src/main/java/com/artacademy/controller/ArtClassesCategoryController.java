@@ -36,7 +36,7 @@ public class ArtClassesCategoryController {
 
     @GetMapping("/{id}")
     @PublicEndpoint
-    public ResponseEntity<ArtClassesCategoryResponseDto> getById(@PathVariable UUID id) {
+    public ResponseEntity<ArtClassesCategoryResponseDto> getById(@PathVariable String id) {
         return ResponseEntity.ok(categoryService.getById(id));
     }
 
@@ -54,7 +54,7 @@ public class ArtClassesCategoryController {
 
     @PutMapping("/{id}")
     @ManagerAccess
-    public ResponseEntity<ArtClassesCategoryResponseDto> update(@PathVariable UUID id,
+    public ResponseEntity<ArtClassesCategoryResponseDto> update(@PathVariable String id,
             @Valid @RequestBody ArtClassesCategoryRequestDto request) {
         log.info("Updating art classes category ID: {}", id);
         return ResponseEntity.ok(categoryService.update(id, request));
@@ -62,7 +62,7 @@ public class ArtClassesCategoryController {
 
     @DeleteMapping("/{id}")
     @AdminOnly
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(@PathVariable String id) {
         log.warn("Deleting art classes category ID: {}", id);
         categoryService.delete(id);
         return ResponseEntity.noContent().build();

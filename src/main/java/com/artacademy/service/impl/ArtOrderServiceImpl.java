@@ -16,11 +16,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,14 +33,19 @@ public class ArtOrderServiceImpl implements ArtOrderService {
     private final ArtOrderMapper orderMapper;
 
     @Override
-    @Transactional
     public ArtOrderResponseDto createOrder(ArtOrderRequestDto request) {
         log.info("Creating order with {} items", request.getItems().size());
         User user = getCurrentUser();
 
         ArtOrder order = ArtOrder.builder()
                 .orderNumber(generateOrderNumber())
-                .user(user)
+                .user(ArtOrder.UserRef.builder()
+                        .userId(user.getId())
+                        .email(user.getEmail())
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .phoneNumber(user.getPhoneNumber())
+                        .build())
                 .status(OrderStatus.PAYMENT_PENDING)
                 .shippingAddress(request.getShippingAddress())
                 .billingAddress(request.getBillingAddress() != null ? request.getBillingAddress()
@@ -53,7 +56,7 @@ public class ArtOrderServiceImpl implements ArtOrderService {
         BigDecimal total = BigDecimal.ZERO;
 
         for (ArtOrderRequestDto.ArtOrderItemDto itemDto : request.getItems()) {
-            ArtOrderItem orderItem = createOrderItem(order, itemDto.getItemId(), itemDto.getItemType(),
+            ArtOrder.OrderItem orderItem = createOrderItem(itemDto.getItemId(), itemDto.getItemType(),
                     itemDto.getQuantity());
             order.getItems().add(orderItem);
             total = total.add(orderItem.getSubtotal());
@@ -68,7 +71,6 @@ public class ArtOrderServiceImpl implements ArtOrderService {
     }
 
     @Override
-    @Transactional
     public ArtOrderResponseDto checkoutCart(ArtCartCheckoutRequestDto request) {
         log.info("Checking out cart for customer");
         User user = getCurrentUser();
@@ -81,7 +83,12 @@ public class ArtOrderServiceImpl implements ArtOrderService {
 
         ArtOrder order = ArtOrder.builder()
                 .orderNumber(generateOrderNumber())
-                .user(user)
+                .user(ArtOrder.UserRef.builder()
+                        .userId(user.getId())
+                        .email(user.getEmail())
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .build())
                 .status(OrderStatus.PAYMENT_PENDING)
                 .shippingAddress(request.getShippingAddress())
                 .billingAddress(request.getBillingAddress() != null ? request.getBillingAddress()
@@ -91,9 +98,8 @@ public class ArtOrderServiceImpl implements ArtOrderService {
 
         BigDecimal total = BigDecimal.ZERO;
 
-        for (ArtCartItem cartItem : cart.getItems()) {
-            ArtOrderItem orderItem = ArtOrderItem.builder()
-                    .order(order)
+        for (ArtShoppingCart.CartItem cartItem : cart.getItems()) {
+            ArtOrder.OrderItem orderItem = ArtOrder.OrderItem.builder()
                     .itemId(cartItem.getItemId())
                     .itemType(cartItem.getItemType())
                     .itemName(cartItem.getItemName())
@@ -118,32 +124,26 @@ public class ArtOrderServiceImpl implements ArtOrderService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ArtOrderResponseDto getById(UUID id) {
+    public ArtOrderResponseDto getById(String id) {
         ArtOrder order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtOrder", "id", id));
         return orderMapper.toDto(order);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<ArtOrderResponseDto> getAll(OrderStatus status, String orderNumber, BigDecimal minPrice,
-            BigDecimal maxPrice, LocalDateTime startDate, LocalDateTime endDate, UUID userId, Pageable pageable) {
-        // For simplicity, just return all orders. In production, use Specification
-        // pattern.
+            BigDecimal maxPrice, LocalDateTime startDate, LocalDateTime endDate, String userId, Pageable pageable) {
         return orderRepository.findAll(pageable).map(orderMapper::toDto);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<ArtOrderResponseDto> getMyOrders(Pageable pageable) {
         User user = getCurrentUser();
         return orderRepository.findByUserId(user.getId(), pageable).map(orderMapper::toDto);
     }
 
     @Override
-    @Transactional
-    public ArtOrderResponseDto updateStatus(UUID id, OrderStatus status, String notes) {
+    public ArtOrderResponseDto updateStatus(String id, OrderStatus status, String notes) {
         log.info("Updating order {} status to: {}", id, status);
         ArtOrder order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtOrder", "id", id));
@@ -159,7 +159,7 @@ public class ArtOrderServiceImpl implements ArtOrderService {
         return orderMapper.toDto(orderRepository.save(order));
     }
 
-    private ArtOrderItem createOrderItem(ArtOrder order, UUID itemId, ArtItemType itemType, Integer quantity) {
+    private ArtOrder.OrderItem createOrderItem(String itemId, ArtItemType itemType, Integer quantity) {
         String itemName;
         String imageUrl;
         BigDecimal unitPrice;
@@ -179,8 +179,7 @@ public class ArtOrderServiceImpl implements ArtOrderService {
             unitPrice = material.getBasePrice().subtract(material.getBasePrice().multiply(discount));
         }
 
-        return ArtOrderItem.builder()
-                .order(order)
+        return ArtOrder.OrderItem.builder()
                 .itemId(itemId)
                 .itemType(itemType)
                 .itemName(itemName)
@@ -191,7 +190,7 @@ public class ArtOrderServiceImpl implements ArtOrderService {
     }
 
     private void deductStock(ArtOrder order) {
-        for (ArtOrderItem item : order.getItems()) {
+        for (ArtOrder.OrderItem item : order.getItems()) {
             if (item.getItemType() == ArtItemType.MATERIAL) {
                 ArtMaterials material = artMaterialsRepository.findById(item.getItemId())
                         .orElseThrow(() -> new ResourceNotFoundException("ArtMaterials", "id", item.getItemId()));

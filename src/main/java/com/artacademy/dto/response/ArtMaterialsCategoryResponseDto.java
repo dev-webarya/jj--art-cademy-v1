@@ -6,20 +6,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ArtMaterialsCategoryResponseDto {
-
-    private UUID id;
+    private String id;
     private String name;
-    private UUID parentId;
+    private String description;
+    private String imageUrl;
+    private String parentId;
     private String parentName;
-    private List<ArtMaterialsCategoryResponseDto> subcategories;
     private Instant createdAt;
     private Instant updatedAt;
 }

@@ -12,10 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,7 +25,6 @@ public class ArtMaterialsCategoryServiceImpl implements ArtMaterialsCategoryServ
     private final ArtMaterialsCategoryMapper categoryMapper;
 
     @Override
-    @Transactional
     public ArtMaterialsCategoryResponseDto create(ArtMaterialsCategoryRequestDto request) {
         log.info("Creating ArtMaterialsCategory: {}", request.getName());
         ArtMaterialsCategory entity = categoryMapper.toEntity(request);
@@ -36,15 +33,17 @@ public class ArtMaterialsCategoryServiceImpl implements ArtMaterialsCategoryServ
             ArtMaterialsCategory parent = categoryRepository.findById(request.getParentId())
                     .orElseThrow(
                             () -> new ResourceNotFoundException("ArtMaterialsCategory", "id", request.getParentId()));
-            entity.setParent(parent);
+            entity.setParent(ArtMaterialsCategory.CategoryRef.builder()
+                    .categoryId(parent.getId())
+                    .name(parent.getName())
+                    .build());
         }
 
         return categoryMapper.toDto(categoryRepository.save(entity));
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ArtMaterialsCategoryResponseDto getById(UUID id) {
+    public ArtMaterialsCategoryResponseDto getById(String id) {
         log.debug("Fetching ArtMaterialsCategory by ID: {}", id);
         ArtMaterialsCategory entity = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtMaterialsCategory", "id", id));
@@ -52,13 +51,11 @@ public class ArtMaterialsCategoryServiceImpl implements ArtMaterialsCategoryServ
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<ArtMaterialsCategoryResponseDto> getAll(Pageable pageable) {
         return categoryRepository.findAll(pageable).map(categoryMapper::toDto);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ArtMaterialsCategoryResponseDto> getAllRootCategories() {
         return categoryRepository.findAll().stream()
                 .filter(c -> c.getParent() == null)
@@ -67,8 +64,7 @@ public class ArtMaterialsCategoryServiceImpl implements ArtMaterialsCategoryServ
     }
 
     @Override
-    @Transactional
-    public ArtMaterialsCategoryResponseDto update(UUID id, ArtMaterialsCategoryRequestDto request) {
+    public ArtMaterialsCategoryResponseDto update(String id, ArtMaterialsCategoryRequestDto request) {
         log.info("Updating ArtMaterialsCategory ID: {}", id);
         ArtMaterialsCategory entity = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtMaterialsCategory", "id", id));
@@ -79,7 +75,10 @@ public class ArtMaterialsCategoryServiceImpl implements ArtMaterialsCategoryServ
             ArtMaterialsCategory parent = categoryRepository.findById(request.getParentId())
                     .orElseThrow(
                             () -> new ResourceNotFoundException("ArtMaterialsCategory", "id", request.getParentId()));
-            entity.setParent(parent);
+            entity.setParent(ArtMaterialsCategory.CategoryRef.builder()
+                    .categoryId(parent.getId())
+                    .name(parent.getName())
+                    .build());
         } else {
             entity.setParent(null);
         }
@@ -88,8 +87,7 @@ public class ArtMaterialsCategoryServiceImpl implements ArtMaterialsCategoryServ
     }
 
     @Override
-    @Transactional
-    public void delete(UUID id) {
+    public void delete(String id) {
         log.warn("Deleting ArtMaterialsCategory ID: {}", id);
         if (!categoryRepository.existsById(id)) {
             throw new ResourceNotFoundException("ArtMaterialsCategory", "id", id);

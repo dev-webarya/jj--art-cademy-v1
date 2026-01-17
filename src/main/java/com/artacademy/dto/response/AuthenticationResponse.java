@@ -15,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL) // Don't include null fields in the JSON response
 public class AuthenticationResponse {
-    private UUID id; // Changed from Long to UUID
+    private String id; // Changed from Long to String
     private String firstName;
     private String lastName;
     private Set<String> roles; // Changed from String role to Set<String> roles

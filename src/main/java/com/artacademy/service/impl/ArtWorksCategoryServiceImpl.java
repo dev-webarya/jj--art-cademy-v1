@@ -12,10 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,7 +25,6 @@ public class ArtWorksCategoryServiceImpl implements ArtWorksCategoryService {
     private final ArtWorksCategoryMapper categoryMapper;
 
     @Override
-    @Transactional
     public ArtWorksCategoryResponseDto create(ArtWorksCategoryRequestDto request) {
         log.info("Creating ArtWorksCategory: {}", request.getName());
         ArtWorksCategory entity = categoryMapper.toEntity(request);
@@ -35,15 +32,17 @@ public class ArtWorksCategoryServiceImpl implements ArtWorksCategoryService {
         if (request.getParentId() != null) {
             ArtWorksCategory parent = categoryRepository.findById(request.getParentId())
                     .orElseThrow(() -> new ResourceNotFoundException("ArtWorksCategory", "id", request.getParentId()));
-            entity.setParent(parent);
+            entity.setParent(ArtWorksCategory.CategoryRef.builder()
+                    .categoryId(parent.getId())
+                    .name(parent.getName())
+                    .build());
         }
 
         return categoryMapper.toDto(categoryRepository.save(entity));
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ArtWorksCategoryResponseDto getById(UUID id) {
+    public ArtWorksCategoryResponseDto getById(String id) {
         log.debug("Fetching ArtWorksCategory by ID: {}", id);
         ArtWorksCategory entity = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtWorksCategory", "id", id));
@@ -51,13 +50,11 @@ public class ArtWorksCategoryServiceImpl implements ArtWorksCategoryService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<ArtWorksCategoryResponseDto> getAll(Pageable pageable) {
         return categoryRepository.findAll(pageable).map(categoryMapper::toDto);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ArtWorksCategoryResponseDto> getAllRootCategories() {
         return categoryRepository.findAll().stream()
                 .filter(c -> c.getParent() == null)
@@ -66,8 +63,7 @@ public class ArtWorksCategoryServiceImpl implements ArtWorksCategoryService {
     }
 
     @Override
-    @Transactional
-    public ArtWorksCategoryResponseDto update(UUID id, ArtWorksCategoryRequestDto request) {
+    public ArtWorksCategoryResponseDto update(String id, ArtWorksCategoryRequestDto request) {
         log.info("Updating ArtWorksCategory ID: {}", id);
         ArtWorksCategory entity = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtWorksCategory", "id", id));
@@ -77,7 +73,10 @@ public class ArtWorksCategoryServiceImpl implements ArtWorksCategoryService {
         if (request.getParentId() != null) {
             ArtWorksCategory parent = categoryRepository.findById(request.getParentId())
                     .orElseThrow(() -> new ResourceNotFoundException("ArtWorksCategory", "id", request.getParentId()));
-            entity.setParent(parent);
+            entity.setParent(ArtWorksCategory.CategoryRef.builder()
+                    .categoryId(parent.getId())
+                    .name(parent.getName())
+                    .build());
         } else {
             entity.setParent(null);
         }
@@ -86,8 +85,7 @@ public class ArtWorksCategoryServiceImpl implements ArtWorksCategoryService {
     }
 
     @Override
-    @Transactional
-    public void delete(UUID id) {
+    public void delete(String id) {
         log.warn("Deleting ArtWorksCategory ID: {}", id);
         if (!categoryRepository.existsById(id)) {
             throw new ResourceNotFoundException("ArtWorksCategory", "id", id);

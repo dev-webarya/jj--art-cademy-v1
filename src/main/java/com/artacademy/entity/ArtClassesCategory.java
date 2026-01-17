@@ -1,53 +1,52 @@
 package com.artacademy.entity;
 
-import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
 @Getter
 @Setter
-@ToString(exclude = { "parent", "subcategories", "artClasses" })
-@EqualsAndHashCode(exclude = { "parent", "subcategories", "artClasses" })
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "art_classes_categories")
+@Document(collection = "art_classes_categories")
 public class ArtClassesCategory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
-    @Column(nullable = false, unique = true)
+    @Indexed(unique = true)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
     private String description;
 
-    // Self-referencing relationship for hierarchy
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private ArtClassesCategory parent;
+    private String imageUrl;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    // Parent reference for hierarchy
+    private CategoryRef parent;
+
     @Builder.Default
-    private Set<ArtClassesCategory> subcategories = new HashSet<>();
+    private boolean deleted = false;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    @Builder.Default
-    private Set<ArtClasses> artClasses = new HashSet<>();
-
-    @CreationTimestamp
-    @Column(updatable = false)
+    @CreatedDate
     private Instant createdAt;
 
-    @UpdateTimestamp
+    @LastModifiedDate
     private Instant updatedAt;
+
+    // Embedded class for category reference
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CategoryRef {
+        private String categoryId;
+        private String name;
+    }
 }

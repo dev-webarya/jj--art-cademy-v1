@@ -1,63 +1,95 @@
 package com.artacademy.entity;
 
-import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "art_classes")
-// --- FIX: Soft Delete Configuration ---
-@SQLDelete(sql = "UPDATE art_classes SET deleted = true WHERE id = ?")
-@SQLRestriction("deleted = false")
+@Document(collection = "art_classes")
 public class ArtClasses {
 
         @Id
-        @GeneratedValue(strategy = GenerationType.UUID)
-        private UUID id;
+        private String id;
 
-        @Column(nullable = false)
+        @Indexed
         private String name;
 
-        @Column(columnDefinition = "TEXT")
         private String description;
 
-        @Column(nullable = false, precision = 10, scale = 2)
         private BigDecimal basePrice;
 
-        @Column(nullable = false)
         @Builder.Default
         private boolean isActive = true;
 
-        @Column(nullable = false)
+        @Indexed
         private String proficiency; // e.g. Beginner, Intermediate, Advanced
 
-        // --- FIX: Soft Delete Flag ---
-        @Column(nullable = false)
         @Builder.Default
         private boolean deleted = false;
 
-        @CreationTimestamp
+        @CreatedDate
         private Instant createdAt;
 
-        @UpdateTimestamp
+        @LastModifiedDate
         private Instant updatedAt;
 
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "category_id")
-        private ArtClassesCategory category;
+        // Embedded category reference
+        private CategoryRef category;
 
-        @Column(nullable = false)
         private String imageUrl;
+
+        // Embedded images
+        @Builder.Default
+        private List<ImageRef> images = new ArrayList<>();
+
+        // Schedule info
+        private Schedule schedule;
+
+        // Embedded class for category reference
+        @Getter
+        @Setter
+        @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class CategoryRef {
+                private String categoryId;
+                private String name;
+        }
+
+        // Embedded class for images
+        @Getter
+        @Setter
+        @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class ImageRef {
+                private String imageUrl;
+                private String altText;
+                private Integer displayOrder;
+                private boolean isPrimary;
+        }
+
+        // Embedded class for schedule
+        @Getter
+        @Setter
+        @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class Schedule {
+                private Integer durationMinutes;
+                private Integer maxStudents;
+                private List<String> recurringDays;
+        }
 }

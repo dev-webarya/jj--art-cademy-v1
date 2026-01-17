@@ -11,21 +11,19 @@ import com.artacademy.mapper.UserMapper;
 import com.artacademy.repository.RoleRepository;
 import com.artacademy.repository.UserRepository;
 import com.artacademy.service.UserService;
-import com.artacademy.specification.UserSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,16 +35,14 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private final UserSpecification userSpecification;
 
     @Override
-    @Transactional
     public UserResponse createUser(UserRequest userRequest) {
         log.info("Creating user with email: {}", userRequest.getEmail());
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        // 2. Uniqueness Checks
+        // Uniqueness Checks
         if (userRepository.existsByEmail(userRequest.getEmail())) {
             throw new DuplicateResourceException("User with email '" + userRequest.getEmail() + "' already exists.");
         }
@@ -60,9 +56,13 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         user.setPhoneNumber(userRequest.getPhoneNumber());
 
-        // 3. Role Assignment Logic
+        // Role Assignment Logic
         if (userRequest.getRoles() == null || userRequest.getRoles().isEmpty()) {
-            user.getRoles().add(findRoleByName("ROLE_CUSTOMER"));
+            Role customerRole = findRoleByName("ROLE_CUSTOMER");
+            user.getRoles().add(User.RoleRef.builder()
+                    .roleId(customerRole.getId())
+                    .name(customerRole.getName())
+                    .build());
         } else {
             // Restriction: Only Admin can assign Admin role
             boolean tryingToAssignPrivileged = userRequest.getRoles().stream()
@@ -72,10 +72,16 @@ public class UserServiceImpl implements UserService {
                 throw new AccessDeniedException("Only Admins can create other Admins.");
             }
 
-            Set<Role> roles = userRequest.getRoles().stream()
-                    .map(this::findRoleByName)
+            Set<User.RoleRef> roleRefs = userRequest.getRoles().stream()
+                    .map(roleName -> {
+                        Role role = findRoleByName(roleName);
+                        return User.RoleRef.builder()
+                                .roleId(role.getId())
+                                .name(role.getName())
+                                .build();
+                    })
                     .collect(Collectors.toSet());
-            user.setRoles(roles);
+            user.setRoles(roleRefs);
         }
 
         user.setEnabled(true);
@@ -85,22 +91,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<UserResponse> getAllUsers(Pageable pageable, String searchTerm) {
-        Specification<User> spec = userSpecification.searchByTerm(searchTerm);
-        return userRepository.findAll(spec, pageable).map(userMapper::toResponse);
+        Page<User> page = userRepository.findAll(pageable);
+        List<UserResponse> users = page.getContent().stream()
+                .filter(u -> !u.isDeleted())
+                .filter(u -> searchTerm == null || searchTerm.isEmpty() ||
+                        u.getFirstName().toLowerCase().contains(searchTerm.toLowerCase()) ||
+                        u.getLastName().toLowerCase().contains(searchTerm.toLowerCase()) ||
+                        u.getEmail().toLowerCase().contains(searchTerm.toLowerCase()))
+                .map(userMapper::toResponse)
+                .collect(Collectors.toList());
+        return new PageImpl<>(users, pageable, page.getTotalElements());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public UserResponse getUserById(UUID userId) {
+    public UserResponse getUserById(String userId) {
         User user = findUserById(userId);
         return userMapper.toResponse(user);
     }
 
     @Override
-    @Transactional
-    public UserResponse updateUser(UUID userId, UserRequest userRequest) {
+    public UserResponse updateUser(String userId, UserRequest userRequest) {
         User existingUser = findUserById(userId);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
@@ -121,18 +132,22 @@ public class UserServiceImpl implements UserService {
 
         // Update Roles (Admin Only)
         if (userRequest.getRoles() != null && isAdmin) {
-            Set<Role> roles = userRequest.getRoles().stream()
-                    .map(this::findRoleByName)
+            Set<User.RoleRef> roleRefs = userRequest.getRoles().stream()
+                    .map(roleName -> {
+                        Role role = findRoleByName(roleName);
+                        return User.RoleRef.builder()
+                                .roleId(role.getId())
+                                .name(role.getName())
+                                .build();
+                    })
                     .collect(Collectors.toSet());
-            existingUser.setRoles(roles);
+            existingUser.setRoles(roleRefs);
         }
 
         return userMapper.toResponse(userRepository.save(existingUser));
     }
 
-    // --- NEW: Get Logged-in User Profile ---
     @Override
-    @Transactional(readOnly = true)
     public UserResponse getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUserEmail = auth.getName();
@@ -141,9 +156,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(currentUser);
     }
 
-    // --- NEW: Update Logged-in User Profile ---
     @Override
-    @Transactional
     public UserResponse updateCurrentUser(UserRequest userRequest) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUserEmail = auth.getName();
@@ -180,16 +193,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
-    public void deleteUser(UUID userId) {
+    public void deleteUser(String userId) {
         log.warn("Deleting user ID: {}", userId);
-        if (!userRepository.existsById(userId)) {
-            throw new ResourceNotFoundException("User not found with id: " + userId);
-        }
-        userRepository.deleteById(userId);
+        User user = findUserById(userId);
+        user.setDeleted(true);
+        userRepository.save(user);
     }
 
-    private User findUserById(UUID userId) {
+    @Override
+    public List<UserResponse> getUsersByRole(String roleName) {
+        return userRepository.findByRoleName(roleName).stream()
+                .map(userMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    private User findUserById(String userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
     }

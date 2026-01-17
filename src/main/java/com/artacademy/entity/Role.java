@@ -1,31 +1,31 @@
 package com.artacademy.entity;
 
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.time.Instant;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "app_roles")
+@Document(collection = "roles")
 public class Role {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
-    @Column(unique = true, nullable = false)
-    private String name; // e.g., "ROLE_CUSTOMER", "ROLE_ADMIN"
+    @Indexed(unique = true)
+    private String name; // e.g., "ROLE_CUSTOMER", "ROLE_ADMIN", "ROLE_TEACHER"
 
-    @ManyToMany(mappedBy = "roles")
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @Builder.Default
-    private Set<User> users = new HashSet<>();
+    @CreatedDate
+    private Instant createdAt;
+
+    @LastModifiedDate
+    private Instant updatedAt;
 }

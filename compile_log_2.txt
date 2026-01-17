@@ -1,0 +1,665 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< com.artacademy:artacademy >----------------------
+[INFO] Building artacademy 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ artacademy ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ artacademy ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 185 source files with javac [debug release 17] to target\classes
+[INFO] MapStruct: Using accessor naming strategy: org.mapstruct.ap.spi.DefaultAccessorNamingStrategy
+[INFO] MapStruct: Using builder provider: org.mapstruct.ap.spi.DefaultBuilderProvider
+[INFO] MapStruct: Using enum naming strategy: org.mapstruct.ap.spi.DefaultEnumMappingStrategy
+[INFO]  MapStruct: processing: com.artacademy.mapper.ArtClassesCategoryMapper.
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.entity.ArtClassesCategory toEntity(com.artacademy.dto.request.ArtClassesCategoryRequestDto dto).
+[INFO] -- MapStruct: mapping property: dto.getName() to: name(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: description(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: imageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.ArtClassesCategoryResponseDto toDto(com.artacademy.entity.ArtClassesCategory entity).
+[INFO] -- MapStruct: mapping property: entityParentCategoryId( entity ) to: parentId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityParentCategoryId( entity ).
+[INFO] -- MapStruct: mapping property: entityParentName( entity ) to: parentName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityParentName( entity ).
+[INFO] -- MapStruct: mapping property: entity.getId() to: id(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getId().
+[INFO] -- MapStruct: mapping property: entity.getName() to: name(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getName().
+[INFO] -- MapStruct: mapping property: entity.getDescription() to: description(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getDescription().
+[INFO] -- MapStruct: mapping property: entity.getImageUrl() to: imageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getImageUrl().
+[INFO] -- MapStruct: mapping property: entity.getCreatedAt() to: createdAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getCreatedAt().
+[INFO] -- MapStruct: mapping property: entity.getUpdatedAt() to: updatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getUpdatedAt().
+[INFO] - MapStruct: creating iterable mapping method implementation for java.util.List<com.artacademy.dto.response.ArtClassesCategoryResponseDto> toDtoList(java.util.List<com.artacademy.entity.ArtClassesCategory> entities).
+[INFO] -- MapStruct: selecting element mapping: com.artacademy.dto.response.ArtClassesCategoryResponseDto #toDto(artClassesCategory).
+[INFO] - MapStruct: creating bean mapping method implementation for void updateEntity(com.artacademy.dto.request.ArtClassesCategoryRequestDto dto, @MappingTarget com.artacademy.entity.ArtClassesCategory entity).
+[INFO] -- MapStruct: mapping property: dto.getName() to: setName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: setDescription(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO]  MapStruct: processing: com.artacademy.mapper.ArtGalleryCategoryMapper.
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.entity.ArtGalleryCategory toEntity(com.artacademy.dto.request.ArtGalleryCategoryRequestDto dto).
+[INFO] -- MapStruct: mapping property: dto.getName() to: name(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: description(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: imageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.ArtGalleryCategoryResponseDto toDto(com.artacademy.entity.ArtGalleryCategory entity).
+[INFO] -- MapStruct: mapping property: entityParentCategoryId( entity ) to: parentId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityParentCategoryId( entity ).
+[INFO] -- MapStruct: mapping property: entityParentName( entity ) to: parentName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityParentName( entity ).
+[INFO] -- MapStruct: mapping property: entity.getId() to: id(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getId().
+[INFO] -- MapStruct: mapping property: entity.getName() to: name(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getName().
+[INFO] -- MapStruct: mapping property: entity.getDescription() to: description(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getDescription().
+[INFO] -- MapStruct: mapping property: entity.getImageUrl() to: imageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getImageUrl().
+[INFO] -- MapStruct: mapping property: entity.getCreatedAt() to: createdAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getCreatedAt().
+[INFO] -- MapStruct: mapping property: entity.getUpdatedAt() to: updatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getUpdatedAt().
+[INFO] - MapStruct: creating iterable mapping method implementation for java.util.List<com.artacademy.dto.response.ArtGalleryCategoryResponseDto> toDtoList(java.util.List<com.artacademy.entity.ArtGalleryCategory> entities).
+[INFO] -- MapStruct: selecting element mapping: com.artacademy.dto.response.ArtGalleryCategoryResponseDto #toDto(artGalleryCategory).
+[INFO] - MapStruct: creating bean mapping method implementation for void updateEntity(com.artacademy.dto.request.ArtGalleryCategoryRequestDto dto, @MappingTarget com.artacademy.entity.ArtGalleryCategory entity).
+[INFO] -- MapStruct: mapping property: dto.getName() to: setName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: setDescription(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO]  MapStruct: processing: com.artacademy.mapper.ArtGalleryMapper.
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.entity.ArtGallery toEntity(com.artacademy.dto.request.ArtGalleryRequestDto dto).
+[INFO] -- MapStruct: mapping property: dto.getName() to: name(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: description(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: imageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.ArtGalleryResponseDto toDto(com.artacademy.entity.ArtGallery entity).
+[INFO] -- MapStruct: mapping property: entityCategoryCategoryId( entity ) to: setCategoryId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityCategoryCategoryId( entity ).
+[INFO] -- MapStruct: mapping property: entityCategoryName( entity ) to: setCategoryName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityCategoryName( entity ).
+[INFO] -- MapStruct: mapping property: entity.getId() to: setId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getId().
+[INFO] -- MapStruct: mapping property: entity.getName() to: setName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getName().
+[INFO] -- MapStruct: mapping property: entity.getDescription() to: setDescription(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getDescription().
+[INFO] -- MapStruct: mapping property: entity.isActive() to: setActive(boolean).
+[INFO] -- MapStruct: selecting property mapping: entity.isActive().
+[INFO] -- MapStruct: mapping property: entity.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getImageUrl().
+[INFO] -- MapStruct: mapping property: entity.getCreatedAt() to: setCreatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getCreatedAt().
+[INFO] -- MapStruct: mapping property: entity.getUpdatedAt() to: setUpdatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getUpdatedAt().
+[INFO] - MapStruct: creating bean mapping method implementation for void updateEntity(com.artacademy.dto.request.ArtGalleryRequestDto dto, @MappingTarget com.artacademy.entity.ArtGallery entity).
+[INFO] -- MapStruct: mapping property: dto.getName() to: setName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: setDescription(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.isActive() to: setActive(boolean).
+[INFO] -- MapStruct: selecting property mapping: dto.isActive().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO]  MapStruct: processing: com.artacademy.mapper.ArtPaymentMapper.
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.ArtPaymentResponseDto toDto(com.artacademy.entity.ArtPayment payment).
+[INFO] -- MapStruct: mapping property: paymentOrderOrderId( payment ) to: setOrderId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: paymentOrderOrderId( payment ).
+[INFO] -- MapStruct: mapping property: paymentOrderOrderNumber( payment ) to: setOrderNumber(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: paymentOrderOrderNumber( payment ).
+[INFO] -- MapStruct: mapping property: paymentUserUserId( payment ) to: setUserId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: paymentUserUserId( payment ).
+[INFO] -- MapStruct: mapping property: paymentUserEmail( payment ) to: setUserEmail(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: paymentUserEmail( payment ).
+[INFO] -- MapStruct: mapping property: payment.getId() to: setId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: payment.getId().
+[INFO] -- MapStruct: mapping property: payment.getRazorpayOrderId() to: setRazorpayOrderId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: payment.getRazorpayOrderId().
+[INFO] -- MapStruct: mapping property: payment.getRazorpayPaymentId() to: setRazorpayPaymentId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: payment.getRazorpayPaymentId().
+[INFO] -- MapStruct: mapping property: payment.getRazorpaySignature() to: setRazorpaySignature(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: payment.getRazorpaySignature().
+[INFO] -- MapStruct: mapping property: payment.getAmount() to: setAmount(java.math.BigDecimal).
+[INFO] -- MapStruct: selecting property mapping: payment.getAmount().
+[INFO] -- MapStruct: mapping property: payment.getCurrency() to: setCurrency(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: payment.getCurrency().
+[INFO] -- MapStruct: mapping property: payment.getStatus() to: setStatus(com.artacademy.enums.PaymentStatus).
+[INFO] -- MapStruct: selecting property mapping: payment.getStatus().
+[INFO] -- MapStruct: mapping property: payment.getProcessedAt() to: setProcessedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: payment.getProcessedAt().
+[INFO]  MapStruct: processing: com.artacademy.mapper.ArtCartMapper.
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.ArtCartResponseDto toDto(com.artacademy.entity.ArtShoppingCart cart).
+[INFO] -- MapStruct: mapping property: cart.getUserId() to: setUserId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: cart.getUserId().
+[INFO] -- MapStruct: mapping property: cart.getItems() to: setItems(java.util.List<com.artacademy.dto.response.ArtCartResponseDto.ArtCartItemDto>).
+[INFO] -- MapStruct: selecting property mapping: java.util.List<com.artacademy.dto.response.ArtCartResponseDto.ArtCartItemDto> #toItemDtoList(cart.getItems()).
+[INFO] -- MapStruct: mapping property: cart.getId() to: setId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: cart.getId().
+[INFO] -- MapStruct: mapping property: cart.getUpdatedAt() to: setUpdatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: cart.getUpdatedAt().
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.ArtCartResponseDto.ArtCartItemDto toItemDto(com.artacademy.entity.ArtShoppingCart.CartItem item).
+[INFO] -- MapStruct: mapping property: item.getItemId() to: setItemId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: item.getItemId().
+[INFO] -- MapStruct: mapping property: item.getItemType() to: setItemType(com.artacademy.enums.ArtItemType).
+[INFO] -- MapStruct: selecting property mapping: item.getItemType().
+[INFO] -- MapStruct: mapping property: item.getItemName() to: setItemName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: item.getItemName().
+[INFO] -- MapStruct: mapping property: item.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: item.getImageUrl().
+[INFO] -- MapStruct: mapping property: item.getUnitPrice() to: setUnitPrice(java.math.BigDecimal).
+[INFO] -- MapStruct: selecting property mapping: item.getUnitPrice().
+[INFO] -- MapStruct: mapping property: item.getQuantity() to: setQuantity(java.lang.Integer).
+[INFO] -- MapStruct: selecting property mapping: item.getQuantity().
+[INFO] - MapStruct: creating iterable mapping method implementation for java.util.List<com.artacademy.dto.response.ArtCartResponseDto.ArtCartItemDto> toItemDtoList(java.util.List<com.artacademy.entity.ArtShoppingCart.CartItem> items).
+[INFO] -- MapStruct: selecting element mapping: com.artacademy.dto.response.ArtCartResponseDto.ArtCartItemDto #toItemDto(cartItem).
+[INFO]  MapStruct: processing: com.artacademy.mapper.UserMapper.
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.entity.User toEntity(com.artacademy.dto.request.UserRequest userRequest).
+[INFO] -- MapStruct: mapping property: userRequest.getEmail() to: setEmail(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: userRequest.getEmail().
+[INFO] -- MapStruct: mapping property: userRequest.getFirstName() to: setFirstName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: userRequest.getFirstName().
+[INFO] -- MapStruct: mapping property: userRequest.getLastName() to: setLastName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: userRequest.getLastName().
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.UserResponse toResponse(com.artacademy.entity.User user).
+[INFO] -- MapStruct: mapping property: user.getEmail() to: email(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: user.getEmail().
+[INFO] -- MapStruct: mapping property: user.getRoles() to: roles(java.util.Set<java.lang.String>).
+[INFO] -- MapStruct: selecting property mapping: java.util.Set<java.lang.String> #roleRefsToRoleNames(user.getRoles()).
+[INFO] -- MapStruct: mapping property: user.isEnabled() to: enabled(boolean).
+[INFO] -- MapStruct: selecting property mapping: user.isEnabled().
+[INFO] -- MapStruct: mapping property: user.getId() to: id(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: user.getId().
+[INFO] -- MapStruct: mapping property: user.getFirstName() to: firstName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: user.getFirstName().
+[INFO] -- MapStruct: mapping property: user.getLastName() to: lastName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: user.getLastName().
+[INFO] -- MapStruct: mapping property: user.getPhoneNumber() to: phoneNumber(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: user.getPhoneNumber().
+[INFO] -- MapStruct: mapping property: user.getCreatedAt() to: createdAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: user.getCreatedAt().
+[INFO] -- MapStruct: mapping property: user.getUpdatedAt() to: updatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: user.getUpdatedAt().
+[INFO] - MapStruct: creating bean mapping method implementation for void updateEntityFromRequest(com.artacademy.dto.request.UserRequest userRequest, @MappingTarget com.artacademy.entity.User user).
+[INFO] -- MapStruct: mapping property: userRequest.getEmail() to: setEmail(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: userRequest.getEmail().
+[INFO] -- MapStruct: mapping property: userRequest.getFirstName() to: setFirstName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: userRequest.getFirstName().
+[INFO] -- MapStruct: mapping property: userRequest.getLastName() to: setLastName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: userRequest.getLastName().
+[INFO] -- MapStruct: mapping property: userRequest.getPhoneNumber() to: setPhoneNumber(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: userRequest.getPhoneNumber().
+[INFO]  MapStruct: processing: com.artacademy.mapper.ArtMaterialsCategoryMapper.
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.entity.ArtMaterialsCategory toEntity(com.artacademy.dto.request.ArtMaterialsCategoryRequestDto dto).
+[INFO] -- MapStruct: mapping property: dto.getName() to: name(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: description(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: imageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.ArtMaterialsCategoryResponseDto toDto(com.artacademy.entity.ArtMaterialsCategory entity).
+[INFO] -- MapStruct: mapping property: entityParentCategoryId( entity ) to: parentId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityParentCategoryId( entity ).
+[INFO] -- MapStruct: mapping property: entityParentName( entity ) to: parentName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityParentName( entity ).
+[INFO] -- MapStruct: mapping property: entity.getId() to: id(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getId().
+[INFO] -- MapStruct: mapping property: entity.getName() to: name(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getName().
+[INFO] -- MapStruct: mapping property: entity.getDescription() to: description(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getDescription().
+[INFO] -- MapStruct: mapping property: entity.getImageUrl() to: imageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getImageUrl().
+[INFO] -- MapStruct: mapping property: entity.getCreatedAt() to: createdAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getCreatedAt().
+[INFO] -- MapStruct: mapping property: entity.getUpdatedAt() to: updatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getUpdatedAt().
+[INFO] - MapStruct: creating iterable mapping method implementation for java.util.List<com.artacademy.dto.response.ArtMaterialsCategoryResponseDto> toDtoList(java.util.List<com.artacademy.entity.ArtMaterialsCategory> entities).
+[INFO] -- MapStruct: selecting element mapping: com.artacademy.dto.response.ArtMaterialsCategoryResponseDto #toDto(artMaterialsCategory).
+[INFO] - MapStruct: creating bean mapping method implementation for void updateEntity(com.artacademy.dto.request.ArtMaterialsCategoryRequestDto dto, @MappingTarget com.artacademy.entity.ArtMaterialsCategory entity).
+[INFO] -- MapStruct: mapping property: dto.getName() to: setName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: setDescription(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO]  MapStruct: processing: com.artacademy.mapper.ArtExhibitionCategoryMapper.
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.entity.ArtExhibitionCategory toEntity(com.artacademy.dto.request.ArtExhibitionCategoryRequestDto dto).
+[INFO] -- MapStruct: mapping property: dto.getName() to: name(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: description(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: imageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.ArtExhibitionCategoryResponseDto toDto(com.artacademy.entity.ArtExhibitionCategory entity).
+[INFO] -- MapStruct: mapping property: entityParentCategoryId( entity ) to: parentId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityParentCategoryId( entity ).
+[INFO] -- MapStruct: mapping property: entityParentName( entity ) to: parentName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityParentName( entity ).
+[INFO] -- MapStruct: mapping property: entity.getId() to: id(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getId().
+[INFO] -- MapStruct: mapping property: entity.getName() to: name(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getName().
+[INFO] -- MapStruct: mapping property: entity.getDescription() to: description(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getDescription().
+[INFO] -- MapStruct: mapping property: entity.getImageUrl() to: imageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getImageUrl().
+[INFO] -- MapStruct: mapping property: entity.getCreatedAt() to: createdAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getCreatedAt().
+[INFO] -- MapStruct: mapping property: entity.getUpdatedAt() to: updatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getUpdatedAt().
+[INFO] - MapStruct: creating iterable mapping method implementation for java.util.List<com.artacademy.dto.response.ArtExhibitionCategoryResponseDto> toDtoList(java.util.List<com.artacademy.entity.ArtExhibitionCategory> entities).
+[INFO] -- MapStruct: selecting element mapping: com.artacademy.dto.response.ArtExhibitionCategoryResponseDto #toDto(artExhibitionCategory).
+[INFO] - MapStruct: creating bean mapping method implementation for void updateEntity(com.artacademy.dto.request.ArtExhibitionCategoryRequestDto dto, @MappingTarget com.artacademy.entity.ArtExhibitionCategory entity).
+[INFO] -- MapStruct: mapping property: dto.getName() to: setName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: setDescription(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO]  MapStruct: processing: com.artacademy.mapper.ArtExhibitionMapper.
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.entity.ArtExhibition toEntity(com.artacademy.dto.request.ArtExhibitionRequestDto dto).
+[INFO] -- MapStruct: mapping property: dto.getName() to: name(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: description(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: imageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO] -- MapStruct: mapping property: dto.getStartDate() to: startDate(java.time.LocalDate).
+[INFO] -- MapStruct: selecting property mapping: dto.getStartDate().
+[INFO] -- MapStruct: mapping property: dto.getEndDate() to: endDate(java.time.LocalDate).
+[INFO] -- MapStruct: selecting property mapping: dto.getEndDate().
+[INFO] -- MapStruct: mapping property: dto.getLocation() to: location(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getLocation().
+[INFO] -- MapStruct: mapping property: dto.getArtistCount() to: artistCount(java.lang.Integer).
+[INFO] -- MapStruct: selecting property mapping: dto.getArtistCount().
+[INFO] -- MapStruct: mapping property: dto.getArtworksCount() to: artworksCount(java.lang.Integer).
+[INFO] -- MapStruct: selecting property mapping: dto.getArtworksCount().
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.ArtExhibitionResponseDto toDto(com.artacademy.entity.ArtExhibition entity).
+[INFO] -- MapStruct: mapping property: entityCategoryCategoryId( entity ) to: setCategoryId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityCategoryCategoryId( entity ).
+[INFO] -- MapStruct: mapping property: entityCategoryName( entity ) to: setCategoryName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityCategoryName( entity ).
+[INFO] -- MapStruct: mapping property: entity.getId() to: setId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getId().
+[INFO] -- MapStruct: mapping property: entity.getName() to: setName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getName().
+[INFO] -- MapStruct: mapping property: entity.getDescription() to: setDescription(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getDescription().
+[INFO] -- MapStruct: mapping property: entity.isActive() to: setActive(boolean).
+[INFO] -- MapStruct: selecting property mapping: entity.isActive().
+[INFO] -- MapStruct: mapping property: entity.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getImageUrl().
+[INFO] -- MapStruct: mapping property: entity.getStartDate() to: setStartDate(java.time.LocalDate).
+[INFO] -- MapStruct: selecting property mapping: entity.getStartDate().
+[INFO] -- MapStruct: mapping property: entity.getEndDate() to: setEndDate(java.time.LocalDate).
+[INFO] -- MapStruct: selecting property mapping: entity.getEndDate().
+[INFO] -- MapStruct: mapping property: entity.getLocation() to: setLocation(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getLocation().
+[INFO] -- MapStruct: mapping property: entity.getArtistCount() to: setArtistCount(java.lang.Integer).
+[INFO] -- MapStruct: selecting property mapping: entity.getArtistCount().
+[INFO] -- MapStruct: mapping property: entity.getArtworksCount() to: setArtworksCount(java.lang.Integer).
+[INFO] -- MapStruct: selecting property mapping: entity.getArtworksCount().
+[INFO] -- MapStruct: mapping property: entity.getCreatedAt() to: setCreatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getCreatedAt().
+[INFO] -- MapStruct: mapping property: entity.getUpdatedAt() to: setUpdatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getUpdatedAt().
+[INFO] - MapStruct: creating bean mapping method implementation for void updateEntity(com.artacademy.dto.request.ArtExhibitionRequestDto dto, @MappingTarget com.artacademy.entity.ArtExhibition entity).
+[INFO] -- MapStruct: mapping property: dto.getName() to: setName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: setDescription(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.isActive() to: setActive(boolean).
+[INFO] -- MapStruct: selecting property mapping: dto.isActive().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO] -- MapStruct: mapping property: dto.getStartDate() to: setStartDate(java.time.LocalDate).
+[INFO] -- MapStruct: selecting property mapping: dto.getStartDate().
+[INFO] -- MapStruct: mapping property: dto.getEndDate() to: setEndDate(java.time.LocalDate).
+[INFO] -- MapStruct: selecting property mapping: dto.getEndDate().
+[INFO] -- MapStruct: mapping property: dto.getLocation() to: setLocation(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getLocation().
+[INFO] -- MapStruct: mapping property: dto.getArtistCount() to: setArtistCount(java.lang.Integer).
+[INFO] -- MapStruct: selecting property mapping: dto.getArtistCount().
+[INFO] -- MapStruct: mapping property: dto.getArtworksCount() to: setArtworksCount(java.lang.Integer).
+[INFO] -- MapStruct: selecting property mapping: dto.getArtworksCount().
+[INFO]  MapStruct: processing: com.artacademy.mapper.ArtWorksCategoryMapper.
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.entity.ArtWorksCategory toEntity(com.artacademy.dto.request.ArtWorksCategoryRequestDto dto).
+[INFO] -- MapStruct: mapping property: dto.getName() to: name(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: description(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: imageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.ArtWorksCategoryResponseDto toDto(com.artacademy.entity.ArtWorksCategory entity).
+[INFO] -- MapStruct: mapping property: entityParentCategoryId( entity ) to: parentId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityParentCategoryId( entity ).
+[INFO] -- MapStruct: mapping property: entityParentName( entity ) to: parentName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityParentName( entity ).
+[INFO] -- MapStruct: mapping property: entity.getId() to: id(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getId().
+[INFO] -- MapStruct: mapping property: entity.getName() to: name(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getName().
+[INFO] -- MapStruct: mapping property: entity.getDescription() to: description(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getDescription().
+[INFO] -- MapStruct: mapping property: entity.getImageUrl() to: imageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getImageUrl().
+[INFO] -- MapStruct: mapping property: entity.getCreatedAt() to: createdAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getCreatedAt().
+[INFO] -- MapStruct: mapping property: entity.getUpdatedAt() to: updatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getUpdatedAt().
+[INFO] - MapStruct: creating iterable mapping method implementation for java.util.List<com.artacademy.dto.response.ArtWorksCategoryResponseDto> toDtoList(java.util.List<com.artacademy.entity.ArtWorksCategory> entities).
+[INFO] -- MapStruct: selecting element mapping: com.artacademy.dto.response.ArtWorksCategoryResponseDto #toDto(artWorksCategory).
+[INFO] - MapStruct: creating bean mapping method implementation for void updateEntity(com.artacademy.dto.request.ArtWorksCategoryRequestDto dto, @MappingTarget com.artacademy.entity.ArtWorksCategory entity).
+[INFO] -- MapStruct: mapping property: dto.getName() to: setName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: setDescription(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO]  MapStruct: processing: com.artacademy.mapper.ArtOrderMapper.
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.ArtOrderResponseDto toDto(com.artacademy.entity.ArtOrder order).
+[INFO] -- MapStruct: mapping property: orderUserUserId( order ) to: setUserId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: orderUserUserId( order ).
+[INFO] -- MapStruct: mapping property: orderUserEmail( order ) to: setUserEmail(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: orderUserEmail( order ).
+[INFO] -- MapStruct: mapping property: order.getItems() to: setItems(java.util.List<com.artacademy.dto.response.ArtOrderResponseDto.ArtOrderItemDto>).
+[INFO] -- MapStruct: selecting property mapping: java.util.List<com.artacademy.dto.response.ArtOrderResponseDto.ArtOrderItemDto> #toItemDtoList(order.getItems()).
+[INFO] -- MapStruct: mapping property: order.getStatusHistory() to: setStatusHistory(java.util.List<com.artacademy.dto.response.ArtOrderResponseDto.ArtOrderStatusHistoryDto>).
+[INFO] -- MapStruct: selecting property mapping: java.util.List<com.artacademy.dto.response.ArtOrderResponseDto.ArtOrderStatusHistoryDto> #toHistoryDtoList(order.getStatusHistory()).
+[INFO] -- MapStruct: mapping property: order.getId() to: setId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: order.getId().
+[INFO] -- MapStruct: mapping property: order.getOrderNumber() to: setOrderNumber(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: order.getOrderNumber().
+[INFO] -- MapStruct: mapping property: order.getStatus() to: setStatus(com.artacademy.enums.OrderStatus).
+[INFO] -- MapStruct: selecting property mapping: order.getStatus().
+[INFO] -- MapStruct: mapping property: order.getTotalPrice() to: setTotalPrice(java.math.BigDecimal).
+[INFO] -- MapStruct: selecting property mapping: order.getTotalPrice().
+[INFO] -- MapStruct: mapping property: order.getShippingAddress() to: setShippingAddress(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: order.getShippingAddress().
+[INFO] -- MapStruct: mapping property: order.getBillingAddress() to: setBillingAddress(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: order.getBillingAddress().
+[INFO] -- MapStruct: mapping property: order.getCreatedAt() to: setCreatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: order.getCreatedAt().
+[INFO] -- MapStruct: mapping property: order.getUpdatedAt() to: setUpdatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: order.getUpdatedAt().
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.ArtOrderResponseDto.ArtOrderItemDto toItemDto(com.artacademy.entity.ArtOrder.OrderItem item).
+[INFO] -- MapStruct: mapping property: item.getItemId() to: setItemId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: item.getItemId().
+[INFO] -- MapStruct: mapping property: item.getItemType() to: setItemType(com.artacademy.enums.ArtItemType).
+[INFO] -- MapStruct: selecting property mapping: item.getItemType().
+[INFO] -- MapStruct: mapping property: item.getItemName() to: setItemName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: item.getItemName().
+[INFO] -- MapStruct: mapping property: item.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: item.getImageUrl().
+[INFO] -- MapStruct: mapping property: item.getUnitPrice() to: setUnitPrice(java.math.BigDecimal).
+[INFO] -- MapStruct: selecting property mapping: item.getUnitPrice().
+[INFO] -- MapStruct: mapping property: item.getQuantity() to: setQuantity(java.lang.Integer).
+[INFO] -- MapStruct: selecting property mapping: item.getQuantity().
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.ArtOrderResponseDto.ArtOrderStatusHistoryDto toHistoryDto(com.artacademy.entity.ArtOrder.StatusHistory history).
+[INFO] -- MapStruct: mapping property: history.getStatus() to: setStatus(com.artacademy.enums.OrderStatus).
+[INFO] -- MapStruct: selecting property mapping: history.getStatus().
+[INFO] -- MapStruct: mapping property: history.getNotes() to: setNotes(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: history.getNotes().
+[INFO] -- MapStruct: mapping property: history.getChangedAt() to: setChangedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: history.getChangedAt().
+[INFO] - MapStruct: creating iterable mapping method implementation for java.util.List<com.artacademy.dto.response.ArtOrderResponseDto.ArtOrderItemDto> toItemDtoList(java.util.List<com.artacademy.entity.ArtOrder.OrderItem> items).
+[INFO] -- MapStruct: selecting element mapping: com.artacademy.dto.response.ArtOrderResponseDto.ArtOrderItemDto #toItemDto(orderItem).
+[INFO] - MapStruct: creating iterable mapping method implementation for java.util.List<com.artacademy.dto.response.ArtOrderResponseDto.ArtOrderStatusHistoryDto> toHistoryDtoList(java.util.List<com.artacademy.entity.ArtOrder.StatusHistory> history).
+[INFO] -- MapStruct: selecting element mapping: com.artacademy.dto.response.ArtOrderResponseDto.ArtOrderStatusHistoryDto #toHistoryDto(statusHistory).
+[INFO]  MapStruct: processing: com.artacademy.mapper.ArtClassesMapper.
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.entity.ArtClasses toEntity(com.artacademy.dto.request.ArtClassesRequestDto dto).
+[INFO] -- MapStruct: mapping property: dto.getName() to: name(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: description(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getBasePrice() to: basePrice(java.math.BigDecimal).
+[INFO] -- MapStruct: selecting property mapping: dto.getBasePrice().
+[INFO] -- MapStruct: mapping property: dto.getProficiency() to: proficiency(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getProficiency().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: imageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.ArtClassesResponseDto toDto(com.artacademy.entity.ArtClasses entity).
+[INFO] -- MapStruct: mapping property: entityCategoryCategoryId( entity ) to: setCategoryId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityCategoryCategoryId( entity ).
+[INFO] -- MapStruct: mapping property: entityCategoryName( entity ) to: setCategoryName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityCategoryName( entity ).
+[INFO] -- MapStruct: mapping property: entity.getId() to: setId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getId().
+[INFO] -- MapStruct: mapping property: entity.getName() to: setName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getName().
+[INFO] -- MapStruct: mapping property: entity.getDescription() to: setDescription(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getDescription().
+[INFO] -- MapStruct: mapping property: entity.getBasePrice() to: setBasePrice(java.math.BigDecimal).
+[INFO] -- MapStruct: selecting property mapping: entity.getBasePrice().
+[INFO] -- MapStruct: mapping property: entity.isActive() to: setActive(boolean).
+[INFO] -- MapStruct: selecting property mapping: entity.isActive().
+[INFO] -- MapStruct: mapping property: entity.getProficiency() to: setProficiency(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getProficiency().
+[INFO] -- MapStruct: mapping property: entity.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getImageUrl().
+[INFO] -- MapStruct: mapping property: entity.getCreatedAt() to: setCreatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getCreatedAt().
+[INFO] -- MapStruct: mapping property: entity.getUpdatedAt() to: setUpdatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getUpdatedAt().
+[INFO] - MapStruct: creating bean mapping method implementation for void updateEntity(com.artacademy.dto.request.ArtClassesRequestDto dto, @MappingTarget com.artacademy.entity.ArtClasses entity).
+[INFO] -- MapStruct: mapping property: dto.getName() to: setName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: setDescription(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getBasePrice() to: setBasePrice(java.math.BigDecimal).
+[INFO] -- MapStruct: selecting property mapping: dto.getBasePrice().
+[INFO] -- MapStruct: mapping property: dto.isActive() to: setActive(boolean).
+[INFO] -- MapStruct: selecting property mapping: dto.isActive().
+[INFO] -- MapStruct: mapping property: dto.getProficiency() to: setProficiency(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getProficiency().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO]  MapStruct: processing: com.artacademy.mapper.ArtWorksMapper.
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.entity.ArtWorks toEntity(com.artacademy.dto.request.ArtWorksRequestDto dto).
+[INFO] -- MapStruct: mapping property: dto.getName() to: name(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: description(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getBasePrice() to: basePrice(java.math.BigDecimal).
+[INFO] -- MapStruct: selecting property mapping: dto.getBasePrice().
+[INFO] -- MapStruct: mapping property: dto.getArtistName() to: artistName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getArtistName().
+[INFO] -- MapStruct: mapping property: dto.getArtMedium() to: artMedium(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getArtMedium().
+[INFO] -- MapStruct: mapping property: dto.getSize() to: size(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getSize().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: imageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.ArtWorksResponseDto toDto(com.artacademy.entity.ArtWorks entity).
+[INFO] -- MapStruct: mapping property: entityCategoryCategoryId( entity ) to: setCategoryId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityCategoryCategoryId( entity ).
+[INFO] -- MapStruct: mapping property: entityCategoryName( entity ) to: setCategoryName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityCategoryName( entity ).
+[INFO] -- MapStruct: mapping property: entity.getId() to: setId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getId().
+[INFO] -- MapStruct: mapping property: entity.getName() to: setName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getName().
+[INFO] -- MapStruct: mapping property: entity.getDescription() to: setDescription(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getDescription().
+[INFO] -- MapStruct: mapping property: entity.getBasePrice() to: setBasePrice(java.math.BigDecimal).
+[INFO] -- MapStruct: selecting property mapping: entity.getBasePrice().
+[INFO] -- MapStruct: mapping property: entity.isActive() to: setActive(boolean).
+[INFO] -- MapStruct: selecting property mapping: entity.isActive().
+[INFO] -- MapStruct: mapping property: entity.getArtistName() to: setArtistName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getArtistName().
+[INFO] -- MapStruct: mapping property: entity.getArtMedium() to: setArtMedium(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getArtMedium().
+[INFO] -- MapStruct: mapping property: entity.getSize() to: setSize(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getSize().
+[INFO] -- MapStruct: mapping property: entity.getViews() to: setViews(java.lang.Integer).
+[INFO] -- MapStruct: selecting property mapping: entity.getViews().
+[INFO] -- MapStruct: mapping property: entity.getLikes() to: setLikes(java.lang.Integer).
+[INFO] -- MapStruct: selecting property mapping: entity.getLikes().
+[INFO] -- MapStruct: mapping property: entity.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getImageUrl().
+[INFO] -- MapStruct: mapping property: entity.getCreatedAt() to: setCreatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getCreatedAt().
+[INFO] -- MapStruct: mapping property: entity.getUpdatedAt() to: setUpdatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getUpdatedAt().
+[INFO] - MapStruct: creating bean mapping method implementation for void updateEntity(com.artacademy.dto.request.ArtWorksRequestDto dto, @MappingTarget com.artacademy.entity.ArtWorks entity).
+[INFO] -- MapStruct: mapping property: dto.getName() to: setName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: setDescription(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getBasePrice() to: setBasePrice(java.math.BigDecimal).
+[INFO] -- MapStruct: selecting property mapping: dto.getBasePrice().
+[INFO] -- MapStruct: mapping property: dto.isActive() to: setActive(boolean).
+[INFO] -- MapStruct: selecting property mapping: dto.isActive().
+[INFO] -- MapStruct: mapping property: dto.getArtistName() to: setArtistName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getArtistName().
+[INFO] -- MapStruct: mapping property: dto.getArtMedium() to: setArtMedium(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getArtMedium().
+[INFO] -- MapStruct: mapping property: dto.getSize() to: setSize(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getSize().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO]  MapStruct: processing: com.artacademy.mapper.ArtMaterialsMapper.
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.entity.ArtMaterials toEntity(com.artacademy.dto.request.ArtMaterialsRequestDto dto).
+[INFO] -- MapStruct: mapping property: dto.getName() to: name(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: description(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getBasePrice() to: basePrice(java.math.BigDecimal).
+[INFO] -- MapStruct: selecting property mapping: dto.getBasePrice().
+[INFO] -- MapStruct: mapping property: dto.getDiscount() to: discount(java.lang.Integer).
+[INFO] -- MapStruct: selecting property mapping: dto.getDiscount().
+[INFO] -- MapStruct: mapping property: dto.getStock() to: stock(java.math.BigDecimal).
+[INFO] -- MapStruct: selecting property mapping: dto.getStock().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: imageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO] - MapStruct: creating bean mapping method implementation for com.artacademy.dto.response.ArtMaterialsResponseDto toDto(com.artacademy.entity.ArtMaterials entity).
+[INFO] -- MapStruct: mapping property: entityCategoryCategoryId( entity ) to: setCategoryId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityCategoryCategoryId( entity ).
+[INFO] -- MapStruct: mapping property: entityCategoryName( entity ) to: setCategoryName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entityCategoryName( entity ).
+[INFO] -- MapStruct: mapping property: entity.getId() to: setId(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getId().
+[INFO] -- MapStruct: mapping property: entity.getName() to: setName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getName().
+[INFO] -- MapStruct: mapping property: entity.getDescription() to: setDescription(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getDescription().
+[INFO] -- MapStruct: mapping property: entity.getBasePrice() to: setBasePrice(java.math.BigDecimal).
+[INFO] -- MapStruct: selecting property mapping: entity.getBasePrice().
+[INFO] -- MapStruct: mapping property: entity.getDiscount() to: setDiscount(java.lang.Integer).
+[INFO] -- MapStruct: selecting property mapping: entity.getDiscount().
+[INFO] -- MapStruct: mapping property: entity.getStock() to: setStock(java.math.BigDecimal).
+[INFO] -- MapStruct: selecting property mapping: entity.getStock().
+[INFO] -- MapStruct: mapping property: entity.isActive() to: setActive(boolean).
+[INFO] -- MapStruct: selecting property mapping: entity.isActive().
+[INFO] -- MapStruct: mapping property: entity.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: entity.getImageUrl().
+[INFO] -- MapStruct: mapping property: entity.getCreatedAt() to: setCreatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getCreatedAt().
+[INFO] -- MapStruct: mapping property: entity.getUpdatedAt() to: setUpdatedAt(java.time.Instant).
+[INFO] -- MapStruct: selecting property mapping: entity.getUpdatedAt().
+[INFO] - MapStruct: creating bean mapping method implementation for void updateEntity(com.artacademy.dto.request.ArtMaterialsRequestDto dto, @MappingTarget com.artacademy.entity.ArtMaterials entity).
+[INFO] -- MapStruct: mapping property: dto.getName() to: setName(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getName().
+[INFO] -- MapStruct: mapping property: dto.getDescription() to: setDescription(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getDescription().
+[INFO] -- MapStruct: mapping property: dto.getBasePrice() to: setBasePrice(java.math.BigDecimal).
+[INFO] -- MapStruct: selecting property mapping: dto.getBasePrice().
+[INFO] -- MapStruct: mapping property: dto.getDiscount() to: setDiscount(java.lang.Integer).
+[INFO] -- MapStruct: selecting property mapping: dto.getDiscount().
+[INFO] -- MapStruct: mapping property: dto.getStock() to: setStock(java.math.BigDecimal).
+[INFO] -- MapStruct: selecting property mapping: dto.getStock().
+[INFO] -- MapStruct: mapping property: dto.isActive() to: setActive(boolean).
+[INFO] -- MapStruct: selecting property mapping: dto.isActive().
+[INFO] -- MapStruct: mapping property: dto.getImageUrl() to: setImageUrl(java.lang.String).
+[INFO] -- MapStruct: selecting property mapping: dto.getImageUrl().
+[INFO] Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/mapper/ArtGalleryMapper.java:[16,16] Unmapped target property: "isActive".
+[WARNING] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/mapper/ArtPaymentMapper.java:[15,27] Unmapped target property: "createdAt".
+[WARNING] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/mapper/ArtExhibitionMapper.java:[16,19] Unmapped target property: "isActive".
+[WARNING] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/mapper/ArtClassesMapper.java:[18,16] Unmapped target property: "isActive".
+[WARNING] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/mapper/ArtWorksMapper.java:[18,14] Unmapped target property: "isActive".
+[WARNING] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/mapper/ArtMaterialsMapper.java:[16,18] Unmapped target property: "isActive".
+[INFO] 6 warnings 
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtGalleryCategoryController.java:[40,58] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtGalleryCategoryController.java:[60,57] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtGalleryCategoryController.java:[67,32] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/service/impl/AuthenticationServiceImpl.java:[221,43] incompatible types: java.lang.String cannot be converted to java.util.UUID
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/service/impl/AuthenticationServiceImpl.java:[227,29] incompatible types: no instance(s) of type variable(s) X exist so that java.lang.Object conforms to com.artacademy.dto.response.AuthenticationResponse
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/service/impl/AuthenticationServiceImpl.java:[251,31] incompatible types: java.lang.String cannot be converted to java.util.UUID
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtWorksCategoryController.java:[39,58] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtWorksCategoryController.java:[59,57] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtWorksCategoryController.java:[66,32] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtExhibitionCategoryController.java:[40,58] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtExhibitionCategoryController.java:[60,57] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtExhibitionCategoryController.java:[67,32] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/UserController.java:[62,58] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/UserController.java:[69,57] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/UserController.java:[76,32] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtClassesCategoryController.java:[40,58] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtClassesCategoryController.java:[60,57] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtClassesCategoryController.java:[67,32] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtMaterialsCategoryController.java:[40,58] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtMaterialsCategoryController.java:[60,57] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtMaterialsCategoryController.java:[67,32] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[INFO] 21 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  9.313 s
+[INFO] Finished at: 2026-01-17T03:31:11+05:30
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project artacademy: Compilation failure: Compilation failure: 
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtGalleryCategoryController.java:[40,58] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtGalleryCategoryController.java:[60,57] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtGalleryCategoryController.java:[67,32] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/service/impl/AuthenticationServiceImpl.java:[221,43] incompatible types: java.lang.String cannot be converted to java.util.UUID
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/service/impl/AuthenticationServiceImpl.java:[227,29] incompatible types: no instance(s) of type variable(s) X exist so that java.lang.Object conforms to com.artacademy.dto.response.AuthenticationResponse
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/service/impl/AuthenticationServiceImpl.java:[251,31] incompatible types: java.lang.String cannot be converted to java.util.UUID
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtWorksCategoryController.java:[39,58] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtWorksCategoryController.java:[59,57] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtWorksCategoryController.java:[66,32] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtExhibitionCategoryController.java:[40,58] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtExhibitionCategoryController.java:[60,57] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtExhibitionCategoryController.java:[67,32] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/UserController.java:[62,58] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/UserController.java:[69,57] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/UserController.java:[76,32] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtClassesCategoryController.java:[40,58] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtClassesCategoryController.java:[60,57] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtClassesCategoryController.java:[67,32] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtMaterialsCategoryController.java:[40,58] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtMaterialsCategoryController.java:[60,57] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] /C:/Users/Ajay Gupta/Desktop/jj--art-cademy-v1/src/main/java/com/artacademy/controller/ArtMaterialsCategoryController.java:[67,32] incompatible types: java.util.UUID cannot be converted to java.lang.String
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

@@ -58,20 +58,20 @@ public class UserController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_STORE_MANAGER')")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable("id") UUID userId) {
+    public ResponseEntity<UserResponse> getUserById(@PathVariable("id") String userId) {
         return ResponseEntity.ok(userService.getUserById(userId));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_STORE_MANAGER')")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable("id") UUID userId,
+    public ResponseEntity<UserResponse> updateUser(@PathVariable("id") String userId,
             @Valid @RequestBody UserRequest request) {
         return ResponseEntity.ok(userService.updateUser(userId, request));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<Void> deleteUser(@PathVariable("id") UUID userId) {
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") String userId) {
         log.warn("Deleting user ID: {}", userId);
         userService.deleteUser(userId);
         return ResponseEntity.noContent().build();

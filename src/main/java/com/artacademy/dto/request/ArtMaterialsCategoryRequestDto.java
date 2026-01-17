@@ -3,13 +3,11 @@ package com.artacademy.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-import java.util.UUID;
-
 @Data
 public class ArtMaterialsCategoryRequestDto {
-
-    @NotBlank(message = "Category name is required")
+    @NotBlank(message = "Name is required")
     private String name;
-
-    private UUID parentId;
+    private String description;
+    private String imageUrl;
+    private String parentId;
 }

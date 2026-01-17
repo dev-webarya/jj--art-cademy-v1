@@ -9,18 +9,18 @@ import org.mapstruct.*;
 public interface ArtGalleryMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "artGalleryCategory", ignore = true)
+    @Mapping(target = "category", ignore = true)
     @Mapping(target = "deleted", constant = "false")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     ArtGallery toEntity(ArtGalleryRequestDto dto);
 
-    @Mapping(target = "categoryId", source = "artGalleryCategory.id")
-    @Mapping(target = "categoryName", source = "artGalleryCategory.name")
+    @Mapping(target = "categoryId", source = "category.categoryId")
+    @Mapping(target = "categoryName", source = "category.name")
     ArtGalleryResponseDto toDto(ArtGallery entity);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "artGalleryCategory", ignore = true)
+    @Mapping(target = "category", ignore = true)
     @Mapping(target = "deleted", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

@@ -1,74 +1,115 @@
 package com.artacademy.entity;
 
 import com.artacademy.enums.OrderStatus;
-import jakarta.persistence.*;
+import com.artacademy.enums.ArtItemType;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "art_orders")
+@Document(collection = "art_orders")
 public class ArtOrder {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
-    @Column(nullable = false, unique = true)
+    @Indexed(unique = true)
     private String orderNumber;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    // Embedded user reference
+    private UserRef user;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private OrderStatus status;
 
-    @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal totalPrice;
 
-    @Column(columnDefinition = "TEXT")
     private String shippingAddress;
 
-    @Column(columnDefinition = "TEXT")
     private String billingAddress;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    // Embedded order items
     @Builder.Default
-    private List<ArtOrderItem> items = new ArrayList<>();
+    private List<OrderItem> items = new ArrayList<>();
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    // Embedded status history
     @Builder.Default
-    private List<ArtOrderStatusHistory> statusHistory = new ArrayList<>();
+    private List<StatusHistory> statusHistory = new ArrayList<>();
 
-    @CreationTimestamp
-    @Column(updatable = false)
+    @Builder.Default
+    private boolean deleted = false;
+
+    @CreatedDate
     private Instant createdAt;
 
-    @UpdateTimestamp
+    @LastModifiedDate
     private Instant updatedAt;
 
     /**
      * Add status history entry
      */
     public void addStatusHistory(OrderStatus status, String notes) {
-        ArtOrderStatusHistory history = ArtOrderStatusHistory.builder()
-                .order(this)
+        StatusHistory history = StatusHistory.builder()
                 .status(status)
                 .notes(notes)
+                .changedAt(Instant.now())
                 .build();
         this.statusHistory.add(history);
+    }
+
+    // Embedded class for user reference
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UserRef {
+        private String userId;
+        private String email;
+        private String firstName;
+        private String lastName;
+        private String phoneNumber;
+    }
+
+    // Embedded class for order items
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OrderItem {
+        private String itemId;
+        private ArtItemType itemType;
+        private String itemName;
+        private String imageUrl;
+        private BigDecimal unitPrice;
+        private Integer quantity;
+
+        public BigDecimal getSubtotal() {
+            return unitPrice.multiply(BigDecimal.valueOf(quantity));
+        }
+    }
+
+    // Embedded class for status history
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class StatusHistory {
+        private OrderStatus status;
+        private String notes;
+        private Instant changedAt;
     }
 }

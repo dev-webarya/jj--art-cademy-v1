@@ -12,12 +12,12 @@ import com.artacademy.service.ArtWorksService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +29,6 @@ public class ArtWorksServiceImpl implements ArtWorksService {
     private final ArtWorksMapper artWorksMapper;
 
     @Override
-    @Transactional
     public ArtWorksResponseDto create(ArtWorksRequestDto request) {
         log.info("Creating artwork: {}", request.getName());
         ArtWorks entity = artWorksMapper.toEntity(request);
@@ -38,7 +37,10 @@ public class ArtWorksServiceImpl implements ArtWorksService {
             ArtWorksCategory category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(
                             () -> new ResourceNotFoundException("ArtWorksCategory", "id", request.getCategoryId()));
-            entity.setCategory(category);
+            entity.setCategory(ArtWorks.CategoryRef.builder()
+                    .categoryId(category.getId())
+                    .name(category.getName())
+                    .build());
         }
 
         entity.setViews(0);
@@ -48,8 +50,7 @@ public class ArtWorksServiceImpl implements ArtWorksService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ArtWorksResponseDto getById(UUID id) {
+    public ArtWorksResponseDto getById(String id) {
         log.debug("Fetching artwork by ID: {}", id);
         ArtWorks entity = artWorksRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", id));
@@ -57,14 +58,45 @@ public class ArtWorksServiceImpl implements ArtWorksService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<ArtWorksResponseDto> getAll(Specification<ArtWorks> spec, Pageable pageable) {
-        return artWorksRepository.findAll(spec, pageable).map(artWorksMapper::toDto);
+    public Page<ArtWorksResponseDto> getAll(Pageable pageable) {
+        Page<ArtWorks> page = artWorksRepository.findAll(pageable);
+        List<ArtWorksResponseDto> dtos = page.getContent().stream()
+                .filter(w -> !w.isDeleted())
+                .map(artWorksMapper::toDto)
+                .collect(Collectors.toList());
+        return new PageImpl<>(dtos, pageable, page.getTotalElements());
     }
 
     @Override
-    @Transactional
-    public ArtWorksResponseDto update(UUID id, ArtWorksRequestDto request) {
+    public List<ArtWorksResponseDto> getAllActive() {
+        return artWorksRepository.findActiveWorks().stream()
+                .map(artWorksMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ArtWorksResponseDto> getByCategory(String categoryId) {
+        return artWorksRepository.findByCategoryId(categoryId).stream()
+                .map(artWorksMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ArtWorksResponseDto> searchByName(String name) {
+        return artWorksRepository.searchByName(name).stream()
+                .map(artWorksMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ArtWorksResponseDto> searchByArtist(String artistName) {
+        return artWorksRepository.searchByArtist(artistName).stream()
+                .map(artWorksMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public ArtWorksResponseDto update(String id, ArtWorksRequestDto request) {
         log.info("Updating artwork ID: {}", id);
         ArtWorks entity = artWorksRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", id));
@@ -75,25 +107,26 @@ public class ArtWorksServiceImpl implements ArtWorksService {
             ArtWorksCategory category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(
                             () -> new ResourceNotFoundException("ArtWorksCategory", "id", request.getCategoryId()));
-            entity.setCategory(category);
+            entity.setCategory(ArtWorks.CategoryRef.builder()
+                    .categoryId(category.getId())
+                    .name(category.getName())
+                    .build());
         }
 
         return artWorksMapper.toDto(artWorksRepository.save(entity));
     }
 
     @Override
-    @Transactional
-    public void delete(UUID id) {
+    public void delete(String id) {
         log.warn("Deleting artwork ID: {}", id);
-        if (!artWorksRepository.existsById(id)) {
-            throw new ResourceNotFoundException("ArtWorks", "id", id);
-        }
-        artWorksRepository.deleteById(id);
+        ArtWorks entity = artWorksRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", id));
+        entity.setDeleted(true);
+        artWorksRepository.save(entity);
     }
 
     @Override
-    @Transactional
-    public ArtWorksResponseDto incrementViews(UUID id) {
+    public ArtWorksResponseDto incrementViews(String id) {
         ArtWorks entity = artWorksRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", id));
         entity.setViews(entity.getViews() + 1);
@@ -101,8 +134,7 @@ public class ArtWorksServiceImpl implements ArtWorksService {
     }
 
     @Override
-    @Transactional
-    public ArtWorksResponseDto incrementLikes(UUID id) {
+    public ArtWorksResponseDto incrementLikes(String id) {
         ArtWorks entity = artWorksRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", id));
         entity.setLikes(entity.getLikes() + 1);

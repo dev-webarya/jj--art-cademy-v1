@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -33,13 +32,11 @@ public class ArtCartServiceImpl implements ArtCartService {
     private final ArtCartMapper cartMapper;
 
     @Override
-    @Transactional(readOnly = true)
     public ArtCartResponseDto getMyCart() {
         return cartMapper.toDto(getOrCreateCart(getCurrentUser()));
     }
 
     @Override
-    @Transactional
     public ArtCartResponseDto addToCart(ArtCartItemRequestDto request) {
         log.info("Adding item {} (type: {}) to cart", request.getItemId(), request.getItemType());
         User user = getCurrentUser();
@@ -66,8 +63,8 @@ public class ArtCartServiceImpl implements ArtCartService {
             unitPrice = material.getBasePrice().subtract(material.getBasePrice().multiply(discount));
         }
 
-        // Check if item already in cart
-        Optional<ArtCartItem> existingItem = cart.getItems().stream()
+        // Check if item already in cart using embedded CartItem
+        Optional<ArtShoppingCart.CartItem> existingItem = cart.getItems().stream()
                 .filter(item -> item.getItemId().equals(request.getItemId())
                         && item.getItemType() == request.getItemType())
                 .findFirst();
@@ -75,8 +72,7 @@ public class ArtCartServiceImpl implements ArtCartService {
         if (existingItem.isPresent()) {
             existingItem.get().setQuantity(existingItem.get().getQuantity() + request.getQuantity());
         } else {
-            ArtCartItem newItem = ArtCartItem.builder()
-                    .cart(cart)
+            ArtShoppingCart.CartItem newItem = ArtShoppingCart.CartItem.builder()
                     .itemId(request.getItemId())
                     .itemType(request.getItemType())
                     .itemName(itemName)
@@ -91,18 +87,17 @@ public class ArtCartServiceImpl implements ArtCartService {
     }
 
     @Override
-    @Transactional
-    public ArtCartResponseDto updateQuantity(UUID itemId, Integer quantity) {
+    public ArtCartResponseDto updateQuantity(String itemId, Integer quantity) {
         User user = getCurrentUser();
         ArtShoppingCart cart = getOrCreateCart(user);
 
-        ArtCartItem cartItem = cart.getItems().stream()
-                .filter(item -> item.getId().equals(itemId))
+        ArtShoppingCart.CartItem cartItem = cart.getItems().stream()
+                .filter(item -> item.getItemId().equals(itemId))
                 .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("ArtCartItem", "id", itemId));
+                .orElseThrow(() -> new ResourceNotFoundException("CartItem", "itemId", itemId));
 
         if (quantity <= 0) {
-            cart.getItems().remove(cartItem);
+            cart.getItems().removeIf(item -> item.getItemId().equals(itemId));
         } else {
             cartItem.setQuantity(quantity);
         }
@@ -111,16 +106,14 @@ public class ArtCartServiceImpl implements ArtCartService {
     }
 
     @Override
-    @Transactional
-    public ArtCartResponseDto removeFromCart(UUID itemId) {
+    public ArtCartResponseDto removeFromCart(String itemId) {
         User user = getCurrentUser();
         ArtShoppingCart cart = getOrCreateCart(user);
-        cart.getItems().removeIf(item -> item.getId().equals(itemId));
+        cart.getItems().removeIf(item -> item.getItemId().equals(itemId));
         return cartMapper.toDto(cartRepository.save(cart));
     }
 
     @Override
-    @Transactional
     public void clearCart() {
         log.warn("Clearing cart for current user");
         ArtShoppingCart cart = getOrCreateCart(getCurrentUser());
@@ -130,7 +123,10 @@ public class ArtCartServiceImpl implements ArtCartService {
 
     private ArtShoppingCart getOrCreateCart(User user) {
         return cartRepository.findByUserId(user.getId())
-                .orElseGet(() -> cartRepository.save(ArtShoppingCart.builder().user(user).build()));
+                .orElseGet(() -> cartRepository.save(ArtShoppingCart.builder()
+                        .userId(user.getId())
+                        .userEmail(user.getEmail())
+                        .build()));
     }
 
     private User getCurrentUser() {

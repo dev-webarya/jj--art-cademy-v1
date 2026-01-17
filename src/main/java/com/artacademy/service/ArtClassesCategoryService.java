@@ -6,19 +6,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface ArtClassesCategoryService {
 
     ArtClassesCategoryResponseDto create(ArtClassesCategoryRequestDto request);
 
-    ArtClassesCategoryResponseDto getById(UUID id);
+    ArtClassesCategoryResponseDto getById(String id);
 
     Page<ArtClassesCategoryResponseDto> getAll(Pageable pageable);
 
     List<ArtClassesCategoryResponseDto> getAllRootCategories();
 
-    ArtClassesCategoryResponseDto update(UUID id, ArtClassesCategoryRequestDto request);
+    ArtClassesCategoryResponseDto update(String id, ArtClassesCategoryRequestDto request);
 
-    void delete(UUID id);
+    void delete(String id);
 }

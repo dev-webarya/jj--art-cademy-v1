@@ -1,33 +1,36 @@
 package com.artacademy.entity;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "email_otp")
+@Document(collection = "email_otps")
 public class EmailOtp {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
-    @Column(nullable = false)
+    @Indexed
+    private String email;
+
     private String otp;
 
-    @Column(nullable = false)
+    @Indexed(expireAfter = "0s")
     private Instant expiryDate;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
-    private User user;
+    private String userId;
+
+    @Builder.Default
+    private boolean verified = false;
+
+    @CreatedDate
+    private Instant createdAt;
 }

@@ -5,13 +5,11 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.util.UUID;
-
 @Data
 public class ArtCartItemRequestDto {
 
     @NotNull(message = "Item ID is required")
-    private UUID itemId;
+    private String itemId;
 
     @NotNull(message = "Item type is required")
     private ArtItemType itemType;

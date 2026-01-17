@@ -2,21 +2,28 @@ package com.artacademy.service;
 
 import com.artacademy.dto.request.ArtExhibitionRequestDto;
 import com.artacademy.dto.response.ArtExhibitionResponseDto;
-import com.artacademy.entity.ArtExhibition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 
-import java.util.UUID;
+import java.time.LocalDate;
+import java.util.List;
 
 public interface ArtExhibitionService {
     ArtExhibitionResponseDto create(ArtExhibitionRequestDto request);
 
-    ArtExhibitionResponseDto getById(UUID id);
+    ArtExhibitionResponseDto getById(String id);
 
-    Page<ArtExhibitionResponseDto> getAll(Specification<ArtExhibition> spec, Pageable pageable);
+    Page<ArtExhibitionResponseDto> getAll(Pageable pageable);
 
-    ArtExhibitionResponseDto update(UUID id, ArtExhibitionRequestDto request);
+    List<ArtExhibitionResponseDto> getAllActive();
 
-    void delete(UUID id);
+    List<ArtExhibitionResponseDto> getByCategory(String categoryId);
+
+    List<ArtExhibitionResponseDto> getCurrentExhibitions();
+
+    List<ArtExhibitionResponseDto> getUpcomingExhibitions();
+
+    ArtExhibitionResponseDto update(String id, ArtExhibitionRequestDto request);
+
+    void delete(String id);
 }

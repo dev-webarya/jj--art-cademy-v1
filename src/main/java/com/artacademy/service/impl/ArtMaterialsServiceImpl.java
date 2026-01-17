@@ -12,12 +12,12 @@ import com.artacademy.service.ArtMaterialsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,40 +29,72 @@ public class ArtMaterialsServiceImpl implements ArtMaterialsService {
     private final ArtMaterialsMapper artMaterialsMapper;
 
     @Override
-    @Transactional
     public ArtMaterialsResponseDto create(ArtMaterialsRequestDto request) {
-        log.info("Creating art material: {}", request.getName());
+        log.info("Creating material: {}", request.getName());
         ArtMaterials entity = artMaterialsMapper.toEntity(request);
 
         if (request.getCategoryId() != null) {
             ArtMaterialsCategory category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(
                             () -> new ResourceNotFoundException("ArtMaterialsCategory", "id", request.getCategoryId()));
-            entity.setCategory(category);
+            entity.setCategory(ArtMaterials.CategoryRef.builder()
+                    .categoryId(category.getId())
+                    .name(category.getName())
+                    .build());
         }
 
         return artMaterialsMapper.toDto(artMaterialsRepository.save(entity));
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ArtMaterialsResponseDto getById(UUID id) {
-        log.debug("Fetching art material by ID: {}", id);
+    public ArtMaterialsResponseDto getById(String id) {
+        log.debug("Fetching material by ID: {}", id);
         ArtMaterials entity = artMaterialsRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtMaterials", "id", id));
         return artMaterialsMapper.toDto(entity);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<ArtMaterialsResponseDto> getAll(Specification<ArtMaterials> spec, Pageable pageable) {
-        return artMaterialsRepository.findAll(spec, pageable).map(artMaterialsMapper::toDto);
+    public Page<ArtMaterialsResponseDto> getAll(Pageable pageable) {
+        Page<ArtMaterials> page = artMaterialsRepository.findAll(pageable);
+        List<ArtMaterialsResponseDto> dtos = page.getContent().stream()
+                .filter(m -> !m.isDeleted())
+                .map(artMaterialsMapper::toDto)
+                .collect(Collectors.toList());
+        return new PageImpl<>(dtos, pageable, page.getTotalElements());
     }
 
     @Override
-    @Transactional
-    public ArtMaterialsResponseDto update(UUID id, ArtMaterialsRequestDto request) {
-        log.info("Updating art material ID: {}", id);
+    public List<ArtMaterialsResponseDto> getAllActive() {
+        return artMaterialsRepository.findActiveMaterials().stream()
+                .map(artMaterialsMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ArtMaterialsResponseDto> getByCategory(String categoryId) {
+        return artMaterialsRepository.findByCategoryId(categoryId).stream()
+                .map(artMaterialsMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ArtMaterialsResponseDto> searchByName(String name) {
+        return artMaterialsRepository.searchByName(name).stream()
+                .map(artMaterialsMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ArtMaterialsResponseDto> getInStock() {
+        return artMaterialsRepository.findInStock().stream()
+                .map(artMaterialsMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public ArtMaterialsResponseDto update(String id, ArtMaterialsRequestDto request) {
+        log.info("Updating material ID: {}", id);
         ArtMaterials entity = artMaterialsRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtMaterials", "id", id));
 
@@ -72,19 +104,21 @@ public class ArtMaterialsServiceImpl implements ArtMaterialsService {
             ArtMaterialsCategory category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(
                             () -> new ResourceNotFoundException("ArtMaterialsCategory", "id", request.getCategoryId()));
-            entity.setCategory(category);
+            entity.setCategory(ArtMaterials.CategoryRef.builder()
+                    .categoryId(category.getId())
+                    .name(category.getName())
+                    .build());
         }
 
         return artMaterialsMapper.toDto(artMaterialsRepository.save(entity));
     }
 
     @Override
-    @Transactional
-    public void delete(UUID id) {
-        log.warn("Deleting art material ID: {}", id);
-        if (!artMaterialsRepository.existsById(id)) {
-            throw new ResourceNotFoundException("ArtMaterials", "id", id);
-        }
-        artMaterialsRepository.deleteById(id);
+    public void delete(String id) {
+        log.warn("Deleting material ID: {}", id);
+        ArtMaterials entity = artMaterialsRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ArtMaterials", "id", id));
+        entity.setDeleted(true);
+        artMaterialsRepository.save(entity);
     }
 }

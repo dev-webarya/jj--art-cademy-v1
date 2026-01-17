@@ -15,7 +15,7 @@ public interface ArtMaterialsMapper {
     @Mapping(target = "updatedAt", ignore = true)
     ArtMaterials toEntity(ArtMaterialsRequestDto dto);
 
-    @Mapping(target = "categoryId", source = "category.id")
+    @Mapping(target = "categoryId", source = "category.categoryId")
     @Mapping(target = "categoryName", source = "category.name")
     ArtMaterialsResponseDto toDto(ArtMaterials entity);
 

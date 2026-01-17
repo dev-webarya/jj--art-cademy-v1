@@ -1,7 +1,6 @@
 package com.artacademy.mapper;
 
 import com.artacademy.dto.response.ArtCartResponseDto;
-import com.artacademy.entity.ArtCartItem;
 import com.artacademy.entity.ArtShoppingCart;
 import org.mapstruct.*;
 
@@ -10,13 +9,13 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ArtCartMapper {
 
-    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "userId", source = "userId")
     @Mapping(target = "items", source = "items")
     @Mapping(target = "totalPrice", expression = "java(cart.getTotalPrice())")
     ArtCartResponseDto toDto(ArtShoppingCart cart);
 
     @Mapping(target = "subtotal", expression = "java(item.getSubtotal())")
-    ArtCartResponseDto.ArtCartItemDto toItemDto(ArtCartItem item);
+    ArtCartResponseDto.ArtCartItemDto toItemDto(ArtShoppingCart.CartItem item);
 
-    List<ArtCartResponseDto.ArtCartItemDto> toItemDtoList(java.util.Set<ArtCartItem> items);
+    List<ArtCartResponseDto.ArtCartItemDto> toItemDtoList(List<ArtShoppingCart.CartItem> items);
 }

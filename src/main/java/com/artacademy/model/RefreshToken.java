@@ -1,15 +1,16 @@
 package com.artacademy.model;
 
-import com.artacademy.entity.User;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 
-@Entity
+@Document(collection = "refresh_tokens")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,16 +18,15 @@ import java.time.Instant;
 public class RefreshToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(nullable = false, unique = true)
+    @Indexed(unique = true)
     private String token;
 
-    @Column(nullable = false)
+    @Indexed(expireAfter = "0s")
     private Instant expiryDate;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user;
+    // User reference
+    private String userId;
+    private String userEmail;
 }

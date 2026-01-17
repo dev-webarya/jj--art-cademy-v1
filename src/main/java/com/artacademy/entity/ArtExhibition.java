@@ -1,72 +1,67 @@
 package com.artacademy.entity;
 
-import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "art_exhibitions")
-// --- Soft Delete Configuration ---
-@SQLDelete(sql = "UPDATE art_exhibitions SET deleted = true WHERE id = ?")
-@SQLRestriction("deleted = false")
+@Document(collection = "art_exhibitions")
 public class ArtExhibition {
 
         @Id
-        @GeneratedValue(strategy = GenerationType.UUID)
-        private UUID id;
+        private String id;
 
-        @Column(nullable = false)
         private String name;
 
-        @Column(columnDefinition = "TEXT")
         private String description;
 
-        @Column(nullable = false)
         @Builder.Default
         private boolean isActive = true;
 
-        // --- FIX: Soft Delete Flag ---
-        @Column(nullable = false)
         @Builder.Default
         private boolean deleted = false;
 
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "art_exhibition_category_id")
-        private ArtExhibitionCategory artExhibitionCategory;
+        // Embedded category reference
+        private CategoryRef category;
 
-        @CreationTimestamp
+        @CreatedDate
         private Instant createdAt;
 
-        @UpdateTimestamp
+        @LastModifiedDate
         private Instant updatedAt;
 
-        @Column(nullable = false)
         private String imageUrl;
 
-        @Column(nullable = false)
+        @Indexed
         private LocalDate startDate;
 
-        @Column(nullable = false)
         private LocalDate endDate;
 
-        @Column(nullable = false)
         private String location;
 
-        @Column(nullable = false)
-        private Integer artistCount;
+        @Builder.Default
+        private Integer artistCount = 0;
 
-        @Column(nullable = false)
-        private Integer ArtworksCount;
+        @Builder.Default
+        private Integer artworksCount = 0;
+
+        @Getter
+        @Setter
+        @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class CategoryRef {
+                private String categoryId;
+                private String name;
+        }
 }

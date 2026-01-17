@@ -25,7 +25,6 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -45,15 +44,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenService refreshTokenService;
     private final EmailOtpRepository emailOtpRepository;
-
-    // --- INTEGRATION: Notification Service ---
     private final ArtNotificationService notificationService;
 
     private static final String DEFAULT_ROLE = "ROLE_CUSTOMER";
     private static final String ADMIN_ROLE = "ROLE_ADMIN";
 
     @Override
-    @Transactional
     public RegistrationResponse register(RegisterRequest request) {
         var existingUserOpt = userRepository.findByEmail(request.getEmail());
 
@@ -79,8 +75,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         Role defaultRole = findRoleByName(DEFAULT_ROLE);
-        Set<Role> roles = new HashSet<>();
-        roles.add(defaultRole);
+        Set<User.RoleRef> roleRefs = new HashSet<>();
+        roleRefs.add(User.RoleRef.builder()
+                .roleId(defaultRole.getId())
+                .name(defaultRole.getName())
+                .build());
 
         var user = User.builder()
                 .firstName(request.getFirstName())
@@ -88,7 +87,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .email(request.getEmail())
                 .phoneNumber(request.getPhoneNumber())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .roles(roles)
+                .roles(roleRefs)
                 .isEnabled(false)
                 .build();
         User savedUser = userRepository.save(user);
@@ -99,7 +98,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    @Transactional
     public AuthenticationResponse devRegister(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("User exists.");
@@ -108,11 +106,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new DuplicateResourceException("Phone number exists.");
         }
 
-        Set<Role> roles = new HashSet<>();
+        Set<User.RoleRef> roleRefs = new HashSet<>();
         if (request.getEmail().contains("+admin@")) {
-            roles.add(findRoleByName(ADMIN_ROLE));
+            Role adminRole = findRoleByName(ADMIN_ROLE);
+            roleRefs.add(User.RoleRef.builder()
+                    .roleId(adminRole.getId())
+                    .name(adminRole.getName())
+                    .build());
         } else {
-            roles.add(findRoleByName(DEFAULT_ROLE));
+            Role defaultRole = findRoleByName(DEFAULT_ROLE);
+            roleRefs.add(User.RoleRef.builder()
+                    .roleId(defaultRole.getId())
+                    .name(defaultRole.getName())
+                    .build());
         }
 
         var user = User.builder()
@@ -121,7 +127,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .email(request.getEmail())
                 .phoneNumber(request.getPhoneNumber())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .roles(roles)
+                .roles(roleRefs)
                 .isEnabled(true)
                 .build();
         User savedUser = userRepository.save(user);
@@ -130,10 +136,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    @Transactional
     public AuthenticationResponse verifyEmailOtp(VerifyOtpRequest request) {
         EmailOtp emailOtp = findAndValidateOtp(request.getEmail(), request.getOtp());
-        User user = emailOtp.getUser();
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + request.getEmail()));
 
         if (user.isEnabled()) {
             throw new InvalidRequestException("Account is already verified.");
@@ -147,7 +153,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    @Transactional
     public RegistrationResponse requestOtp(OtpRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + request.getEmail()));
@@ -156,10 +161,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    @Transactional
     public AuthenticationResponse verifyLoginOtp(LoginOtpRequest request) {
         EmailOtp emailOtp = findAndValidateOtp(request.getEmail(), request.getOtp());
-        User user = emailOtp.getUser();
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         if (!user.isEnabled())
             throw new InvalidRequestException("Account is not verified.");
         emailOtpRepository.delete(emailOtp);
@@ -167,10 +172,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    @Transactional
     public RegistrationResponse resetPassword(PasswordResetRequest request) {
         EmailOtp emailOtp = findAndValidateOtp(request.getEmail(), request.getOtp());
-        User user = emailOtp.getUser();
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         if (!user.isEnabled())
             throw new InvalidRequestException("Account not verified.");
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -180,7 +185,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    @Transactional
     public AuthenticationResponse login(LoginRequest request) {
         try {
             authenticationManager.authenticate(
@@ -203,8 +207,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public AuthenticationResponse refreshToken(RefreshTokenRequest request) {
         return refreshTokenService.findByToken(request.getToken())
                 .map(refreshTokenService::verifyExpiration)
-                .map(RefreshToken::getUser)
-                .map(user -> {
+                .map(token -> {
+                    User user = userRepository.findById(token.getUserId())
+                            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
                     if (!user.isEnabled())
                         throw new InvalidRequestException("User account is not enabled.");
                     String accessToken = jwtService.generateToken(user);
@@ -216,7 +221,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                             .id(user.getId())
                             .firstName(user.getFirstName())
                             .lastName(user.getLastName())
-                            .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
+                            .roles(user.getRoles().stream().map(User.RoleRef::getName).collect(Collectors.toSet()))
                             .build();
                 })
                 .orElseThrow(() -> new InvalidRequestException("Refresh token expired or invalid!"));
@@ -224,16 +229,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private void sendOtpEmail(User user) {
         String otp = String.format("%06d", new Random().nextInt(1000000));
-        emailOtpRepository.findByUser(user).ifPresent(emailOtpRepository::delete);
+        emailOtpRepository.findByEmail(user.getEmail()).ifPresent(emailOtpRepository::delete);
 
         EmailOtp emailOtp = EmailOtp.builder()
-                .user(user)
+                .email(user.getEmail())
+                .userId(user.getId())
                 .otp(otp)
                 .expiryDate(Instant.now().plusSeconds(600))
                 .build();
         emailOtpRepository.save(emailOtp);
 
-        // --- NOTIFICATION: Send OTP ---
         notificationService.sendOtp(user, otp);
     }
 
@@ -246,7 +251,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .id(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
-                .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
+                .roles(user.getRoles().stream().map(User.RoleRef::getName).collect(Collectors.toSet()))
                 .accessToken(accessToken)
                 .refreshToken(refreshToken.getToken())
                 .accessTokenExpiresAt(expiresAt)
@@ -254,19 +259,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     private EmailOtp findAndValidateOtp(String email, String otp) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
-
-        EmailOtp emailOtp = emailOtpRepository.findByUser(user)
-                .orElseThrow(() -> new ResourceNotFoundException("No OTP found."));
+        EmailOtp emailOtp = emailOtpRepository.findByEmailAndOtp(email, otp)
+                .orElseThrow(() -> new InvalidRequestException("Invalid OTP."));
 
         if (emailOtp.getExpiryDate().isBefore(Instant.now())) {
             emailOtpRepository.delete(emailOtp);
             throw new InvalidRequestException("OTP has expired.");
-        }
-
-        if (!emailOtp.getOtp().equals(otp)) {
-            throw new InvalidRequestException("Invalid OTP.");
         }
 
         return emailOtp;

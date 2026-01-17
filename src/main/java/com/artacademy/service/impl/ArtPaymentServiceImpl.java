@@ -19,10 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.UUID;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -47,7 +46,6 @@ public class ArtPaymentServiceImpl implements ArtPaymentService {
     }
 
     @Override
-    @Transactional
     public ArtPaymentResponseDto initiatePayment(ArtPaymentRequestDto request) {
         log.info("Initiating payment for order: {}", request.getOrderId());
 
@@ -55,7 +53,8 @@ public class ArtPaymentServiceImpl implements ArtPaymentService {
                 .orElseThrow(() -> new ResourceNotFoundException("ArtOrder", "id", request.getOrderId()));
 
         // Check if payment already exists for this order
-        if (paymentRepository.findByOrderId(order.getId()).isPresent()) {
+        List<ArtPayment> existingPayments = paymentRepository.findByOrderId(order.getId());
+        if (!existingPayments.isEmpty()) {
             throw new IllegalStateException("Payment already initiated for this order");
         }
 
@@ -71,9 +70,16 @@ public class ArtPaymentServiceImpl implements ArtPaymentService {
 
             Order razorpayOrder = razorpay.orders.create(orderRequest);
 
-            // Create payment record
+            // Create payment record with embedded order and user refs
             ArtPayment payment = ArtPayment.builder()
-                    .order(order)
+                    .order(ArtPayment.OrderRef.builder()
+                            .orderId(order.getId())
+                            .orderNumber(order.getOrderNumber())
+                            .build())
+                    .user(ArtPayment.UserRef.builder()
+                            .userId(order.getUser().getUserId())
+                            .email(order.getUser().getEmail())
+                            .build())
                     .razorpayOrderId(razorpayOrder.get("id"))
                     .amount(order.getTotalPrice())
                     .currency("INR")
@@ -96,7 +102,6 @@ public class ArtPaymentServiceImpl implements ArtPaymentService {
     }
 
     @Override
-    @Transactional
     public ArtPaymentResponseDto verifyPayment(String razorpayOrderId, String razorpayPaymentId,
             String razorpaySignature) {
         log.info("Verifying payment for Razorpay order: {}", razorpayOrderId);
@@ -118,8 +123,10 @@ public class ArtPaymentServiceImpl implements ArtPaymentService {
                 payment.setRazorpaySignature(razorpaySignature);
                 payment.setStatus(PaymentStatus.SUCCESS);
 
-                // Update order status to PROCESSING
-                ArtOrder order = payment.getOrder();
+                // Update order status to PROCESSING using order ID from payment ref
+                ArtOrder order = orderRepository.findById(payment.getOrder().getOrderId())
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("ArtOrder", "id", payment.getOrder().getOrderId()));
                 order.setStatus(OrderStatus.PROCESSING);
                 order.addStatusHistory(OrderStatus.PROCESSING, "Payment verified successfully");
                 orderRepository.save(order);
@@ -141,11 +148,12 @@ public class ArtPaymentServiceImpl implements ArtPaymentService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ArtPaymentResponseDto getPaymentByOrderId(UUID orderId) {
-        ArtPayment payment = paymentRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("ArtPayment", "orderId", orderId));
-        ArtPaymentResponseDto response = paymentMapper.toDto(payment);
+    public ArtPaymentResponseDto getPaymentByOrderId(String orderId) {
+        List<ArtPayment> payments = paymentRepository.findByOrderId(orderId);
+        if (payments.isEmpty()) {
+            throw new ResourceNotFoundException("ArtPayment", "orderId", orderId);
+        }
+        ArtPaymentResponseDto response = paymentMapper.toDto(payments.get(0));
         response.setRazorpayKeyId(razorpayKeyId);
         return response;
     }

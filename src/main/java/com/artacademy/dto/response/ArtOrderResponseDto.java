@@ -7,13 +7,12 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 public class ArtOrderResponseDto {
-    private UUID id;
+    private String id;
     private String orderNumber;
-    private UUID userId;
+    private String userId;
     private String userEmail;
     private OrderStatus status;
     private BigDecimal totalPrice;
@@ -26,8 +25,7 @@ public class ArtOrderResponseDto {
 
     @Data
     public static class ArtOrderItemDto {
-        private UUID id;
-        private UUID itemId;
+        private String itemId;
         private ArtItemType itemType;
         private String itemName;
         private String imageUrl;

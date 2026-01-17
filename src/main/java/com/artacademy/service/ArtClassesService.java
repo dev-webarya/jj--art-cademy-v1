@@ -2,21 +2,25 @@ package com.artacademy.service;
 
 import com.artacademy.dto.request.ArtClassesRequestDto;
 import com.artacademy.dto.response.ArtClassesResponseDto;
-import com.artacademy.entity.ArtClasses;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 
-import java.util.UUID;
+import java.util.List;
 
 public interface ArtClassesService {
     ArtClassesResponseDto create(ArtClassesRequestDto request);
 
-    ArtClassesResponseDto getById(UUID id);
+    ArtClassesResponseDto getById(String id);
 
-    Page<ArtClassesResponseDto> getAll(Specification<ArtClasses> spec, Pageable pageable);
+    Page<ArtClassesResponseDto> getAll(Pageable pageable);
 
-    ArtClassesResponseDto update(UUID id, ArtClassesRequestDto request);
+    List<ArtClassesResponseDto> getAllActive();
 
-    void delete(UUID id);
+    List<ArtClassesResponseDto> getByCategory(String categoryId);
+
+    List<ArtClassesResponseDto> searchByName(String name);
+
+    ArtClassesResponseDto update(String id, ArtClassesRequestDto request);
+
+    void delete(String id);
 }

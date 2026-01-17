@@ -1,50 +1,51 @@
 package com.artacademy.entity;
 
-import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
-@Getter // Replaced @Data
-@Setter // Replaced @Data
-@ToString(exclude = { "parent", "subcategories", "artExhibition" }) // Added to break loop
-@EqualsAndHashCode(exclude = { "parent", "subcategories", "artExhibition" }) // Added to break loop
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "exhibition_categories")
+@Document(collection = "art_exhibition_categories")
 public class ArtExhibitionCategory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
-    @Column(nullable = false, unique = true)
+    @Indexed(unique = true)
     private String name;
 
-    // Self-referencing relationship for hierarchy
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "exhibition_parent_id")
-    private ArtExhibitionCategory parent;
+    private String description;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    private String imageUrl;
+
+    // Parent reference for hierarchy
+    private CategoryRef parent;
+
     @Builder.Default
-    private Set<ArtExhibitionCategory> subcategories = new HashSet<>();
+    private boolean deleted = false;
 
-    @OneToMany(mappedBy = "artExhibitionCategory", cascade = CascadeType.ALL)
-    @Builder.Default
-    private Set<ArtExhibition> artExhibition = new HashSet<>();
-
-    @CreationTimestamp
-    @Column(updatable = false)
+    @CreatedDate
     private Instant createdAt;
 
-    @UpdateTimestamp
+    @LastModifiedDate
     private Instant updatedAt;
+
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CategoryRef {
+        private String categoryId;
+        private String name;
+    }
 }

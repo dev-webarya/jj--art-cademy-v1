@@ -12,10 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,7 +25,6 @@ public class ArtExhibitionCategoryServiceImpl implements ArtExhibitionCategorySe
     private final ArtExhibitionCategoryMapper categoryMapper;
 
     @Override
-    @Transactional
     public ArtExhibitionCategoryResponseDto create(ArtExhibitionCategoryRequestDto request) {
         log.info("Creating ArtExhibitionCategory: {}", request.getName());
         ArtExhibitionCategory entity = categoryMapper.toEntity(request);
@@ -36,15 +33,17 @@ public class ArtExhibitionCategoryServiceImpl implements ArtExhibitionCategorySe
             ArtExhibitionCategory parent = categoryRepository.findById(request.getParentId())
                     .orElseThrow(
                             () -> new ResourceNotFoundException("ArtExhibitionCategory", "id", request.getParentId()));
-            entity.setParent(parent);
+            entity.setParent(ArtExhibitionCategory.CategoryRef.builder()
+                    .categoryId(parent.getId())
+                    .name(parent.getName())
+                    .build());
         }
 
         return categoryMapper.toDto(categoryRepository.save(entity));
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ArtExhibitionCategoryResponseDto getById(UUID id) {
+    public ArtExhibitionCategoryResponseDto getById(String id) {
         log.debug("Fetching ArtExhibitionCategory by ID: {}", id);
         ArtExhibitionCategory entity = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtExhibitionCategory", "id", id));
@@ -52,13 +51,11 @@ public class ArtExhibitionCategoryServiceImpl implements ArtExhibitionCategorySe
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<ArtExhibitionCategoryResponseDto> getAll(Pageable pageable) {
         return categoryRepository.findAll(pageable).map(categoryMapper::toDto);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ArtExhibitionCategoryResponseDto> getAllRootCategories() {
         return categoryRepository.findAll().stream()
                 .filter(c -> c.getParent() == null)
@@ -67,8 +64,7 @@ public class ArtExhibitionCategoryServiceImpl implements ArtExhibitionCategorySe
     }
 
     @Override
-    @Transactional
-    public ArtExhibitionCategoryResponseDto update(UUID id, ArtExhibitionCategoryRequestDto request) {
+    public ArtExhibitionCategoryResponseDto update(String id, ArtExhibitionCategoryRequestDto request) {
         log.info("Updating ArtExhibitionCategory ID: {}", id);
         ArtExhibitionCategory entity = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtExhibitionCategory", "id", id));
@@ -79,7 +75,10 @@ public class ArtExhibitionCategoryServiceImpl implements ArtExhibitionCategorySe
             ArtExhibitionCategory parent = categoryRepository.findById(request.getParentId())
                     .orElseThrow(
                             () -> new ResourceNotFoundException("ArtExhibitionCategory", "id", request.getParentId()));
-            entity.setParent(parent);
+            entity.setParent(ArtExhibitionCategory.CategoryRef.builder()
+                    .categoryId(parent.getId())
+                    .name(parent.getName())
+                    .build());
         } else {
             entity.setParent(null);
         }
@@ -88,8 +87,7 @@ public class ArtExhibitionCategoryServiceImpl implements ArtExhibitionCategorySe
     }
 
     @Override
-    @Transactional
-    public void delete(UUID id) {
+    public void delete(String id) {
         log.warn("Deleting ArtExhibitionCategory ID: {}", id);
         if (!categoryRepository.existsById(id)) {
             throw new ResourceNotFoundException("ArtExhibitionCategory", "id", id);

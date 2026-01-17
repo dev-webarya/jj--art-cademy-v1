@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Data
 public class ArtWorksRequestDto {
@@ -20,19 +19,15 @@ public class ArtWorksRequestDto {
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
     private BigDecimal basePrice;
 
-    @NotBlank(message = "Artist name is required")
     private String artistName;
 
-    @NotBlank(message = "Art medium is required")
     private String artMedium;
 
-    @NotBlank(message = "Size is required")
     private String size;
 
     private boolean isActive = true;
 
-    private UUID categoryId;
+    private String categoryId;
 
-    @NotBlank(message = "Image URL is required")
     private String imageUrl;
 }

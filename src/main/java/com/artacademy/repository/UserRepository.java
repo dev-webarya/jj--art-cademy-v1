@@ -1,19 +1,29 @@
 package com.artacademy.repository;
 
 import com.artacademy.entity.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID; // Import UUID
 
 @Repository
-public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> { // Changed Long to
-                                                                                                    // UUID
-    Optional<User> findByEmail(String email); // Changed findByUsername to findByEmail
+public interface UserRepository extends MongoRepository<User, String> {
+    Optional<User> findByEmail(String email);
 
-    boolean existsByEmail(String email); // Added for convenience
+    boolean existsByEmail(String email);
 
-    Optional<User> findByPhoneNumber(String phoneNumber); // Added for validation
+    Optional<User> findByPhoneNumber(String phoneNumber);
+
+    // Find users by role name
+    @Query("{'roles.name': ?0, 'deleted': false}")
+    List<User> findByRoleName(String roleName);
+
+    // Find all non-deleted users
+    List<User> findByDeletedFalse();
+
+    // Find by email ignoring deleted status (for auth)
+    @Query("{'email': ?0}")
+    Optional<User> findByEmailIncludingDeleted(String email);
 }

@@ -4,8 +4,6 @@ import com.artacademy.dto.request.ArtCartCheckoutRequestDto;
 import com.artacademy.dto.request.ArtOrderRequestDto;
 import com.artacademy.dto.response.ArtOrderResponseDto;
 import com.artacademy.enums.OrderStatus;
-import com.artacademy.security.annotations.AdminOnly;
-import com.artacademy.security.annotations.ManagerAccess;
 import com.artacademy.service.ArtOrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/art-orders")
@@ -40,7 +36,7 @@ public class ArtOrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ArtOrderResponseDto> getById(@PathVariable UUID id) {
+    public ResponseEntity<ArtOrderResponseDto> getById(@PathVariable String id) {
         return ResponseEntity.ok(artOrderService.getById(id));
     }
 
@@ -50,7 +46,7 @@ public class ArtOrderController {
     }
 
     @GetMapping
-    @ManagerAccess
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<Page<ArtOrderResponseDto>> getAll(
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) String orderNumber,
@@ -61,7 +57,7 @@ public class ArtOrderController {
     @PutMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<ArtOrderResponseDto> updateStatus(
-            @PathVariable UUID id,
+            @PathVariable String id,
             @RequestParam OrderStatus status,
             @RequestParam(required = false) String notes) {
         log.info("Updating order {} status to: {}", id, status);
