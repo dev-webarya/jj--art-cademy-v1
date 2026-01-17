@@ -4,9 +4,9 @@ import com.artacademy.dto.request.ClassEnrollmentRequestDto;
 import com.artacademy.dto.request.EnrollmentStatusUpdateDto;
 import com.artacademy.dto.response.ClassEnrollmentResponseDto;
 import com.artacademy.entity.User;
-import com.artacademy.security.annotations.AdminOnly;
 import com.artacademy.service.ClassEnrollmentService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,100 +15,75 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/enrollments")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Class Enrollments", description = "Endpoints for managing class enrollments")
+@Tag(name = "Class Enrollments", description = "Operations for enrolling in art classes")
+@SecurityRequirement(name = "bearerAuth")
 public class ClassEnrollmentController {
 
     private final ClassEnrollmentService enrollmentService;
 
-    // =====================
-    // Student Endpoints
-    // =====================
-
     @PostMapping
-    @Operation(summary = "Enroll in a class", description = "Create a new enrollment request (status: PENDING)")
+    @Operation(summary = "Enroll in a class")
     public ResponseEntity<ClassEnrollmentResponseDto> enroll(
             @Valid @RequestBody ClassEnrollmentRequestDto request,
             @AuthenticationPrincipal User user) {
-        log.info("Enrollment request from user: {}", user.getEmail());
+        log.info("User {} requesting enrollment in class {}", user.getEmail(), request.getClassId());
         return new ResponseEntity<>(enrollmentService.enroll(request, user), HttpStatus.CREATED);
     }
 
-    @GetMapping("/my")
-    @Operation(summary = "Get my enrollments", description = "Get all enrollments for the logged-in user")
+    @GetMapping("/my-enrollments")
+    @Operation(summary = "Get current user's enrollments")
     public ResponseEntity<Page<ClassEnrollmentResponseDto>> getMyEnrollments(
             @AuthenticationPrincipal User user,
             Pageable pageable) {
         return ResponseEntity.ok(enrollmentService.getMyEnrollments(user, pageable));
     }
 
-    @PostMapping("/{id}/cancel")
-    @Operation(summary = "Cancel enrollment", description = "Cancel a pending enrollment")
+    @PutMapping("/{enrollmentId}/cancel")
+    @Operation(summary = "Cancel an enrollment (Student)")
     public ResponseEntity<ClassEnrollmentResponseDto> cancelEnrollment(
-            @PathVariable UUID id,
+            @PathVariable String enrollmentId,
             @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(enrollmentService.cancelEnrollment(id, user));
+        return ResponseEntity.ok(enrollmentService.cancelEnrollment(enrollmentId, user));
     }
 
-    // =====================
-    // Admin Endpoints
-    // =====================
+    // Admin endpoints
 
     @GetMapping
-    @AdminOnly
-    @Operation(summary = "Get all enrollments (Admin)", description = "Get all enrollments with pagination")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @Operation(summary = "Get all enrollments (Admin)")
     public ResponseEntity<Page<ClassEnrollmentResponseDto>> getAllEnrollments(Pageable pageable) {
         return ResponseEntity.ok(enrollmentService.getAllEnrollments(pageable));
     }
 
-    @GetMapping("/pending")
-    @AdminOnly
-    @Operation(summary = "Get pending enrollments (Admin)", description = "Get all pending enrollment requests")
-    public ResponseEntity<Page<ClassEnrollmentResponseDto>> getPendingEnrollments(Pageable pageable) {
-        return ResponseEntity.ok(enrollmentService.getPendingEnrollments(pageable));
+    @GetMapping("/{enrollmentId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @Operation(summary = "Get enrollment by ID (Admin)")
+    public ResponseEntity<ClassEnrollmentResponseDto> getEnrollmentById(@PathVariable String enrollmentId) {
+        return ResponseEntity.ok(enrollmentService.getEnrollmentById(enrollmentId));
     }
 
-    @PatchMapping("/{id}/status")
-    @AdminOnly
-    @Operation(summary = "Update enrollment status (Admin)", description = "Approve or reject an enrollment")
+    @PutMapping("/{enrollmentId}/status")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @Operation(summary = "Update enrollment status (Admin)")
     public ResponseEntity<ClassEnrollmentResponseDto> updateStatus(
-            @PathVariable UUID id,
+            @PathVariable String enrollmentId,
             @Valid @RequestBody EnrollmentStatusUpdateDto request) {
-        log.info("Updating enrollment {} status to {}", id, request.getStatus());
-        return ResponseEntity.ok(enrollmentService.updateEnrollmentStatus(id, request));
+        return ResponseEntity.ok(enrollmentService.updateEnrollmentStatus(enrollmentId, request));
     }
 
-    @DeleteMapping("/{id}")
-    @AdminOnly
-    @Operation(summary = "Delete enrollment (Admin)", description = "Permanently delete an enrollment record")
-    public ResponseEntity<Void> deleteEnrollment(@PathVariable UUID id) {
-        log.warn("Deleting enrollment: {}", id);
-        enrollmentService.deleteEnrollment(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // =====================
-    // Common Endpoints
-    // =====================
-
-    @GetMapping("/{id}")
-    @Operation(summary = "Get enrollment by ID", description = "Get enrollment details by ID")
-    public ResponseEntity<ClassEnrollmentResponseDto> getEnrollmentById(@PathVariable UUID id) {
-        return ResponseEntity.ok(enrollmentService.getEnrollmentById(id));
-    }
-
-    @GetMapping("/pending/count")
-    @AdminOnly
-    @Operation(summary = "Count pending enrollments (Admin)", description = "Get count of pending enrollments")
-    public ResponseEntity<Long> countPendingEnrollments() {
-        return ResponseEntity.ok(enrollmentService.countPendingEnrollments());
+    @DeleteMapping("/{enrollmentId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete enrollment (Admin)")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteEnrollment(@PathVariable String enrollmentId) {
+        enrollmentService.deleteEnrollment(enrollmentId);
     }
 }

@@ -2,77 +2,60 @@ package com.artacademy.controller;
 
 import com.artacademy.dto.request.ArtClassesRequestDto;
 import com.artacademy.dto.response.ArtClassesResponseDto;
-import com.artacademy.entity.ArtClasses;
-import com.artacademy.security.annotations.AdminOnly;
-import com.artacademy.security.annotations.ManagerAccess;
-import com.artacademy.security.annotations.PublicEndpoint;
 import com.artacademy.service.ArtClassesService;
-import com.artacademy.specification.ArtClassesSpecification;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/art-classes")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Art Classes", description = "Endpoints for managing art classes")
 public class ArtClassesController {
 
     private final ArtClassesService artClassesService;
 
     @PostMapping
-    @ManagerAccess
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @Operation(summary = "Create ArtClass")
     public ResponseEntity<ArtClassesResponseDto> create(@Valid @RequestBody ArtClassesRequestDto request) {
-        log.info("Creating art class: {}", request.getName());
         return new ResponseEntity<>(artClassesService.create(request), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    @PublicEndpoint
-    public ResponseEntity<ArtClassesResponseDto> getById(@PathVariable UUID id) {
+    @Operation(summary = "Get ArtClass by ID")
+    public ResponseEntity<ArtClassesResponseDto> getById(@PathVariable String id) {
         return ResponseEntity.ok(artClassesService.getById(id));
     }
 
     @GetMapping
-    @PublicEndpoint
-    public ResponseEntity<Page<ArtClassesResponseDto>> getAll(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String proficiency,
-            @RequestParam(required = false) Boolean isActive,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(required = false) UUID categoryId,
-            Pageable pageable) {
-
-        Specification<ArtClasses> spec = Specification.where(ArtClassesSpecification.hasName(name))
-                .and(ArtClassesSpecification.hasProficiency(proficiency))
-                .and(ArtClassesSpecification.isActive(isActive))
-                .and(ArtClassesSpecification.priceBetween(minPrice, maxPrice))
-                .and(ArtClassesSpecification.inCategory(categoryId));
-
-        return ResponseEntity.ok(artClassesService.getAll(spec, pageable));
+    @Operation(summary = "Get all ArtClasses")
+    public ResponseEntity<Page<ArtClassesResponseDto>> getAll(Pageable pageable) {
+        return ResponseEntity.ok(artClassesService.getAll(pageable));
     }
 
     @PutMapping("/{id}")
-    @ManagerAccess
-    public ResponseEntity<ArtClassesResponseDto> update(@PathVariable UUID id,
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @Operation(summary = "Update ArtClass")
+    public ResponseEntity<ArtClassesResponseDto> update(@PathVariable String id,
             @Valid @RequestBody ArtClassesRequestDto request) {
         return ResponseEntity.ok(artClassesService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @AdminOnly
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete ArtClass")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable String id) {
         artClassesService.delete(id);
-        return ResponseEntity.noContent().build();
     }
 }

@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Data
 public class ArtWorksRequestDto {
@@ -31,7 +30,7 @@ public class ArtWorksRequestDto {
 
     private boolean isActive = true;
 
-    private UUID categoryId;
+    private String categoryId;
 
     @NotBlank(message = "Image URL is required")
     private String imageUrl;

@@ -9,8 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/api/v1/art-payments")
 @RequiredArgsConstructor
@@ -36,7 +34,7 @@ public class ArtPaymentController {
     }
 
     @GetMapping("/order/{orderId}")
-    public ResponseEntity<ArtPaymentResponseDto> getPaymentByOrderId(@PathVariable UUID orderId) {
+    public ResponseEntity<ArtPaymentResponseDto> getPaymentByOrderId(@PathVariable String orderId) {
         return ResponseEntity.ok(artPaymentService.getPaymentByOrderId(orderId));
     }
 }

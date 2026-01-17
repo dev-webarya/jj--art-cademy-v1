@@ -9,18 +9,17 @@ import org.mapstruct.*;
 public interface ArtExhibitionMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "artExhibitionCategory", ignore = true)
+    @Mapping(target = "categoryId", ignore = true)
     @Mapping(target = "deleted", constant = "false")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     ArtExhibition toEntity(ArtExhibitionRequestDto dto);
 
-    @Mapping(target = "categoryId", source = "artExhibitionCategory.id")
-    @Mapping(target = "categoryName", source = "artExhibitionCategory.name")
+    @Mapping(target = "categoryName", ignore = true) // Would need separate category lookup
     ArtExhibitionResponseDto toDto(ArtExhibition entity);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "artExhibitionCategory", ignore = true)
+    @Mapping(target = "categoryId", ignore = true)
     @Mapping(target = "deleted", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

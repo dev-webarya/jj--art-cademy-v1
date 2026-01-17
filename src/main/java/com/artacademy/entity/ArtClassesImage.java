@@ -1,43 +1,36 @@
 package com.artacademy.entity;
 
-import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
-import java.util.UUID;
 
-@Getter // Replaced @Data
-@Setter // Replaced @Data
-@ToString(exclude = "artClasses") // Added to break loop
-@EqualsAndHashCode(exclude = "artClasses") // Added to break loop
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "art_classes_images")
+@Document(collection = "classes_images")
 public class ArtClassesImage {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "art_classes_id", nullable = false)
-    private ArtClasses artClasses;
+    @Indexed
+    private String artClassId;
 
-    @Column(nullable = false)
     private String imageUrl;
 
-    @Column(nullable = false)
     @Builder.Default
     private boolean isPrimary = false;
 
-    @CreationTimestamp
-    @Column(updatable = false)
+    @CreatedDate
     private Instant createdAt;
 
-    @UpdateTimestamp
+    @LastModifiedDate
     private Instant updatedAt;
 }

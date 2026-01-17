@@ -7,8 +7,6 @@ import com.artacademy.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.UUID;
-
 public interface ClassEnrollmentService {
 
     // Student Operations
@@ -16,19 +14,19 @@ public interface ClassEnrollmentService {
 
     Page<ClassEnrollmentResponseDto> getMyEnrollments(User user, Pageable pageable);
 
-    ClassEnrollmentResponseDto cancelEnrollment(UUID enrollmentId, User user);
+    ClassEnrollmentResponseDto cancelEnrollment(String enrollmentId, User user);
 
     // Admin Operations
     Page<ClassEnrollmentResponseDto> getAllEnrollments(Pageable pageable);
 
     Page<ClassEnrollmentResponseDto> getPendingEnrollments(Pageable pageable);
 
-    ClassEnrollmentResponseDto updateEnrollmentStatus(UUID enrollmentId, EnrollmentStatusUpdateDto request);
+    ClassEnrollmentResponseDto updateEnrollmentStatus(String enrollmentId, EnrollmentStatusUpdateDto request);
 
     // Common Operations
-    ClassEnrollmentResponseDto getEnrollmentById(UUID enrollmentId);
+    ClassEnrollmentResponseDto getEnrollmentById(String enrollmentId);
 
-    void deleteEnrollment(UUID enrollmentId);
+    void deleteEnrollment(String enrollmentId);
 
     // Statistics
     long countPendingEnrollments();

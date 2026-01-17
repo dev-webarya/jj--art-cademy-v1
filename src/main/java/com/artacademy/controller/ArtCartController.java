@@ -9,8 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/api/v1/art-cart")
 @RequiredArgsConstructor
@@ -32,14 +30,14 @@ public class ArtCartController {
     }
 
     @PutMapping("/items/{itemId}")
-    public ResponseEntity<ArtCartResponseDto> updateQuantity(@PathVariable UUID itemId,
+    public ResponseEntity<ArtCartResponseDto> updateQuantity(@PathVariable String itemId,
             @RequestParam Integer quantity) {
         log.info("Updating cart item {} quantity to: {}", itemId, quantity);
         return ResponseEntity.ok(artCartService.updateQuantity(itemId, quantity));
     }
 
     @DeleteMapping("/items/{itemId}")
-    public ResponseEntity<ArtCartResponseDto> removeItem(@PathVariable UUID itemId) {
+    public ResponseEntity<ArtCartResponseDto> removeItem(@PathVariable String itemId) {
         log.info("Removing cart item: {}", itemId);
         return ResponseEntity.ok(artCartService.removeFromCart(itemId));
     }

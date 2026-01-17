@@ -4,13 +4,11 @@ import com.artacademy.enums.ClassSchedule;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
-import java.util.UUID;
-
 @Data
 public class ClassEnrollmentRequestDto {
 
     @NotNull(message = "Class ID is required")
-    private UUID classId;
+    private String classId;
 
     @NotBlank(message = "Parent/Guardian name is required")
     private String parentGuardianName;
@@ -22,6 +20,8 @@ public class ClassEnrollmentRequestDto {
 
     @NotNull(message = "Schedule is required")
     private ClassSchedule schedule;
+
+    private String studentName;
 
     private String additionalMessage;
 }

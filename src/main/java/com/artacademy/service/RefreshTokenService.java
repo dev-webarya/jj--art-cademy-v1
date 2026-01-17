@@ -7,13 +7,16 @@ import com.artacademy.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import com.artacademy.exception.InvalidRequestException;
 
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Refresh token service updated for MongoDB.
+ * Uses userId as String reference instead of User object.
+ */
 @Service
 public class RefreshTokenService {
 
@@ -25,20 +28,19 @@ public class RefreshTokenService {
     @Value("${application.security.jwt.refresh-token.expiration}")
     private long refreshExpiration;
 
-    @Transactional
-    public RefreshToken createRefreshToken(String email) { // Changed username to email
-        User user = userRepository.findByEmail(email) // Changed findByUsername to findByEmail
+    public RefreshToken createRefreshToken(String email) {
+        User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return refreshTokenRepository.findByUser(user)
+        return refreshTokenRepository.findByUserId(user.getId())
                 .map(token -> {
                     token.setExpiryDate(Instant.now().plusMillis(refreshExpiration));
                     token.setToken(UUID.randomUUID().toString());
-                    return token;
+                    return refreshTokenRepository.save(token);
                 })
                 .orElseGet(() -> {
                     RefreshToken newToken = RefreshToken.builder()
-                            .user(user)
+                            .userId(user.getId())
                             .token(UUID.randomUUID().toString())
                             .expiryDate(Instant.now().plusMillis(refreshExpiration))
                             .build();
@@ -59,14 +61,12 @@ public class RefreshTokenService {
         return token;
     }
 
-    @Transactional
-    public void deleteByUserId(UUID userId) { // Changed from Long to UUID
-        userRepository.findById(userId).ifPresent(refreshTokenRepository::deleteByUser);
+    public void deleteByUserId(String userId) {
+        refreshTokenRepository.deleteByUserId(userId);
     }
 
-    @Transactional
-    public void deleteByUsername(String email) { // Changed username to email
-        userRepository.findByEmail(email).ifPresent(refreshTokenRepository::deleteByUser); // Changed findByUsername to
-                                                                                           // findByEmail
+    public void deleteByUsername(String email) {
+        userRepository.findByEmailAndDeletedFalse(email)
+                .ifPresent(user -> refreshTokenRepository.deleteByUserId(user.getId()));
     }
 }

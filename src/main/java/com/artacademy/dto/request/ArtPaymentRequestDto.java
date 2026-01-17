@@ -1,13 +1,11 @@
 package com.artacademy.dto.request;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-
-import java.util.UUID;
 
 @Data
 public class ArtPaymentRequestDto {
 
-    @NotNull(message = "Order ID is required")
-    private UUID orderId;
+    @NotBlank(message = "Order ID is required")
+    private String orderId;
 }

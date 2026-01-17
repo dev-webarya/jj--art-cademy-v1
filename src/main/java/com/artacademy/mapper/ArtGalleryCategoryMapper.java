@@ -11,24 +11,15 @@ import java.util.List;
 public interface ArtGalleryCategoryMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "parent", ignore = true)
-    @Mapping(target = "subcategories", ignore = true)
-    @Mapping(target = "artGallery", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     ArtGalleryCategory toEntity(ArtGalleryCategoryRequestDto dto);
 
-    @Mapping(target = "parentId", source = "parent.id")
-    @Mapping(target = "parentName", source = "parent.name")
-    @Mapping(target = "subcategories", source = "subcategories")
     ArtGalleryCategoryResponseDto toDto(ArtGalleryCategory entity);
 
     List<ArtGalleryCategoryResponseDto> toDtoList(List<ArtGalleryCategory> entities);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "parent", ignore = true)
-    @Mapping(target = "subcategories", ignore = true)
-    @Mapping(target = "artGallery", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateEntity(ArtGalleryCategoryRequestDto dto, @MappingTarget ArtGalleryCategory entity);

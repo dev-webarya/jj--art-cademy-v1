@@ -10,15 +10,21 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ClassEnrollmentMapper {
 
-    @Mapping(target = "userId", source = "user.id")
-    @Mapping(target = "studentName", expression = "java(enrollment.getUser().getFirstName() + \" \" + enrollment.getUser().getLastName())")
-    @Mapping(target = "studentEmail", source = "user.email")
-    @Mapping(target = "studentPhone", source = "user.phoneNumber")
-    @Mapping(target = "classId", source = "artClass.id")
-    @Mapping(target = "className", source = "artClass.name")
-    @Mapping(target = "classDescription", source = "artClass.description")
-    @Mapping(target = "scheduleDisplayName", expression = "java(enrollment.getSchedule().getDisplayName())")
-    ClassEnrollmentResponseDto toResponseDto(ClassEnrollment enrollment);
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "userId", ignore = true)
+    @Mapping(target = "userEmail", ignore = true)
+    @Mapping(target = "className", ignore = true)
+    @Mapping(target = "classDescription", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "adminNotes", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    ClassEnrollment toEntity(com.artacademy.dto.request.ClassEnrollmentRequestDto request);
 
-    List<ClassEnrollmentResponseDto> toResponseDtoList(List<ClassEnrollment> enrollments);
+    @Mapping(target = "studentEmail", source = "userEmail")
+    @Mapping(target = "studentPhone", ignore = true) // Not in entity
+    @Mapping(target = "scheduleDisplayName", expression = "java(enrollment.getSchedule() != null ? enrollment.getSchedule().getDisplayName() : null)")
+    ClassEnrollmentResponseDto toDto(ClassEnrollment enrollment);
+
+    List<ClassEnrollmentResponseDto> toDtoList(List<ClassEnrollment> enrollments);
 }

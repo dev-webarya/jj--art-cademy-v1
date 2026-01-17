@@ -5,12 +5,11 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.UUID;
 
 @Data
 public class ArtPaymentResponseDto {
-    private UUID id;
-    private UUID orderId;
+    private String id;
+    private String orderId;
     private String orderNumber;
     private String razorpayOrderId;
     private String razorpayPaymentId;

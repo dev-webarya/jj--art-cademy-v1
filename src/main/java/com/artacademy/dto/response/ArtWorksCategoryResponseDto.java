@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 @Builder
@@ -15,9 +14,9 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ArtWorksCategoryResponseDto {
 
-    private UUID id;
+    private String id;
     private String name;
-    private UUID parentId;
+    private String parentId;
     private String parentName;
     private List<ArtWorksCategoryResponseDto> subcategories;
     private Instant createdAt;

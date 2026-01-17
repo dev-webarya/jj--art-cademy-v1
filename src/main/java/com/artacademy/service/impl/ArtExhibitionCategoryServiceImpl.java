@@ -12,11 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,72 +24,62 @@ public class ArtExhibitionCategoryServiceImpl implements ArtExhibitionCategorySe
     private final ArtExhibitionCategoryMapper categoryMapper;
 
     @Override
-    @Transactional
     public ArtExhibitionCategoryResponseDto create(ArtExhibitionCategoryRequestDto request) {
-        log.info("Creating ArtExhibitionCategory: {}", request.getName());
-        ArtExhibitionCategory entity = categoryMapper.toEntity(request);
+        ArtExhibitionCategory category = categoryMapper.toEntity(request);
 
         if (request.getParentId() != null) {
             ArtExhibitionCategory parent = categoryRepository.findById(request.getParentId())
-                    .orElseThrow(
-                            () -> new ResourceNotFoundException("ArtExhibitionCategory", "id", request.getParentId()));
-            entity.setParent(parent);
+                    .orElseThrow(() -> new ResourceNotFoundException("Category", "parentId", request.getParentId()));
+            category.setParentId(parent.getId());
+            category.setParentName(parent.getName());
         }
 
-        return categoryMapper.toDto(categoryRepository.save(entity));
+        ArtExhibitionCategory savedCategory = categoryRepository.save(category);
+        return categoryMapper.toDto(savedCategory);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ArtExhibitionCategoryResponseDto getById(UUID id) {
-        log.debug("Fetching ArtExhibitionCategory by ID: {}", id);
-        ArtExhibitionCategory entity = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ArtExhibitionCategory", "id", id));
-        return categoryMapper.toDto(entity);
+    public ArtExhibitionCategoryResponseDto getById(String id) {
+        ArtExhibitionCategory category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
+        return categoryMapper.toDto(category);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<ArtExhibitionCategoryResponseDto> getAll(Pageable pageable) {
-        return categoryRepository.findAll(pageable).map(categoryMapper::toDto);
+        return categoryRepository.findAll(pageable)
+                .map(categoryMapper::toDto);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ArtExhibitionCategoryResponseDto> getAllRootCategories() {
-        return categoryRepository.findAll().stream()
-                .filter(c -> c.getParent() == null)
-                .map(categoryMapper::toDto)
-                .collect(Collectors.toList());
+        return categoryMapper.toDtoList(categoryRepository.findByParentIdIsNull());
     }
 
     @Override
-    @Transactional
-    public ArtExhibitionCategoryResponseDto update(UUID id, ArtExhibitionCategoryRequestDto request) {
-        log.info("Updating ArtExhibitionCategory ID: {}", id);
-        ArtExhibitionCategory entity = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ArtExhibitionCategory", "id", id));
+    public ArtExhibitionCategoryResponseDto update(String id, ArtExhibitionCategoryRequestDto request) {
+        ArtExhibitionCategory category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
 
-        categoryMapper.updateEntity(request, entity);
+        categoryMapper.updateEntity(request, category);
 
         if (request.getParentId() != null) {
             ArtExhibitionCategory parent = categoryRepository.findById(request.getParentId())
-                    .orElseThrow(
-                            () -> new ResourceNotFoundException("ArtExhibitionCategory", "id", request.getParentId()));
-            entity.setParent(parent);
+                    .orElseThrow(() -> new ResourceNotFoundException("Category", "parentId", request.getParentId()));
+            category.setParentId(parent.getId());
+            category.setParentName(parent.getName());
         } else {
-            entity.setParent(null);
+            category.setParentId(null);
+            category.setParentName(null);
         }
 
-        return categoryMapper.toDto(categoryRepository.save(entity));
+        return categoryMapper.toDto(categoryRepository.save(category));
     }
 
     @Override
-    @Transactional
-    public void delete(UUID id) {
-        log.warn("Deleting ArtExhibitionCategory ID: {}", id);
+    public void delete(String id) {
         if (!categoryRepository.existsById(id)) {
-            throw new ResourceNotFoundException("ArtExhibitionCategory", "id", id);
+            throw new ResourceNotFoundException("Category", "id", id);
         }
         categoryRepository.deleteById(id);
     }

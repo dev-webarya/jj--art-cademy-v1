@@ -13,11 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,87 +21,85 @@ import java.util.UUID;
 public class ArtWorksServiceImpl implements ArtWorksService {
 
     private final ArtWorksRepository artWorksRepository;
-    private final ArtWorksCategoryRepository categoryRepository;
+    private final ArtWorksCategoryRepository artWorksCategoryRepository;
     private final ArtWorksMapper artWorksMapper;
 
     @Override
-    @Transactional
     public ArtWorksResponseDto create(ArtWorksRequestDto request) {
-        log.info("Creating artwork: {}", request.getName());
-        ArtWorks entity = artWorksMapper.toEntity(request);
+        log.info("Creating new artwork: {}", request.getName());
 
-        if (request.getCategoryId() != null) {
-            ArtWorksCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(
-                            () -> new ResourceNotFoundException("ArtWorksCategory", "id", request.getCategoryId()));
-            entity.setCategory(category);
+        // Validate Category
+        ArtWorksCategory category = artWorksCategoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
+
+        ArtWorks artWorks = artWorksMapper.toEntity(request);
+        // Explicitly set category ID and name (denormalization for MongoDB)
+        artWorks.setCategoryId(category.getId());
+        artWorks.setCategoryName(category.getName());
+
+        ArtWorks savedArtWorks = artWorksRepository.save(artWorks);
+        return artWorksMapper.toDto(savedArtWorks);
+    }
+
+    @Override
+    public ArtWorksResponseDto getById(String id) {
+        ArtWorks artWorks = artWorksRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", id));
+
+        // Increment views async (fire and forget logic in real app, here sync)
+        incrementViews(id);
+
+        return artWorksMapper.toDto(artWorks);
+    }
+
+    @Override
+    public Page<ArtWorksResponseDto> getAll(Pageable pageable) {
+        return artWorksRepository.findByDeletedFalse(pageable)
+                .map(artWorksMapper::toDto);
+    }
+
+    @Override
+    public ArtWorksResponseDto update(String id, ArtWorksRequestDto request) {
+        ArtWorks artWorks = artWorksRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", id));
+
+        // Start updates
+        artWorksMapper.updateEntity(request, artWorks);
+
+        // Update Category if changed
+        if (request.getCategoryId() != null && !request.getCategoryId().equals(artWorks.getCategoryId())) {
+            ArtWorksCategory category = artWorksCategoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
+            artWorks.setCategoryId(category.getId());
+            artWorks.setCategoryName(category.getName());
         }
 
-        entity.setViews(0);
-        entity.setLikes(0);
-
-        return artWorksMapper.toDto(artWorksRepository.save(entity));
+        ArtWorks updatedArtWorks = artWorksRepository.save(artWorks);
+        return artWorksMapper.toDto(updatedArtWorks);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ArtWorksResponseDto getById(UUID id) {
-        log.debug("Fetching artwork by ID: {}", id);
-        ArtWorks entity = artWorksRepository.findById(id)
+    public void delete(String id) {
+        ArtWorks artWorks = artWorksRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", id));
-        return artWorksMapper.toDto(entity);
+        artWorks.setDeleted(true);
+        artWorksRepository.save(artWorks);
+        log.info("Soft deleted artwork with id: {}", id);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<ArtWorksResponseDto> getAll(Specification<ArtWorks> spec, Pageable pageable) {
-        return artWorksRepository.findAll(spec, pageable).map(artWorksMapper::toDto);
-    }
-
-    @Override
-    @Transactional
-    public ArtWorksResponseDto update(UUID id, ArtWorksRequestDto request) {
-        log.info("Updating artwork ID: {}", id);
-        ArtWorks entity = artWorksRepository.findById(id)
+    public ArtWorksResponseDto incrementViews(String id) {
+        ArtWorks artWorks = artWorksRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", id));
-
-        artWorksMapper.updateEntity(request, entity);
-
-        if (request.getCategoryId() != null) {
-            ArtWorksCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(
-                            () -> new ResourceNotFoundException("ArtWorksCategory", "id", request.getCategoryId()));
-            entity.setCategory(category);
-        }
-
-        return artWorksMapper.toDto(artWorksRepository.save(entity));
+        artWorks.setViews(artWorks.getViews() == null ? 1 : artWorks.getViews() + 1);
+        return artWorksMapper.toDto(artWorksRepository.save(artWorks));
     }
 
     @Override
-    @Transactional
-    public void delete(UUID id) {
-        log.warn("Deleting artwork ID: {}", id);
-        if (!artWorksRepository.existsById(id)) {
-            throw new ResourceNotFoundException("ArtWorks", "id", id);
-        }
-        artWorksRepository.deleteById(id);
-    }
-
-    @Override
-    @Transactional
-    public ArtWorksResponseDto incrementViews(UUID id) {
-        ArtWorks entity = artWorksRepository.findById(id)
+    public ArtWorksResponseDto incrementLikes(String id) {
+        ArtWorks artWorks = artWorksRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", id));
-        entity.setViews(entity.getViews() + 1);
-        return artWorksMapper.toDto(artWorksRepository.save(entity));
-    }
-
-    @Override
-    @Transactional
-    public ArtWorksResponseDto incrementLikes(UUID id) {
-        ArtWorks entity = artWorksRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", id));
-        entity.setLikes(entity.getLikes() + 1);
-        return artWorksMapper.toDto(artWorksRepository.save(entity));
+        artWorks.setLikes(artWorks.getLikes() == null ? 1 : artWorks.getLikes() + 1);
+        return artWorksMapper.toDto(artWorksRepository.save(artWorks));
     }
 }

@@ -1,19 +1,27 @@
 package com.artacademy.repository;
 
 import com.artacademy.entity.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID; // Import UUID
 
 @Repository
-public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> { // Changed Long to
-                                                                                                    // UUID
-    Optional<User> findByEmail(String email); // Changed findByUsername to findByEmail
+public interface UserRepository extends MongoRepository<User, String> {
 
-    boolean existsByEmail(String email); // Added for convenience
+    Optional<User> findByEmail(String email);
 
-    Optional<User> findByPhoneNumber(String phoneNumber); // Added for validation
+    Optional<User> findByEmailAndDeletedFalse(String email);
+
+    boolean existsByEmail(String email);
+
+    Optional<User> findByPhoneNumber(String phoneNumber);
+
+    // Soft delete aware queries
+    @Query("{ 'deleted': false }")
+    List<User> findAllActive();
+
+    Optional<User> findByIdAndDeletedFalse(String id);
 }

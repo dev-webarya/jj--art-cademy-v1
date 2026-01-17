@@ -9,19 +9,24 @@ import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public interface ArtOrderService {
     ArtOrderResponseDto createOrder(ArtOrderRequestDto request);
 
     ArtOrderResponseDto checkoutCart(ArtCartCheckoutRequestDto request);
 
-    ArtOrderResponseDto getById(UUID id);
+    ArtOrderResponseDto getById(String id);
 
     Page<ArtOrderResponseDto> getAll(OrderStatus status, String orderNumber, BigDecimal minPrice,
-            BigDecimal maxPrice, LocalDateTime startDate, LocalDateTime endDate, UUID userId, Pageable pageable);
+            BigDecimal maxPrice, LocalDateTime startDate, LocalDateTime endDate, String userId, Pageable pageable);
 
     Page<ArtOrderResponseDto> getMyOrders(Pageable pageable);
 
-    ArtOrderResponseDto updateStatus(UUID id, OrderStatus status, String notes);
+    ArtOrderResponseDto updateStatus(String id, OrderStatus status, String notes);
+
+    /**
+     * Rollback order - used when payment fails.
+     * Restores stock and marks order as cancelled.
+     */
+    void rollbackOrder(String orderId, String reason);
 }

@@ -2,62 +2,60 @@ package com.artacademy.entity;
 
 import com.artacademy.enums.ClassSchedule;
 import com.artacademy.enums.EnrollmentStatus;
-import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "class_enrollments")
+@Document(collection = "enrollments")
+@CompoundIndex(name = "user_class_idx", def = "{'userId': 1, 'artClassId': 1}")
 public class ClassEnrollment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
     // The student enrolling (from logged-in user)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Indexed
+    private String userId;
+
+    private String userEmail;
 
     // The class being enrolled in
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "art_class_id", nullable = false)
-    private ArtClasses artClass;
+    @Indexed
+    private String classId;
 
-    @Column(nullable = false)
+    private String className;
+
+    private String classDescription;
+
+    private String studentName;
+
     private String parentGuardianName;
 
-    @Column(nullable = false)
     private Integer studentAge;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ClassSchedule schedule;
 
-    @Column(columnDefinition = "TEXT")
     private String additionalMessage;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     @Builder.Default
     private EnrollmentStatus status = EnrollmentStatus.PENDING;
 
-    @Column(columnDefinition = "TEXT")
     private String adminNotes;
 
-    @CreationTimestamp
-    @Column(updatable = false)
+    @CreatedDate
     private Instant createdAt;
 
-    @UpdateTimestamp
+    @LastModifiedDate
     private Instant updatedAt;
 }

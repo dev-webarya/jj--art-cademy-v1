@@ -7,8 +7,7 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface ArtPaymentMapper {
 
-    @Mapping(target = "orderId", source = "order.id")
-    @Mapping(target = "orderNumber", source = "order.orderNumber")
+    @Mapping(target = "orderNumber", ignore = true) // No longer have order object embedded
     @Mapping(target = "razorpayKeyId", ignore = true)
     ArtPaymentResponseDto toDto(ArtPayment payment);
 }

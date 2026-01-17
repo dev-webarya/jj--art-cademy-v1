@@ -1,50 +1,43 @@
 package com.artacademy.entity;
 
-import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
-@Getter // Replaced @Data
-@Setter // Replaced @Data
-@ToString(exclude = { "parent", "subcategories", "artWorks" }) // Added to break loop
-@EqualsAndHashCode(exclude = { "parent", "subcategories", "artWorks" }) // Added to break loop
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "art_works_categories")
+@Document(collection = "artworks_categories")
 public class ArtWorksCategory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
-    @Column(nullable = false, unique = true)
+    @Indexed(unique = true)
     private String name;
 
-    // Self-referencing relationship for hierarchy
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "art_works_parent_id")
-    private ArtWorksCategory parent;
+    private String description;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    private String imageUrl;
+
+    @Indexed
+    private String parentId;
+
+    private String parentName;
+
     @Builder.Default
-    private Set<ArtWorksCategory> subcategories = new HashSet<>();
+    private boolean isActive = true;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    @Builder.Default
-    private Set<ArtWorks> artWorks = new HashSet<>();
-
-    @CreationTimestamp
-    @Column(updatable = false)
+    @CreatedDate
     private Instant createdAt;
 
-    @UpdateTimestamp
+    @LastModifiedDate
     private Instant updatedAt;
 }

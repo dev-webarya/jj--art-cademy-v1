@@ -5,21 +5,20 @@ import com.artacademy.enums.EnrollmentStatus;
 import lombok.Data;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Data
 public class ClassEnrollmentResponseDto {
 
-    private UUID id;
+    private String id;
 
     // Student info (from User)
-    private UUID userId;
+    private String userId;
     private String studentName;
     private String studentEmail;
     private String studentPhone;
 
     // Class info
-    private UUID classId;
+    private String classId;
     private String className;
     private String classDescription;
 

@@ -31,7 +31,6 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,8 +44,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenService refreshTokenService;
     private final EmailOtpRepository emailOtpRepository;
-
-    // --- INTEGRATION: Notification Service ---
     private final ArtNotificationService notificationService;
 
     private static final String DEFAULT_ROLE = "ROLE_CUSTOMER";
@@ -78,9 +75,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     "User with phone number '" + request.getPhoneNumber() + "' already exists.");
         }
 
-        Role defaultRole = findRoleByName(DEFAULT_ROLE);
-        Set<Role> roles = new HashSet<>();
-        roles.add(defaultRole);
+        Role defaultRole = findRoleEntityByName(DEFAULT_ROLE);
+        Set<String> roles = new HashSet<>();
+        roles.add(defaultRole.getName());
 
         var user = User.builder()
                 .firstName(request.getFirstName())
@@ -108,11 +105,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new DuplicateResourceException("Phone number exists.");
         }
 
-        Set<Role> roles = new HashSet<>();
+        Set<String> roles = new HashSet<>();
         if (request.getEmail().contains("+admin@")) {
-            roles.add(findRoleByName(ADMIN_ROLE));
+            roles.add(findRoleEntityByName(ADMIN_ROLE).getName());
         } else {
-            roles.add(findRoleByName(DEFAULT_ROLE));
+            roles.add(findRoleEntityByName(DEFAULT_ROLE).getName());
         }
 
         var user = User.builder()
@@ -133,7 +130,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     public AuthenticationResponse verifyEmailOtp(VerifyOtpRequest request) {
         EmailOtp emailOtp = findAndValidateOtp(request.getEmail(), request.getOtp());
-        User user = emailOtp.getUser();
+        User user = userRepository.findByEmail(emailOtp.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", emailOtp.getEmail()));
 
         if (user.isEnabled()) {
             throw new InvalidRequestException("Account is already verified.");
@@ -150,7 +148,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     public RegistrationResponse requestOtp(OtpRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + request.getEmail()));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", request.getEmail()));
         sendOtpEmail(user);
         return new RegistrationResponse("OTP has been sent to your email.");
     }
@@ -159,7 +157,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     public AuthenticationResponse verifyLoginOtp(LoginOtpRequest request) {
         EmailOtp emailOtp = findAndValidateOtp(request.getEmail(), request.getOtp());
-        User user = emailOtp.getUser();
+        User user = userRepository.findByEmail(emailOtp.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", emailOtp.getEmail()));
+
         if (!user.isEnabled())
             throw new InvalidRequestException("Account is not verified.");
         emailOtpRepository.delete(emailOtp);
@@ -170,7 +170,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     public RegistrationResponse resetPassword(PasswordResetRequest request) {
         EmailOtp emailOtp = findAndValidateOtp(request.getEmail(), request.getOtp());
-        User user = emailOtp.getUser();
+        User user = userRepository.findByEmail(emailOtp.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", emailOtp.getEmail()));
+
         if (!user.isEnabled())
             throw new InvalidRequestException("Account not verified.");
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -203,7 +205,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public AuthenticationResponse refreshToken(RefreshTokenRequest request) {
         return refreshTokenService.findByToken(request.getToken())
                 .map(refreshTokenService::verifyExpiration)
-                .map(RefreshToken::getUser)
+                .map(token -> userRepository.findById(token.getUserId())
+                        .orElseThrow(() -> new ResourceNotFoundException("User", "id", token.getUserId())))
                 .map(user -> {
                     if (!user.isEnabled())
                         throw new InvalidRequestException("User account is not enabled.");
@@ -216,7 +219,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                             .id(user.getId())
                             .firstName(user.getFirstName())
                             .lastName(user.getLastName())
-                            .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
+                            .roles(user.getRoles())
                             .build();
                 })
                 .orElseThrow(() -> new InvalidRequestException("Refresh token expired or invalid!"));
@@ -224,16 +227,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private void sendOtpEmail(User user) {
         String otp = String.format("%06d", new Random().nextInt(1000000));
-        emailOtpRepository.findByUser(user).ifPresent(emailOtpRepository::delete);
+        emailOtpRepository.findByEmail(user.getEmail()).ifPresent(emailOtpRepository::delete);
 
         EmailOtp emailOtp = EmailOtp.builder()
-                .user(user)
+                .email(user.getEmail())
                 .otp(otp)
-                .expiryDate(Instant.now().plusSeconds(600))
+                .expiresAt(Instant.now().plusSeconds(600))
                 .build();
         emailOtpRepository.save(emailOtp);
-
-        // --- NOTIFICATION: Send OTP ---
         notificationService.sendOtp(user, otp);
     }
 
@@ -246,7 +247,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .id(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
-                .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
+                .roles(user.getRoles())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken.getToken())
                 .accessTokenExpiresAt(expiresAt)
@@ -254,13 +255,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     private EmailOtp findAndValidateOtp(String email, String otp) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
-
-        EmailOtp emailOtp = emailOtpRepository.findByUser(user)
+        EmailOtp emailOtp = emailOtpRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("No OTP found."));
 
-        if (emailOtp.getExpiryDate().isBefore(Instant.now())) {
+        if (emailOtp.getExpiresAt().isBefore(Instant.now())) {
             emailOtpRepository.delete(emailOtp);
             throw new InvalidRequestException("OTP has expired.");
         }
@@ -272,7 +270,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return emailOtp;
     }
 
-    private Role findRoleByName(String roleName) {
+    private Role findRoleEntityByName(String roleName) {
         return roleRepository.findByName(roleName)
                 .orElseThrow(() -> new InvalidRequestException("Role not found: " + roleName));
     }

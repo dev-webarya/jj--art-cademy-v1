@@ -7,7 +7,6 @@ import com.artacademy.entity.ArtClasses;
 import com.artacademy.entity.ClassEnrollment;
 import com.artacademy.entity.User;
 import com.artacademy.enums.EnrollmentStatus;
-import com.artacademy.exception.InvalidRequestException;
 import com.artacademy.exception.ResourceNotFoundException;
 import com.artacademy.mapper.ClassEnrollmentMapper;
 import com.artacademy.repository.ArtClassesRepository;
@@ -18,134 +17,109 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class ClassEnrollmentServiceImpl implements ClassEnrollmentService {
 
     private final ClassEnrollmentRepository enrollmentRepository;
-    private final ArtClassesRepository artClassesRepository;
+    private final ArtClassesRepository classRepository;
     private final ClassEnrollmentMapper enrollmentMapper;
 
     @Override
     public ClassEnrollmentResponseDto enroll(ClassEnrollmentRequestDto request, User user) {
-        log.info("User {} enrolling in class {}", user.getEmail(), request.getClassId());
+        log.info("Enrolling user {} in class {}", user.getId(), request.getClassId());
 
-        // Find the class
-        ArtClasses artClass = artClassesRepository.findById(request.getClassId())
-                .orElseThrow(() -> new ResourceNotFoundException("Class not found with ID: " + request.getClassId()));
+        ArtClasses artClass = classRepository.findByIdAndDeletedFalse(request.getClassId())
+                .orElseThrow(() -> new ResourceNotFoundException("ArtClass", "id", request.getClassId()));
 
-        // Check if user already enrolled in this class
-        if (enrollmentRepository.existsByUserAndArtClass(user, artClass)) {
-            throw new InvalidRequestException("You are already enrolled in this class");
+        ClassEnrollment enrollment = enrollmentMapper.toEntity(request);
+
+        // Set references
+        enrollment.setUserId(user.getId());
+        enrollment.setUserEmail(user.getEmail());
+        // Use provided student name or fallback to user's name
+        if (enrollment.getStudentName() == null || enrollment.getStudentName().isBlank()) {
+            enrollment.setStudentName(user.getFirstName() + " " + user.getLastName());
         }
 
-        // Create enrollment
-        ClassEnrollment enrollment = ClassEnrollment.builder()
-                .user(user)
-                .artClass(artClass)
-                .parentGuardianName(request.getParentGuardianName())
-                .studentAge(request.getStudentAge())
-                .schedule(request.getSchedule())
-                .additionalMessage(request.getAdditionalMessage())
-                .status(EnrollmentStatus.PENDING)
-                .build();
+        enrollment.setClassId(artClass.getId());
+        enrollment.setClassName(artClass.getName());
+        enrollment.setClassDescription(artClass.getDescription());
 
-        ClassEnrollment saved = enrollmentRepository.save(enrollment);
-        log.info("Enrollment created with ID: {} and status: PENDING", saved.getId());
+        enrollment.setStatus(EnrollmentStatus.PENDING);
 
-        return enrollmentMapper.toResponseDto(saved);
+        ClassEnrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        return enrollmentMapper.toDto(savedEnrollment);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<ClassEnrollmentResponseDto> getMyEnrollments(User user, Pageable pageable) {
-        log.info("Fetching enrollments for user: {}", user.getEmail());
-        return enrollmentRepository.findByUser(user, pageable)
-                .map(enrollmentMapper::toResponseDto);
+        return enrollmentRepository.findByUserId(user.getId(), pageable)
+                .map(enrollmentMapper::toDto);
     }
 
     @Override
-    public ClassEnrollmentResponseDto cancelEnrollment(UUID enrollmentId, User user) {
-        log.info("User {} cancelling enrollment {}", user.getEmail(), enrollmentId);
-
+    public ClassEnrollmentResponseDto cancelEnrollment(String enrollmentId, User user) {
         ClassEnrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with ID: " + enrollmentId));
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment", "id", enrollmentId));
 
-        // Verify ownership
-        if (!enrollment.getUser().getId().equals(user.getId())) {
-            throw new InvalidRequestException("You can only cancel your own enrollments");
+        if (!enrollment.getUserId().equals(user.getId())) {
+            throw new com.artacademy.exception.AccessDeniedException("You can only cancel your own enrollments");
         }
 
-        // Check if already approved
-        if (enrollment.getStatus() == EnrollmentStatus.APPROVED) {
-            throw new InvalidRequestException("Cannot cancel approved enrollments. Please contact admin.");
+        if (enrollment.getStatus() == EnrollmentStatus.COMPLETED) {
+            throw new IllegalStateException("Cannot cancel a completed enrollment");
         }
 
         enrollment.setStatus(EnrollmentStatus.CANCELLED);
-        ClassEnrollment saved = enrollmentRepository.save(enrollment);
-
-        log.info("Enrollment {} cancelled", enrollmentId);
-        return enrollmentMapper.toResponseDto(saved);
+        return enrollmentMapper.toDto(enrollmentRepository.save(enrollment));
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<ClassEnrollmentResponseDto> getAllEnrollments(Pageable pageable) {
-        log.info("Fetching all enrollments");
         return enrollmentRepository.findAll(pageable)
-                .map(enrollmentMapper::toResponseDto);
+                .map(enrollmentMapper::toDto);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<ClassEnrollmentResponseDto> getPendingEnrollments(Pageable pageable) {
-        log.info("Fetching pending enrollments");
         return enrollmentRepository.findByStatus(EnrollmentStatus.PENDING, pageable)
-                .map(enrollmentMapper::toResponseDto);
+                .map(enrollmentMapper::toDto);
     }
 
     @Override
-    public ClassEnrollmentResponseDto updateEnrollmentStatus(UUID enrollmentId, EnrollmentStatusUpdateDto request) {
-        log.info("Updating enrollment {} status to {}", enrollmentId, request.getStatus());
-
+    public ClassEnrollmentResponseDto updateEnrollmentStatus(String enrollmentId, EnrollmentStatusUpdateDto request) {
         ClassEnrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with ID: " + enrollmentId));
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment", "id", enrollmentId));
 
         enrollment.setStatus(request.getStatus());
-        enrollment.setAdminNotes(request.getAdminNotes());
+        if (request.getAdminNotes() != null) {
+            enrollment.setAdminNotes(request.getAdminNotes());
+        }
 
-        ClassEnrollment saved = enrollmentRepository.save(enrollment);
-        log.info("Enrollment {} updated to status: {}", enrollmentId, request.getStatus());
-
-        return enrollmentMapper.toResponseDto(saved);
+        return enrollmentMapper.toDto(enrollmentRepository.save(enrollment));
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ClassEnrollmentResponseDto getEnrollmentById(UUID enrollmentId) {
+    public ClassEnrollmentResponseDto getEnrollmentById(String enrollmentId) {
         ClassEnrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with ID: " + enrollmentId));
-        return enrollmentMapper.toResponseDto(enrollment);
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment", "id", enrollmentId));
+        return enrollmentMapper.toDto(enrollment);
     }
 
     @Override
-    public void deleteEnrollment(UUID enrollmentId) {
-        log.warn("Deleting enrollment {}", enrollmentId);
+    public void deleteEnrollment(String enrollmentId) {
         if (!enrollmentRepository.existsById(enrollmentId)) {
-            throw new ResourceNotFoundException("Enrollment not found with ID: " + enrollmentId);
+            throw new ResourceNotFoundException("Enrollment", "id", enrollmentId);
         }
         enrollmentRepository.deleteById(enrollmentId);
-        log.info("Enrollment {} deleted", enrollmentId);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public long countPendingEnrollments() {
         return enrollmentRepository.countByStatus(EnrollmentStatus.PENDING);
     }
