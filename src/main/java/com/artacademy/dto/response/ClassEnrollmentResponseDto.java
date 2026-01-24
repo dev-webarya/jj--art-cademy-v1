@@ -1,32 +1,29 @@
 package com.artacademy.dto.response;
 
-import com.artacademy.enums.ClassSchedule;
 import com.artacademy.enums.EnrollmentStatus;
 import lombok.Data;
-
 import java.time.Instant;
 
 @Data
 public class ClassEnrollmentResponseDto {
 
     private String id;
-
-    // Student info (from User)
     private String userId;
+
+    // Student Info
     private String studentName;
     private String studentEmail;
     private String studentPhone;
 
-    // Class info
+    // Class Info
     private String classId;
     private String className;
     private String classDescription;
 
-    // Enrollment details
+    // Enrollment Details
     private String parentGuardianName;
     private Integer studentAge;
-    private ClassSchedule schedule;
-    private String scheduleDisplayName;
+    private String schedule;
     private String additionalMessage;
 
     // Status

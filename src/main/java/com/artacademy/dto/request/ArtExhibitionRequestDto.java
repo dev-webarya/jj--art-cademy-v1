@@ -17,6 +17,7 @@ public class ArtExhibitionRequestDto {
 
     private boolean isActive = true;
 
+    @NotBlank(message = "Category ID is required")
     private String categoryId;
 
     @NotBlank(message = "Image URL is required")

@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -18,42 +19,52 @@ import java.time.LocalDate;
 @Document(collection = "exhibitions")
 public class ArtExhibition {
 
-        @Id
-        private String id;
+    @Id
+    private String id;
 
-        private String name;
+    private String name;
 
-        private String description;
+    private String description;
 
-        @Builder.Default
-        private boolean isActive = true;
+    @Builder.Default
+    @Field("is_active")
+    private boolean isActive = true;
 
-        // Soft Delete Flag
-        @Builder.Default
-        private boolean deleted = false;
+    // Soft Delete Flag
+    @Builder.Default
+    private boolean deleted = false;
 
-        @Indexed
-        private String categoryId;
+    @Indexed
+    @Field("category_id")
+    private String categoryId;
 
-        private String categoryName;
+    @Field("category_name")
+    private String categoryName;
 
-        @CreatedDate
-        private Instant createdAt;
+    @Field("image_url")
+    private String imageUrl;
 
-        @LastModifiedDate
-        private Instant updatedAt;
+    @Field("start_date")
+    private LocalDate startDate;
 
-        private String imageUrl;
+    @Field("end_date")
+    private LocalDate endDate;
 
-        private LocalDate startDate;
+    private String location;
 
-        private LocalDate endDate;
+    @Builder.Default
+    @Field("artist_count")
+    private Integer artistCount = 0;
 
-        private String location;
+    @Builder.Default
+    @Field("artworks_count")
+    private Integer artworksCount = 0;
 
-        @Builder.Default
-        private Integer artistCount = 0;
+    @CreatedDate
+    @Field("created_at")
+    private Instant createdAt;
 
-        @Builder.Default
-        private Integer artworksCount = 0;
+    @LastModifiedDate
+    @Field("updated_at")
+    private Instant updatedAt;
 }

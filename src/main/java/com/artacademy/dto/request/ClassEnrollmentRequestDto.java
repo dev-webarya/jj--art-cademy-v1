@@ -1,14 +1,23 @@
 package com.artacademy.dto.request;
 
-import com.artacademy.enums.ClassSchedule;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
 public class ClassEnrollmentRequestDto {
 
-    @NotNull(message = "Class ID is required")
+    @NotBlank(message = "Class ID is required")
     private String classId;
+
+    @NotBlank(message = "Student name is required")
+    private String studentName;
+
+    @NotBlank(message = "Student email is required")
+    @Email(message = "Invalid email format")
+    private String studentEmail;
+
+    @NotBlank(message = "Student phone is required")
+    private String studentPhone;
 
     @NotBlank(message = "Parent/Guardian name is required")
     private String parentGuardianName;
@@ -18,10 +27,8 @@ public class ClassEnrollmentRequestDto {
     @Max(value = 100, message = "Invalid age")
     private Integer studentAge;
 
-    @NotNull(message = "Schedule is required")
-    private ClassSchedule schedule;
-
-    private String studentName;
+    @NotBlank(message = "Schedule is required")
+    private String schedule;
 
     private String additionalMessage;
 }

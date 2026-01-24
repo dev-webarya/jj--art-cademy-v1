@@ -7,9 +7,12 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -28,46 +31,55 @@ public class ArtMaterials {
     @TextIndexed
     private String description;
 
+    @Field("base_price")
     private BigDecimal basePrice;
 
     @Builder.Default
     private Integer discount = 0;
 
-    private BigDecimal stock; // count for item
+    private BigDecimal stock; // Global stock count
 
     @Builder.Default
-    private java.util.List<MaterialVariant> variants = new java.util.ArrayList<>();
+    private List<MaterialVariant> variants = new ArrayList<>();
 
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class MaterialVariant {
-        private String id;
+        private String id; // Unique ID for the variant
         private String size; // e.g. "A4", "10x12 inches"
         private BigDecimal price;
+        
+        @Field("discount_price")
         private BigDecimal discountPrice;
+        
         private BigDecimal stock;
     }
 
     @Builder.Default
+    @Field("is_active")
     private boolean isActive = true;
 
     // Soft Delete Flag
     @Builder.Default
     private boolean deleted = false;
 
+    @Indexed
+    @Field("category_id")
+    private String categoryId;
+
+    @Field("category_name")
+    private String categoryName;
+
+    @Field("image_url")
+    private String imageUrl;
+
     @CreatedDate
+    @Field("created_at")
     private Instant createdAt;
 
     @LastModifiedDate
+    @Field("updated_at")
     private Instant updatedAt;
-
-    // Store category ID reference instead of @ManyToOne
-    @Indexed
-    private String categoryId;
-
-    private String categoryName;
-
-    private String imageUrl;
 }

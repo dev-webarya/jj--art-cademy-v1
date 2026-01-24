@@ -5,21 +5,20 @@ import com.artacademy.dto.response.ArtExhibitionResponseDto;
 import com.artacademy.entity.ArtExhibition;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ArtExhibitionMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "categoryId", ignore = true)
+    @Mapping(target = "categoryName", ignore = true) // Handled manually in Service
     @Mapping(target = "deleted", constant = "false")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     ArtExhibition toEntity(ArtExhibitionRequestDto dto);
 
-    // categoryName is populated in the entity by the service, so we map it directly
     ArtExhibitionResponseDto toDto(ArtExhibition entity);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "categoryId", ignore = true)
+    @Mapping(target = "categoryName", ignore = true) // Handled manually in Service
     @Mapping(target = "deleted", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
