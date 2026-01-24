@@ -10,7 +10,6 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ArtCartMapper {
 
-    @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "items", source = "items")
     @Mapping(target = "totalPrice", expression = "java(cart.getTotalPrice())")
     ArtCartResponseDto toDto(ArtShoppingCart cart);
@@ -18,5 +17,5 @@ public interface ArtCartMapper {
     @Mapping(target = "subtotal", expression = "java(item.getSubtotal())")
     ArtCartResponseDto.ArtCartItemDto toItemDto(ArtCartItem item);
 
-    List<ArtCartResponseDto.ArtCartItemDto> toItemDtoList(java.util.Set<ArtCartItem> items);
+    List<ArtCartResponseDto.ArtCartItemDto> toItemDtoList(List<ArtCartItem> items);
 }

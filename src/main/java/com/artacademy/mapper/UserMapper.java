@@ -25,7 +25,7 @@ public interface UserMapper {
     User toEntity(UserRequest userRequest);
 
     @Mapping(target = "email", source = "email")
-    @Mapping(target = "roles", source = "roles", qualifiedByName = "rolesToRoleNames")
+    // MapStruct automatically maps Set<String> to Set<String>
     UserResponse toResponse(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -38,11 +38,4 @@ public interface UserMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "authorities", ignore = true)
     void updateEntityFromRequest(UserRequest userRequest, @MappingTarget User user);
-
-    @Named("rolesToRoleNames")
-    default Set<String> rolesToRoleNames(Set<Role> roles) {
-        if (roles == null)
-            return null;
-        return roles.stream().map(Role::getName).collect(Collectors.toSet());
-    }
 }

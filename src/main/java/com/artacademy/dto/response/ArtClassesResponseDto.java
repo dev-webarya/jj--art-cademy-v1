@@ -4,17 +4,18 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.UUID;
 
 @Data
 public class ArtClassesResponseDto {
-    private UUID id;
+    private String id;
     private String name;
     private String description;
     private BigDecimal basePrice;
+    private BigDecimal discountPrice;
+    private Integer durationWeeks;
     private boolean isActive;
     private String proficiency;
-    private UUID categoryId;
+    private String categoryId;
     private String categoryName;
     private String imageUrl;
     private Instant createdAt;

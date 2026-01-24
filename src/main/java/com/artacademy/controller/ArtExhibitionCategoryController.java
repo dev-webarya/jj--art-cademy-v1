@@ -2,10 +2,9 @@ package com.artacademy.controller;
 
 import com.artacademy.dto.request.ArtExhibitionCategoryRequestDto;
 import com.artacademy.dto.response.ArtExhibitionCategoryResponseDto;
-import com.artacademy.security.annotations.AdminOnly;
-import com.artacademy.security.annotations.ManagerAccess;
-import com.artacademy.security.annotations.PublicEndpoint;
 import com.artacademy.service.ArtExhibitionCategoryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,58 +12,59 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/exhibition-categories")
+@RequestMapping("/api/v1/art-exhibitions-categories")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Art Exhibitions Categories", description = "Endpoints for managing art exhibitions categories")
 public class ArtExhibitionCategoryController {
 
     private final ArtExhibitionCategoryService categoryService;
 
     @PostMapping
-    @ManagerAccess
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @Operation(summary = "Create Category")
     public ResponseEntity<ArtExhibitionCategoryResponseDto> create(
             @Valid @RequestBody ArtExhibitionCategoryRequestDto request) {
-        log.info("Creating exhibition category: {}", request.getName());
         return new ResponseEntity<>(categoryService.create(request), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    @PublicEndpoint
-    public ResponseEntity<ArtExhibitionCategoryResponseDto> getById(@PathVariable UUID id) {
+    @Operation(summary = "Get Category by ID")
+    public ResponseEntity<ArtExhibitionCategoryResponseDto> getById(@PathVariable String id) {
         return ResponseEntity.ok(categoryService.getById(id));
     }
 
     @GetMapping
-    @PublicEndpoint
+    @Operation(summary = "Get all Categories")
     public ResponseEntity<Page<ArtExhibitionCategoryResponseDto>> getAll(Pageable pageable) {
         return ResponseEntity.ok(categoryService.getAll(pageable));
     }
 
-    @GetMapping("/roots")
-    @PublicEndpoint
+    @GetMapping("/root")
+    @Operation(summary = "Get all Root Categories")
     public ResponseEntity<List<ArtExhibitionCategoryResponseDto>> getAllRootCategories() {
         return ResponseEntity.ok(categoryService.getAllRootCategories());
     }
 
     @PutMapping("/{id}")
-    @ManagerAccess
-    public ResponseEntity<ArtExhibitionCategoryResponseDto> update(@PathVariable UUID id,
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @Operation(summary = "Update Category")
+    public ResponseEntity<ArtExhibitionCategoryResponseDto> update(@PathVariable String id,
             @Valid @RequestBody ArtExhibitionCategoryRequestDto request) {
-        log.info("Updating exhibition category ID: {}", id);
         return ResponseEntity.ok(categoryService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @AdminOnly
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        log.warn("Deleting exhibition category ID: {}", id);
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete Category")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable String id) {
         categoryService.delete(id);
-        return ResponseEntity.noContent().build();
     }
 }

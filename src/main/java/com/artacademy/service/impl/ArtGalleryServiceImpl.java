@@ -13,11 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,61 +25,55 @@ public class ArtGalleryServiceImpl implements ArtGalleryService {
     private final ArtGalleryMapper artGalleryMapper;
 
     @Override
-    @Transactional
     public ArtGalleryResponseDto create(ArtGalleryRequestDto request) {
-        log.info("Creating gallery: {}", request.getName());
-        ArtGallery entity = artGalleryMapper.toEntity(request);
+        ArtGalleryCategory category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
 
-        if (request.getCategoryId() != null) {
-            ArtGalleryCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(
-                            () -> new ResourceNotFoundException("ArtGalleryCategory", "id", request.getCategoryId()));
-            entity.setArtGalleryCategory(category);
-        }
+        ArtGallery gallery = artGalleryMapper.toEntity(request);
+        gallery.setCategoryId(category.getId());
+        gallery.setCategoryName(category.getName());
 
-        return artGalleryMapper.toDto(artGalleryRepository.save(entity));
+        ArtGallery savedGallery = artGalleryRepository.save(gallery);
+        return artGalleryMapper.toDto(savedGallery);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ArtGalleryResponseDto getById(UUID id) {
-        ArtGallery entity = artGalleryRepository.findById(id)
+    public ArtGalleryResponseDto getById(String id) {
+        ArtGallery gallery = artGalleryRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtGallery", "id", id));
-        return artGalleryMapper.toDto(entity);
+        return artGalleryMapper.toDto(gallery);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<ArtGalleryResponseDto> getAll(Specification<ArtGallery> spec, Pageable pageable) {
-        return artGalleryRepository.findAll(spec, pageable).map(artGalleryMapper::toDto);
+    public Page<ArtGalleryResponseDto> getAll(Pageable pageable) {
+        return artGalleryRepository.findByDeletedFalse(pageable)
+                .map(artGalleryMapper::toDto);
     }
 
     @Override
-    @Transactional
-    public ArtGalleryResponseDto update(UUID id, ArtGalleryRequestDto request) {
-        log.info("Updating gallery ID: {}", id);
-        ArtGallery entity = artGalleryRepository.findById(id)
+    public ArtGalleryResponseDto update(String id, ArtGalleryRequestDto request) {
+        ArtGallery gallery = artGalleryRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtGallery", "id", id));
 
-        artGalleryMapper.updateEntity(request, entity);
+        artGalleryMapper.updateEntity(request, gallery);
 
-        if (request.getCategoryId() != null) {
+        if (request.getCategoryId() != null && !request.getCategoryId().equals(gallery.getCategoryId())) {
             ArtGalleryCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(
-                            () -> new ResourceNotFoundException("ArtGalleryCategory", "id", request.getCategoryId()));
-            entity.setArtGalleryCategory(category);
+                    .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
+            gallery.setCategoryId(category.getId());
+            gallery.setCategoryName(category.getName());
         }
 
-        return artGalleryMapper.toDto(artGalleryRepository.save(entity));
+        ArtGallery updatedGallery = artGalleryRepository.save(gallery);
+        return artGalleryMapper.toDto(updatedGallery);
     }
 
     @Override
-    @Transactional
-    public void delete(UUID id) {
-        log.warn("Deleting gallery ID: {}", id);
-        if (!artGalleryRepository.existsById(id)) {
-            throw new ResourceNotFoundException("ArtGallery", "id", id);
-        }
-        artGalleryRepository.deleteById(id);
+    public void delete(String id) {
+        ArtGallery gallery = artGalleryRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ArtGallery", "id", id));
+        gallery.setDeleted(true);
+        artGalleryRepository.save(gallery);
+        log.info("Soft deleted gallery with id: {}", id);
     }
 }

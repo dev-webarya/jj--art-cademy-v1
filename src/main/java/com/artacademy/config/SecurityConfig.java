@@ -68,6 +68,25 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.GET, "/api/v1/attribute-values/**")
                                                 .permitAll()
 
+                                                // Public Art Academy Endpoints (GET only)
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/art-works/**").permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/art-works-categories/**")
+                                                .permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/art-classes/**").permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/art-classes-categories/**")
+                                                .permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/art-exhibitions/**")
+                                                .permitAll()
+                                                .requestMatchers(HttpMethod.GET,
+                                                                "/api/v1/art-exhibitions-categories/**")
+                                                .permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/art-galleries/**").permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/art-galleries-categories/**")
+                                                .permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/art-materials/**").permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/art-materials-categories/**")
+                                                .permitAll()
+
                                                 // All other authorization is handled by @PreAuthorize annotations in
                                                 // controllers
                                                 // This provides better flexibility, maintainability, and co-location of

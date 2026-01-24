@@ -13,11 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,62 +25,60 @@ public class ArtMaterialsServiceImpl implements ArtMaterialsService {
     private final ArtMaterialsMapper artMaterialsMapper;
 
     @Override
-    @Transactional
     public ArtMaterialsResponseDto create(ArtMaterialsRequestDto request) {
-        log.info("Creating art material: {}", request.getName());
-        ArtMaterials entity = artMaterialsMapper.toEntity(request);
+        log.info("Creating new material: {}", request.getName());
 
-        if (request.getCategoryId() != null) {
-            ArtMaterialsCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(
-                            () -> new ResourceNotFoundException("ArtMaterialsCategory", "id", request.getCategoryId()));
-            entity.setCategory(category);
-        }
+        ArtMaterialsCategory category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
 
-        return artMaterialsMapper.toDto(artMaterialsRepository.save(entity));
+        ArtMaterials material = artMaterialsMapper.toEntity(request);
+        material.setCategoryId(category.getId());
+        material.setCategoryName(category.getName());
+        // Default values
+        if (material.getDiscount() == null)
+            material.setDiscount(0);
+
+        ArtMaterials savedMaterial = artMaterialsRepository.save(material);
+        return artMaterialsMapper.toDto(savedMaterial);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ArtMaterialsResponseDto getById(UUID id) {
-        log.debug("Fetching art material by ID: {}", id);
-        ArtMaterials entity = artMaterialsRepository.findById(id)
+    public ArtMaterialsResponseDto getById(String id) {
+        ArtMaterials material = artMaterialsRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtMaterials", "id", id));
-        return artMaterialsMapper.toDto(entity);
+        return artMaterialsMapper.toDto(material);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<ArtMaterialsResponseDto> getAll(Specification<ArtMaterials> spec, Pageable pageable) {
-        return artMaterialsRepository.findAll(spec, pageable).map(artMaterialsMapper::toDto);
+    public Page<ArtMaterialsResponseDto> getAll(Pageable pageable) {
+        return artMaterialsRepository.findByDeletedFalse(pageable)
+                .map(artMaterialsMapper::toDto);
     }
 
     @Override
-    @Transactional
-    public ArtMaterialsResponseDto update(UUID id, ArtMaterialsRequestDto request) {
-        log.info("Updating art material ID: {}", id);
-        ArtMaterials entity = artMaterialsRepository.findById(id)
+    public ArtMaterialsResponseDto update(String id, ArtMaterialsRequestDto request) {
+        ArtMaterials material = artMaterialsRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtMaterials", "id", id));
 
-        artMaterialsMapper.updateEntity(request, entity);
+        artMaterialsMapper.updateEntity(request, material);
 
-        if (request.getCategoryId() != null) {
+        if (request.getCategoryId() != null && !request.getCategoryId().equals(material.getCategoryId())) {
             ArtMaterialsCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(
-                            () -> new ResourceNotFoundException("ArtMaterialsCategory", "id", request.getCategoryId()));
-            entity.setCategory(category);
+                    .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
+            material.setCategoryId(category.getId());
+            material.setCategoryName(category.getName());
         }
 
-        return artMaterialsMapper.toDto(artMaterialsRepository.save(entity));
+        ArtMaterials updatedMaterial = artMaterialsRepository.save(material);
+        return artMaterialsMapper.toDto(updatedMaterial);
     }
 
     @Override
-    @Transactional
-    public void delete(UUID id) {
-        log.warn("Deleting art material ID: {}", id);
-        if (!artMaterialsRepository.existsById(id)) {
-            throw new ResourceNotFoundException("ArtMaterials", "id", id);
-        }
-        artMaterialsRepository.deleteById(id);
+    public void delete(String id) {
+        ArtMaterials material = artMaterialsRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ArtMaterials", "id", id));
+        material.setDeleted(true);
+        artMaterialsRepository.save(material);
+        log.info("Soft deleted material with id: {}", id);
     }
 }

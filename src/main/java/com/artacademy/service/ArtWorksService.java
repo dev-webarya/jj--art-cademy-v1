@@ -2,25 +2,21 @@ package com.artacademy.service;
 
 import com.artacademy.dto.request.ArtWorksRequestDto;
 import com.artacademy.dto.response.ArtWorksResponseDto;
-import com.artacademy.entity.ArtWorks;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-
-import java.util.UUID;
 
 public interface ArtWorksService {
     ArtWorksResponseDto create(ArtWorksRequestDto request);
 
-    ArtWorksResponseDto getById(UUID id);
+    ArtWorksResponseDto getById(String id);
 
-    Page<ArtWorksResponseDto> getAll(Specification<ArtWorks> spec, Pageable pageable);
+    Page<ArtWorksResponseDto> getAll(Pageable pageable);
 
-    ArtWorksResponseDto update(UUID id, ArtWorksRequestDto request);
+    ArtWorksResponseDto update(String id, ArtWorksRequestDto request);
 
-    void delete(UUID id);
+    void delete(String id);
 
-    ArtWorksResponseDto incrementViews(UUID id);
+    ArtWorksResponseDto incrementViews(String id);
 
-    ArtWorksResponseDto incrementLikes(UUID id);
+    ArtWorksResponseDto incrementLikes(String id);
 }

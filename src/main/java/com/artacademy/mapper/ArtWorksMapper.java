@@ -9,7 +9,7 @@ import org.mapstruct.*;
 public interface ArtWorksMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "categoryId", ignore = true)
     @Mapping(target = "views", constant = "0")
     @Mapping(target = "likes", constant = "0")
     @Mapping(target = "deleted", constant = "false")
@@ -17,12 +17,11 @@ public interface ArtWorksMapper {
     @Mapping(target = "updatedAt", ignore = true)
     ArtWorks toEntity(ArtWorksRequestDto dto);
 
-    @Mapping(target = "categoryId", source = "category.id")
-    @Mapping(target = "categoryName", source = "category.name")
+    // categoryName is populated in the entity by the service, so we map it directly
     ArtWorksResponseDto toDto(ArtWorks entity);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "categoryId", ignore = true)
     @Mapping(target = "views", ignore = true)
     @Mapping(target = "likes", ignore = true)
     @Mapping(target = "deleted", ignore = true)

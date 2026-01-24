@@ -2,16 +2,15 @@ package com.artacademy.dto.request;
 
 import com.artacademy.enums.ArtItemType;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
-import java.util.UUID;
 
 @Data
 public class ArtCartItemRequestDto {
 
-    @NotNull(message = "Item ID is required")
-    private UUID itemId;
+    @NotBlank(message = "Item ID is required")
+    private String itemId;
 
     @NotNull(message = "Item type is required")
     private ArtItemType itemType;
@@ -19,4 +18,6 @@ public class ArtCartItemRequestDto {
     @NotNull(message = "Quantity is required")
     @Min(value = 1, message = "Quantity must be at least 1")
     private Integer quantity;
+
+    private String itemVariantId;
 }

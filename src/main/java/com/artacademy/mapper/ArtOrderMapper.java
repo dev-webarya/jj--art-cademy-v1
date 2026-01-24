@@ -11,10 +11,9 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ArtOrderMapper {
 
-    @Mapping(target = "userId", source = "user.id")
-    @Mapping(target = "userEmail", source = "user.email")
     @Mapping(target = "items", source = "items")
     @Mapping(target = "statusHistory", source = "statusHistory")
+    @Mapping(target = "userEmail", ignore = true) // No longer have user object, ignore for now
     ArtOrderResponseDto toDto(ArtOrder order);
 
     @Mapping(target = "subtotal", expression = "java(item.getSubtotal())")

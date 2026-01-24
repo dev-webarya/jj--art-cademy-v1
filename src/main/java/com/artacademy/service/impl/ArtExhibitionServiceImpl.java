@@ -13,11 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,61 +25,61 @@ public class ArtExhibitionServiceImpl implements ArtExhibitionService {
     private final ArtExhibitionMapper artExhibitionMapper;
 
     @Override
-    @Transactional
     public ArtExhibitionResponseDto create(ArtExhibitionRequestDto request) {
-        log.info("Creating exhibition: {}", request.getName());
-        ArtExhibition entity = artExhibitionMapper.toEntity(request);
+        ArtExhibitionCategory category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
 
-        if (request.getCategoryId() != null) {
+        ArtExhibition exhibition = artExhibitionMapper.toEntity(request);
+        exhibition.setCategoryId(category.getId());
+        exhibition.setCategoryName(category.getName());
+
+        // Defaults
+        if (exhibition.getArtistCount() == null)
+            exhibition.setArtistCount(0);
+        if (exhibition.getArtworksCount() == null)
+            exhibition.setArtworksCount(0);
+
+        ArtExhibition savedExhibition = artExhibitionRepository.save(exhibition);
+        return artExhibitionMapper.toDto(savedExhibition);
+    }
+
+    @Override
+    public ArtExhibitionResponseDto getById(String id) {
+        ArtExhibition exhibition = artExhibitionRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Exhibition", "id", id));
+        return artExhibitionMapper.toDto(exhibition);
+    }
+
+    @Override
+    public Page<ArtExhibitionResponseDto> getAll(Pageable pageable) {
+        return artExhibitionRepository.findByDeletedFalse(pageable)
+                .map(artExhibitionMapper::toDto);
+    }
+
+    @Override
+    public ArtExhibitionResponseDto update(String id, ArtExhibitionRequestDto request) {
+        ArtExhibition exhibition = artExhibitionRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Exhibition", "id", id));
+
+        artExhibitionMapper.updateEntity(request, exhibition);
+
+        if (request.getCategoryId() != null && !request.getCategoryId().equals(exhibition.getCategoryId())) {
             ArtExhibitionCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("ArtExhibitionCategory", "id",
-                            request.getCategoryId()));
-            entity.setArtExhibitionCategory(category);
+                    .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
+            exhibition.setCategoryId(category.getId());
+            exhibition.setCategoryName(category.getName());
         }
 
-        return artExhibitionMapper.toDto(artExhibitionRepository.save(entity));
+        ArtExhibition updatedExhibition = artExhibitionRepository.save(exhibition);
+        return artExhibitionMapper.toDto(updatedExhibition);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ArtExhibitionResponseDto getById(UUID id) {
-        ArtExhibition entity = artExhibitionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ArtExhibition", "id", id));
-        return artExhibitionMapper.toDto(entity);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ArtExhibitionResponseDto> getAll(Specification<ArtExhibition> spec, Pageable pageable) {
-        return artExhibitionRepository.findAll(spec, pageable).map(artExhibitionMapper::toDto);
-    }
-
-    @Override
-    @Transactional
-    public ArtExhibitionResponseDto update(UUID id, ArtExhibitionRequestDto request) {
-        log.info("Updating exhibition ID: {}", id);
-        ArtExhibition entity = artExhibitionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ArtExhibition", "id", id));
-
-        artExhibitionMapper.updateEntity(request, entity);
-
-        if (request.getCategoryId() != null) {
-            ArtExhibitionCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("ArtExhibitionCategory", "id",
-                            request.getCategoryId()));
-            entity.setArtExhibitionCategory(category);
-        }
-
-        return artExhibitionMapper.toDto(artExhibitionRepository.save(entity));
-    }
-
-    @Override
-    @Transactional
-    public void delete(UUID id) {
-        log.warn("Deleting exhibition ID: {}", id);
-        if (!artExhibitionRepository.existsById(id)) {
-            throw new ResourceNotFoundException("ArtExhibition", "id", id);
-        }
-        artExhibitionRepository.deleteById(id);
+    public void delete(String id) {
+        ArtExhibition exhibition = artExhibitionRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Exhibition", "id", id));
+        exhibition.setDeleted(true);
+        artExhibitionRepository.save(exhibition);
+        log.info("Soft deleted exhibition with id: {}", id);
     }
 }

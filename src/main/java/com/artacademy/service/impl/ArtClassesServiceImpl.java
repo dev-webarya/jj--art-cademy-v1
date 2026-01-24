@@ -13,11 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,62 +25,55 @@ public class ArtClassesServiceImpl implements ArtClassesService {
     private final ArtClassesMapper artClassesMapper;
 
     @Override
-    @Transactional
     public ArtClassesResponseDto create(ArtClassesRequestDto request) {
-        log.info("Creating art class: {}", request.getName());
-        ArtClasses entity = artClassesMapper.toEntity(request);
+        ArtClassesCategory category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
 
-        if (request.getCategoryId() != null) {
+        ArtClasses artClass = artClassesMapper.toEntity(request);
+        artClass.setCategoryId(category.getId());
+        artClass.setCategoryName(category.getName());
+
+        ArtClasses savedClass = artClassesRepository.save(artClass);
+        return artClassesMapper.toDto(savedClass);
+    }
+
+    @Override
+    public ArtClassesResponseDto getById(String id) {
+        ArtClasses artClass = artClassesRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ArtClass", "id", id));
+        return artClassesMapper.toDto(artClass);
+    }
+
+    @Override
+    public Page<ArtClassesResponseDto> getAll(Pageable pageable) {
+        return artClassesRepository.findByDeletedFalse(pageable)
+                .map(artClassesMapper::toDto);
+    }
+
+    @Override
+    public ArtClassesResponseDto update(String id, ArtClassesRequestDto request) {
+        ArtClasses artClass = artClassesRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ArtClass", "id", id));
+
+        artClassesMapper.updateEntity(request, artClass);
+
+        if (request.getCategoryId() != null && !request.getCategoryId().equals(artClass.getCategoryId())) {
             ArtClassesCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(
-                            () -> new ResourceNotFoundException("ArtClassesCategory", "id", request.getCategoryId()));
-            entity.setCategory(category);
+                    .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
+            artClass.setCategoryId(category.getId());
+            artClass.setCategoryName(category.getName());
         }
 
-        return artClassesMapper.toDto(artClassesRepository.save(entity));
+        ArtClasses updatedClass = artClassesRepository.save(artClass);
+        return artClassesMapper.toDto(updatedClass);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ArtClassesResponseDto getById(UUID id) {
-        log.debug("Fetching art class by ID: {}", id);
-        ArtClasses entity = artClassesRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ArtClasses", "id", id));
-        return artClassesMapper.toDto(entity);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ArtClassesResponseDto> getAll(Specification<ArtClasses> spec, Pageable pageable) {
-        return artClassesRepository.findAll(spec, pageable).map(artClassesMapper::toDto);
-    }
-
-    @Override
-    @Transactional
-    public ArtClassesResponseDto update(UUID id, ArtClassesRequestDto request) {
-        log.info("Updating art class ID: {}", id);
-        ArtClasses entity = artClassesRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ArtClasses", "id", id));
-
-        artClassesMapper.updateEntity(request, entity);
-
-        if (request.getCategoryId() != null) {
-            ArtClassesCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(
-                            () -> new ResourceNotFoundException("ArtClassesCategory", "id", request.getCategoryId()));
-            entity.setCategory(category);
-        }
-
-        return artClassesMapper.toDto(artClassesRepository.save(entity));
-    }
-
-    @Override
-    @Transactional
-    public void delete(UUID id) {
-        log.warn("Deleting art class ID: {}", id);
-        if (!artClassesRepository.existsById(id)) {
-            throw new ResourceNotFoundException("ArtClasses", "id", id);
-        }
-        artClassesRepository.deleteById(id);
+    public void delete(String id) {
+        ArtClasses artClass = artClassesRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ArtClass", "id", id));
+        artClass.setDeleted(true);
+        artClassesRepository.save(artClass);
+        log.info("Soft deleted class with id: {}", id);
     }
 }

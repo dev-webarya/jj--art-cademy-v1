@@ -1,10 +1,14 @@
 package com.artacademy.repository;
 
 import com.artacademy.model.TokenDenyList;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
 import java.time.Instant;
 
-public interface TokenDenyListRepository extends JpaRepository<TokenDenyList, Long> {
+@Repository
+public interface TokenDenyListRepository extends MongoRepository<TokenDenyList, String> {
+
     boolean existsByJti(String jti);
 
     void deleteByExpiryDateBefore(Instant now);

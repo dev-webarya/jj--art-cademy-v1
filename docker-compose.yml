@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # ==============================
+  # 1. The ArtAcademy Application
+  # ==============================
+  artacademy-api:
+    build: .
+    container_name: artacademy-api-container
+    ports:
+      - "${SERVER_PORT:-8095}:8095"
+    restart: always
+    # Removing 'depends_on' because we are connecting to external Atlas DB
+    environment:
+      - SERVER_PORT=8095
+
+      # MongoDB Configuration - Points to Atlas via .env now
+      - MONGODB_URI=${MONGODB_URI}
+      - MONGODB_DATABASE=${MONGODB_DATABASE:-artacademy}
+
+      # JWT Security Configuration
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${APPLICATION_SECURITY_JWT_SECRET_KEY}
+      - APPLICATION_SECURITY_JWT_EXPIRATION=${APPLICATION_SECURITY_JWT_EXPIRATION:-86400000}
+      - APPLICATION_SECURITY_JWT_REFRESH_TOKEN_EXPIRATION=${APPLICATION_SECURITY_JWT_REFRESH_TOKEN_EXPIRATION:-604800000}
+
+      # Notification API Configuration
+      - NOTIFICATION_CLIENT_ID=${NOTIFICATION_CLIENT_ID}
+      - NOTIFICATION_CLIENT_SECRET=${NOTIFICATION_CLIENT_SECRET}
+
+      # Mail Configuration
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
+      - SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME}
+      - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=true
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
+
+      # Razorpay Configuration
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
+    networks:
+      - artacademy-network
+
+networks:
+  artacademy-network:
+    driver: bridge

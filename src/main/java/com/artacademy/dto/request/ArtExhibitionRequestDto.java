@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Data
 public class ArtExhibitionRequestDto {
@@ -18,7 +17,7 @@ public class ArtExhibitionRequestDto {
 
     private boolean isActive = true;
 
-    private UUID categoryId;
+    private String categoryId;
 
     @NotBlank(message = "Image URL is required")
     private String imageUrl;

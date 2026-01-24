@@ -2,6 +2,7 @@ package com.artacademy.service.impl;
 
 import com.artacademy.dto.request.ArtCartCheckoutRequestDto;
 import com.artacademy.dto.request.ArtOrderRequestDto;
+import com.artacademy.dto.request.ShipmentRequestDto;
 import com.artacademy.dto.response.ArtOrderResponseDto;
 import com.artacademy.entity.*;
 import com.artacademy.enums.ArtItemType;
@@ -14,14 +15,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Order service implementation for MongoDB.
+ * Implements compensating transactions for rollback on payment failure.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -35,14 +41,13 @@ public class ArtOrderServiceImpl implements ArtOrderService {
     private final ArtOrderMapper orderMapper;
 
     @Override
-    @Transactional
     public ArtOrderResponseDto createOrder(ArtOrderRequestDto request) {
         log.info("Creating order with {} items", request.getItems().size());
         User user = getCurrentUser();
 
         ArtOrder order = ArtOrder.builder()
                 .orderNumber(generateOrderNumber())
-                .user(user)
+                .userId(user.getId())
                 .status(OrderStatus.PAYMENT_PENDING)
                 .shippingAddress(request.getShippingAddress())
                 .billingAddress(request.getBillingAddress() != null ? request.getBillingAddress()
@@ -53,8 +58,11 @@ public class ArtOrderServiceImpl implements ArtOrderService {
         BigDecimal total = BigDecimal.ZERO;
 
         for (ArtOrderRequestDto.ArtOrderItemDto itemDto : request.getItems()) {
-            ArtOrderItem orderItem = createOrderItem(order, itemDto.getItemId(), itemDto.getItemType(),
-                    itemDto.getQuantity());
+            ArtOrderItem orderItem = createOrderItem(
+                    itemDto.getItemId(),
+                    itemDto.getItemType(),
+                    itemDto.getQuantity(),
+                    itemDto.getItemVariantId());
             order.getItems().add(orderItem);
             total = total.add(orderItem.getSubtotal());
         }
@@ -64,11 +72,10 @@ public class ArtOrderServiceImpl implements ArtOrderService {
 
         ArtOrder savedOrder = orderRepository.save(order);
         log.info("Order created with number: {}", savedOrder.getOrderNumber());
-        return orderMapper.toDto(savedOrder);
+        return enrichWithUserEmail(orderMapper.toDto(savedOrder), user.getEmail());
     }
 
     @Override
-    @Transactional
     public ArtOrderResponseDto checkoutCart(ArtCartCheckoutRequestDto request) {
         log.info("Checking out cart for customer");
         User user = getCurrentUser();
@@ -81,7 +88,7 @@ public class ArtOrderServiceImpl implements ArtOrderService {
 
         ArtOrder order = ArtOrder.builder()
                 .orderNumber(generateOrderNumber())
-                .user(user)
+                .userId(user.getId())
                 .status(OrderStatus.PAYMENT_PENDING)
                 .shippingAddress(request.getShippingAddress())
                 .billingAddress(request.getBillingAddress() != null ? request.getBillingAddress()
@@ -89,61 +96,60 @@ public class ArtOrderServiceImpl implements ArtOrderService {
                 .totalPrice(BigDecimal.ZERO)
                 .build();
 
-        BigDecimal total = BigDecimal.ZERO;
-
-        for (ArtCartItem cartItem : cart.getItems()) {
-            ArtOrderItem orderItem = ArtOrderItem.builder()
-                    .order(order)
-                    .itemId(cartItem.getItemId())
-                    .itemType(cartItem.getItemType())
-                    .itemName(cartItem.getItemName())
-                    .imageUrl(cartItem.getImageUrl())
-                    .unitPrice(cartItem.getUnitPrice())
-                    .quantity(cartItem.getQuantity())
-                    .build();
-            order.getItems().add(orderItem);
-            total = total.add(orderItem.getSubtotal());
-        }
-
-        order.setTotalPrice(total);
+        // Use the order's helper method to add items from cart
+        order.addItemsFromCart(cart.getItems());
+        order.calculateTotalPrice();
         order.addStatusHistory(OrderStatus.PAYMENT_PENDING, "Order created from cart checkout");
 
         // Clear cart after checkout
-        cart.getItems().clear();
+        cart.clearItems();
         cartRepository.save(cart);
 
         ArtOrder savedOrder = orderRepository.save(order);
         log.info("Cart checkout complete, order number: {}", savedOrder.getOrderNumber());
-        return orderMapper.toDto(savedOrder);
+        return enrichWithUserEmail(orderMapper.toDto(savedOrder), user.getEmail());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ArtOrderResponseDto getById(UUID id) {
+    public ArtOrderResponseDto getById(String id) {
         ArtOrder order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtOrder", "id", id));
-        return orderMapper.toDto(order);
+
+        // Security check: verify user owns this order or is admin/manager
+        User currentUser = getCurrentUser();
+        boolean isAdminOrManager = currentUser.getRoles().contains("ROLE_ADMIN")
+                || currentUser.getRoles().contains("ROLE_MANAGER");
+
+        if (!isAdminOrManager && !order.getUserId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You do not have permission to access this order");
+        }
+
+        ArtOrderResponseDto dto = orderMapper.toDto(order);
+        // Fetch user email for the response
+        userRepository.findById(order.getUserId())
+                .ifPresent(user -> dto.setUserEmail(user.getEmail()));
+        return dto;
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<ArtOrderResponseDto> getAll(OrderStatus status, String orderNumber, BigDecimal minPrice,
-            BigDecimal maxPrice, LocalDateTime startDate, LocalDateTime endDate, UUID userId, Pageable pageable) {
-        // For simplicity, just return all orders. In production, use Specification
-        // pattern.
-        return orderRepository.findAll(pageable).map(orderMapper::toDto);
+            BigDecimal maxPrice, LocalDateTime startDate, LocalDateTime endDate, String userId, Pageable pageable) {
+        // For simplicity, filter by status if provided, otherwise return all
+        if (status != null) {
+            return orderRepository.findByStatus(status, pageable).map(this::toDtoWithEmail);
+        }
+        return orderRepository.findAll(pageable).map(this::toDtoWithEmail);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<ArtOrderResponseDto> getMyOrders(Pageable pageable) {
         User user = getCurrentUser();
-        return orderRepository.findByUserId(user.getId(), pageable).map(orderMapper::toDto);
+        return orderRepository.findByUserId(user.getId(), pageable)
+                .map(order -> enrichWithUserEmail(orderMapper.toDto(order), user.getEmail()));
     }
 
     @Override
-    @Transactional
-    public ArtOrderResponseDto updateStatus(UUID id, OrderStatus status, String notes) {
+    public ArtOrderResponseDto updateStatus(String id, OrderStatus status, String notes) {
         log.info("Updating order {} status to: {}", id, status);
         ArtOrder order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtOrder", "id", id));
@@ -151,60 +157,204 @@ public class ArtOrderServiceImpl implements ArtOrderService {
         order.setStatus(status);
         order.addStatusHistory(status, notes);
 
-        // Handle stock deduction on PROCESSING status
+        // Handle stock deduction on PROCESSING status (after successful payment)
         if (status == OrderStatus.PROCESSING) {
             deductStock(order);
         }
 
-        return orderMapper.toDto(orderRepository.save(order));
+        return toDtoWithEmail(orderRepository.save(order));
     }
 
-    private ArtOrderItem createOrderItem(ArtOrder order, UUID itemId, ArtItemType itemType, Integer quantity) {
+    @Override
+    public void rollbackOrder(String orderId, String reason) {
+        log.warn("Rolling back order {} due to: {}", orderId, reason);
+        ArtOrder order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("ArtOrder", "id", orderId));
+
+        // Only rollback if stock was already deducted (status is PROCESSING or later)
+        if (order.getStatus() == OrderStatus.PROCESSING ||
+                order.getStatus() == OrderStatus.SHIPPED ||
+                order.getStatus() == OrderStatus.DELIVERED) {
+            restoreStock(order);
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+        order.addStatusHistory(OrderStatus.CANCELLED, "Order cancelled: " + reason);
+        orderRepository.save(order);
+        log.info("Order {} rolled back successfully", orderId);
+    }
+
+    @Override
+    public ArtOrderResponseDto shipOrder(String orderId, ShipmentRequestDto shipmentRequest) {
+        log.info("Shipping order {}", orderId);
+        ArtOrder order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("ArtOrder", "id", orderId));
+
+        // Validate order is in PROCESSING status
+        if (order.getStatus() != OrderStatus.PROCESSING) {
+            throw new IllegalStateException(
+                    "Order must be in PROCESSING status to ship. Current status: " + order.getStatus());
+        }
+
+        // Set shipment details
+        order.setTrackingNumber(shipmentRequest.getTrackingNumber());
+        order.setCarrier(shipmentRequest.getCarrier());
+        order.setTrackingUrl(shipmentRequest.getTrackingUrl());
+        order.setShippedAt(java.time.Instant.now());
+        order.setEstimatedDelivery(shipmentRequest.getEstimatedDelivery());
+
+        // Update status
+        order.setStatus(OrderStatus.SHIPPED);
+        order.addStatusHistory(OrderStatus.SHIPPED,
+                "Order shipped via " + shipmentRequest.getCarrier() + ". Tracking: "
+                        + shipmentRequest.getTrackingNumber());
+
+        return toDtoWithEmail(orderRepository.save(order));
+    }
+
+    @Override
+    public ArtOrderResponseDto markDelivered(String orderId) {
+        log.info("Marking order {} as delivered", orderId);
+        ArtOrder order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("ArtOrder", "id", orderId));
+
+        // Validate order is in SHIPPED status
+        if (order.getStatus() != OrderStatus.SHIPPED) {
+            throw new IllegalStateException(
+                    "Order must be in SHIPPED status to mark as delivered. Current status: " + order.getStatus());
+        }
+
+        order.setDeliveredAt(java.time.Instant.now());
+        order.setStatus(OrderStatus.DELIVERED);
+        order.addStatusHistory(OrderStatus.DELIVERED, "Order delivered successfully");
+
+        return toDtoWithEmail(orderRepository.save(order));
+    }
+
+    private ArtOrderItem createOrderItem(String itemId, ArtItemType itemType, Integer quantity, String variantId) {
         String itemName;
         String imageUrl;
         BigDecimal unitPrice;
+        String variantName = null;
 
         if (itemType == ArtItemType.ARTWORK) {
-            ArtWorks artwork = artWorksRepository.findById(itemId)
+            ArtWorks artwork = artWorksRepository.findByIdAndDeletedFalse(itemId)
                     .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", itemId));
             itemName = artwork.getName();
             imageUrl = artwork.getImageUrl();
-            unitPrice = artwork.getBasePrice();
+            unitPrice = (artwork.getDiscountPrice() != null
+                    && artwork.getDiscountPrice().compareTo(BigDecimal.ZERO) > 0)
+                            ? artwork.getDiscountPrice()
+                            : artwork.getBasePrice();
         } else {
-            ArtMaterials material = artMaterialsRepository.findById(itemId)
+            ArtMaterials material = artMaterialsRepository.findByIdAndDeletedFalse(itemId)
                     .orElseThrow(() -> new ResourceNotFoundException("ArtMaterials", "id", itemId));
             itemName = material.getName();
             imageUrl = material.getImageUrl();
-            BigDecimal discount = BigDecimal.valueOf(material.getDiscount()).divide(BigDecimal.valueOf(100));
-            unitPrice = material.getBasePrice().subtract(material.getBasePrice().multiply(discount));
+
+            if (variantId != null) {
+                ArtMaterials.MaterialVariant variant = material.getVariants().stream()
+                        .filter(v -> v.getId().equals(variantId))
+                        .findFirst()
+                        .orElseThrow(() -> new ResourceNotFoundException("MaterialVariant", "id", variantId));
+
+                variantName = variant.getSize();
+                itemName = itemName + " (" + variantName + ")";
+
+                unitPrice = (variant.getDiscountPrice() != null
+                        && variant.getDiscountPrice().compareTo(BigDecimal.ZERO) > 0)
+                                ? variant.getDiscountPrice()
+                                : variant.getPrice();
+            } else {
+                if (material.getDiscount() != null && material.getDiscount() > 0) {
+                    BigDecimal discount = BigDecimal.valueOf(material.getDiscount())
+                            .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+                    unitPrice = material.getBasePrice().subtract(material.getBasePrice().multiply(discount));
+                } else {
+                    unitPrice = material.getBasePrice();
+                }
+            }
         }
 
         return ArtOrderItem.builder()
-                .order(order)
+                .id(UUID.randomUUID().toString())
                 .itemId(itemId)
                 .itemType(itemType)
                 .itemName(itemName)
                 .imageUrl(imageUrl)
                 .unitPrice(unitPrice)
                 .quantity(quantity)
+                .itemVariantId(variantId)
+                .itemVariantName(variantName)
                 .build();
     }
 
     private void deductStock(ArtOrder order) {
+        log.info("Deducting stock for order: {}", order.getOrderNumber());
+        for (ArtOrderItem item : order.getItems()) {
+            if (item.getItemType() == ArtItemType.MATERIAL) {
+                ArtMaterials material = artMaterialsRepository.findByIdAndDeletedFalse(item.getItemId())
+                        .orElse(null);
+                if (material != null) {
+                    if (item.getItemVariantId() != null) {
+                        // Find and update variant
+                        material.getVariants().stream()
+                                .filter(v -> v.getId().equals(item.getItemVariantId()))
+                                .findFirst()
+                                .ifPresent(v -> {
+                                    BigDecimal newStock = v.getStock().subtract(BigDecimal.valueOf(item.getQuantity()));
+                                    v.setStock(newStock.max(BigDecimal.ZERO));
+                                });
+                    } else {
+                        BigDecimal newStock = material.getStock().subtract(BigDecimal.valueOf(item.getQuantity()));
+                        material.setStock(newStock.max(BigDecimal.ZERO));
+                    }
+                    artMaterialsRepository.save(material);
+                }
+            }
+            // ArtWorks are unique, mark as sold
+            if (item.getItemType() == ArtItemType.ARTWORK) {
+                ArtWorks artwork = artWorksRepository.findByIdAndDeletedFalse(item.getItemId())
+                        .orElse(null);
+                if (artwork != null) {
+                    artwork.setActive(false); // Mark as sold
+                    artWorksRepository.save(artwork);
+                }
+            }
+        }
+    }
+
+    private void restoreStock(ArtOrder order) {
+        log.info("Restoring stock for order: {}", order.getOrderNumber());
         for (ArtOrderItem item : order.getItems()) {
             if (item.getItemType() == ArtItemType.MATERIAL) {
                 ArtMaterials material = artMaterialsRepository.findById(item.getItemId())
-                        .orElseThrow(() -> new ResourceNotFoundException("ArtMaterials", "id", item.getItemId()));
-                BigDecimal newStock = material.getStock().subtract(BigDecimal.valueOf(item.getQuantity()));
-                material.setStock(newStock.max(BigDecimal.ZERO));
-                artMaterialsRepository.save(material);
+                        .orElse(null);
+                if (material != null && !material.isDeleted()) {
+                    if (item.getItemVariantId() != null) {
+                        // Find and update variant
+                        material.getVariants().stream()
+                                .filter(v -> v.getId().equals(item.getItemVariantId()))
+                                .findFirst()
+                                .ifPresent(v -> {
+                                    BigDecimal newStock = v.getStock().add(BigDecimal.valueOf(item.getQuantity()));
+                                    v.setStock(newStock);
+                                });
+                    } else {
+                        BigDecimal restoredStock = material.getStock().add(BigDecimal.valueOf(item.getQuantity()));
+                        material.setStock(restoredStock);
+                    }
+                    artMaterialsRepository.save(material);
+                }
             }
-            // ArtWorks are unique, typically marked as sold/inactive after purchase
+            // Restore artwork availability
             if (item.getItemType() == ArtItemType.ARTWORK) {
                 ArtWorks artwork = artWorksRepository.findById(item.getItemId())
-                        .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", item.getItemId()));
-                artwork.setActive(false); // Mark as sold
-                artWorksRepository.save(artwork);
+                        .orElse(null);
+                if (artwork != null && !artwork.isDeleted()) {
+                    artwork.setActive(true); // Mark as available again
+                    artWorksRepository.save(artwork);
+                }
             }
         }
     }
@@ -215,7 +365,25 @@ public class ArtOrderServiceImpl implements ArtOrderService {
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
+        return userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    /**
+     * Convert order to DTO with user email populated
+     */
+    private ArtOrderResponseDto toDtoWithEmail(ArtOrder order) {
+        ArtOrderResponseDto dto = orderMapper.toDto(order);
+        userRepository.findById(order.getUserId())
+                .ifPresent(user -> dto.setUserEmail(user.getEmail()));
+        return dto;
+    }
+
+    /**
+     * Enrich existing DTO with user email
+     */
+    private ArtOrderResponseDto enrichWithUserEmail(ArtOrderResponseDto dto, String email) {
+        dto.setUserEmail(email);
+        return dto;
     }
 }

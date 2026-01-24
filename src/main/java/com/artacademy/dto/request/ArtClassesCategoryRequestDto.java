@@ -3,8 +3,6 @@ package com.artacademy.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-import java.util.UUID;
-
 @Data
 public class ArtClassesCategoryRequestDto {
 
@@ -13,5 +11,5 @@ public class ArtClassesCategoryRequestDto {
 
     private String description;
 
-    private UUID parentId;
+    private String parentId;
 }

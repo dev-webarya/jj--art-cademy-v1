@@ -1,7 +1,6 @@
 package com.artacademy.exception;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 
 public record ErrorResponse(

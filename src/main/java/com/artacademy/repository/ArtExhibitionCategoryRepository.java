@@ -1,15 +1,18 @@
 package com.artacademy.repository;
 
 import com.artacademy.entity.ArtExhibitionCategory;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 
 @Repository
-public interface ArtExhibitionCategoryRepository extends JpaRepository<ArtExhibitionCategory, UUID> {
-    List<ArtExhibitionCategory> findByParentIsNull();
+public interface ArtExhibitionCategoryRepository extends MongoRepository<ArtExhibitionCategory, String> {
 
-    boolean existsByName(String name);
+    Optional<ArtExhibitionCategory> findByName(String name);
+
+    List<ArtExhibitionCategory> findByIsActiveTrue();
+
+    List<ArtExhibitionCategory> findByParentIdIsNull();
 }

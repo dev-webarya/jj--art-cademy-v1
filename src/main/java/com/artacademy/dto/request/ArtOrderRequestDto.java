@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
-import java.util.UUID;
 
 @Data
 public class ArtOrderRequestDto {
@@ -22,8 +21,8 @@ public class ArtOrderRequestDto {
 
     @Data
     public static class ArtOrderItemDto {
-        @NotNull(message = "Item ID is required")
-        private UUID itemId;
+        @NotBlank(message = "Item ID is required")
+        private String itemId;
 
         @NotNull(message = "Item type is required")
         private ArtItemType itemType;
@@ -31,5 +30,7 @@ public class ArtOrderRequestDto {
         @NotNull(message = "Quantity is required")
         @Min(value = 1, message = "Quantity must be at least 1")
         private Integer quantity;
+
+        private String itemVariantId;
     }
 }
