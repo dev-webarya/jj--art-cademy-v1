@@ -25,6 +25,12 @@ public interface UserMapper {
     User toEntity(UserRequest userRequest);
 
     @Mapping(target = "email", source = "email")
+    @Mapping(target = "isEnabled", source = "enabled")
+    @Mapping(target = "rollNo", source = "rollNo")
+    @Mapping(target = "parentGuardianName", source = "parentGuardianName")
+    @Mapping(target = "studentAge", source = "studentAge")
+    @Mapping(target = "preferredSchedule", source = "preferredSchedule")
+    @Mapping(target = "additionalMessage", source = "additionalMessage")
     // MapStruct automatically maps Set<String> to Set<String>
     UserResponse toResponse(User user);
 

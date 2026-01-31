@@ -1,6 +1,7 @@
 package com.artacademy.config;
 
 import com.artacademy.entity.*;
+import com.artacademy.enums.ClassSchedule;
 import com.artacademy.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -95,65 +96,102 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         private void seedCustomers(Role customerRole) {
-                log.info("[Phase 3] Onboarding Customers...");
+                log.info("[Phase 3] Onboarding Students...");
+
+                // Student 1 - Child (Kids class)
                 userRepository.save(User.builder()
+                                .rollNo("AA-0001")
                                 .firstName("Alice")
                                 .lastName("Artist")
                                 .email("alice@test.com")
                                 .password(passwordEncoder.encode("Password@123"))
-                                .phoneNumber("1231231234")
+                                .phoneNumber("+911231231234")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
+                                .parentGuardianName("Robert Artist")
+                                .studentAge(10)
+                                .preferredSchedule(ClassSchedule.WEEKEND_MORNING)
+                                .additionalMessage("Interested in watercolor painting")
                                 .build());
 
+                // Student 2 - Teen
                 userRepository.save(User.builder()
+                                .rollNo("AA-0002")
                                 .firstName("Bob")
-                                .lastName("Collector")
+                                .lastName("Painter")
                                 .email("bob@test.com")
                                 .password(passwordEncoder.encode("Password@123"))
-                                .phoneNumber("1231231235")
+                                .phoneNumber("+911231231235")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
+                                .parentGuardianName("Sarah Painter")
+                                .studentAge(14)
+                                .preferredSchedule(ClassSchedule.WEEKDAY_EVENING)
+                                .additionalMessage("Wants to learn oil painting")
                                 .build());
 
+                // Student 3 - Child
                 userRepository.save(User.builder()
+                                .rollNo("AA-0003")
                                 .firstName("Charlie")
-                                .lastName("Critic")
+                                .lastName("Sketcher")
                                 .email("charlie@test.com")
                                 .password(passwordEncoder.encode("Password@123"))
-                                .phoneNumber("1231231236")
+                                .phoneNumber("+911231231236")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
+                                .parentGuardianName("Michael Sketcher")
+                                .studentAge(8)
+                                .preferredSchedule(ClassSchedule.WEEKEND_AFTERNOON)
+                                .additionalMessage("Beginner, loves drawing cartoons")
                                 .build());
 
+                // Student 4 - Teen
                 userRepository.save(User.builder()
+                                .rollNo("AA-0004")
                                 .firstName("Diana")
                                 .lastName("Designer")
                                 .email("diana@test.com")
                                 .password(passwordEncoder.encode("Password@123"))
-                                .phoneNumber("1231231237")
+                                .phoneNumber("+911231231237")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
+                                .parentGuardianName("Emma Designer")
+                                .studentAge(16)
+                                .preferredSchedule(ClassSchedule.WEEKDAY_MORNING)
+                                .additionalMessage("Interested in digital art and design")
                                 .build());
 
+                // Student 5 - Child
                 userRepository.save(User.builder()
+                                .rollNo("AA-0005")
                                 .firstName("Evan")
                                 .lastName("Enthusiast")
                                 .email("evan@test.com")
                                 .password(passwordEncoder.encode("Password@123"))
-                                .phoneNumber("1231231238")
+                                .phoneNumber("+911231231238")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
+                                .parentGuardianName("Lisa Enthusiast")
+                                .studentAge(12)
+                                .preferredSchedule(ClassSchedule.WEEKEND_MORNING)
+                                .additionalMessage("Has some experience with acrylic painting")
                                 .build());
 
+                // Student 6 - Teen
                 userRepository.save(User.builder()
+                                .rollNo("AA-0006")
                                 .firstName("Fiona")
                                 .lastName("FineArt")
                                 .email("fiona@test.com")
                                 .password(passwordEncoder.encode("Password@123"))
-                                .phoneNumber("1231231239")
+                                .phoneNumber("+911231231239")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
+                                .parentGuardianName("David FineArt")
+                                .studentAge(15)
+                                .preferredSchedule(ClassSchedule.WEEKDAY_EVENING)
+                                .additionalMessage("Looking to prepare for art school portfolio")
                                 .build());
         }
 
