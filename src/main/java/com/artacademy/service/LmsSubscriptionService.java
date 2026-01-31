@@ -9,6 +9,7 @@ import java.util.List;
 
 /**
  * Service for managing student subscriptions.
+ * Only students with APPROVED enrollment can have subscriptions.
  * Admin-only operations.
  */
 public interface LmsSubscriptionService {
@@ -29,14 +30,14 @@ public interface LmsSubscriptionService {
 
     LmsSubscriptionResponseDto getActiveByStudentId(String studentId);
 
-    LmsSubscriptionResponseDto getByStudentIdAndMonth(String studentId, Integer month, Integer year);
+    LmsSubscriptionResponseDto getByEnrollmentIdAndMonth(String enrollmentId, Integer month, Integer year);
 
     Page<LmsSubscriptionResponseDto> getActiveSubscriptions(Pageable pageable);
 
     List<LmsSubscriptionResponseDto> getByMonth(Integer month, Integer year);
 
     // Subscription management
-    LmsSubscriptionResponseDto renewSubscription(String studentId);
+    LmsSubscriptionResponseDto renewSubscription(String enrollmentId);
 
     LmsSubscriptionResponseDto cancelSubscription(String id);
 

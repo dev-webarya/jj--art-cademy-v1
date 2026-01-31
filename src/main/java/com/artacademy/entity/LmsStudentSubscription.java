@@ -8,6 +8,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
  * LmsStudentSubscription - Monthly subscription for a student.
  * Students can attend up to 8 sessions per month (configurable).
  * No carry-over to next month.
+ * Only students with APPROVED enrollment can have subscriptions.
  */
 @Getter
 @Setter
@@ -23,43 +25,68 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "lms_subscriptions")
-@CompoundIndex(name = "student_month_year_idx", def = "{'studentId': 1, 'subscriptionMonth': 1, 'subscriptionYear': 1}", unique = true)
+@CompoundIndex(name = "student_month_year_idx", def = "{'enrollmentId': 1, 'subscriptionMonth': 1, 'subscriptionYear': 1}", unique = true)
 public class LmsStudentSubscription {
 
     @Id
     private String id;
 
+    // --- Link to APPROVED Enrollment ---
     @Indexed
+    @Field("enrollment_id")
+    private String enrollmentId;
+
+    @Field("roll_no")
+    private String rollNo;
+
+    // --- Student Info (denormalized from enrollment) ---
+    @Field("student_id")
     private String studentId;
 
+    @Field("student_name")
     private String studentName;
+
+    @Field("student_email")
     private String studentEmail;
+
+    @Field("student_phone")
     private String studentPhone;
 
-    // Subscription period
+    // --- Subscription period ---
+    @Field("subscription_month")
     private Integer subscriptionMonth; // 1-12
+
+    @Field("subscription_year")
     private Integer subscriptionYear; // e.g., 2026
+
+    @Field("start_date")
     private LocalDate startDate;
+
+    @Field("end_date")
     private LocalDate endDate;
 
-    // Session limits
+    // --- Session limits ---
     @Builder.Default
+    @Field("allowed_sessions")
     private Integer allowedSessions = 8;
 
     @Builder.Default
+    @Field("attended_sessions")
     private Integer attendedSessions = 0;
 
     @Builder.Default
+    @Field("status")
     private SubscriptionStatus status = SubscriptionStatus.ACTIVE;
 
-    private String paymentId;
-    private Double amountPaid;
+    @Field("notes")
     private String notes;
 
     @CreatedDate
+    @Field("created_at")
     private Instant createdAt;
 
     @LastModifiedDate
+    @Field("updated_at")
     private Instant updatedAt;
 
     // Helper methods

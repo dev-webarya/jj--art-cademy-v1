@@ -5,6 +5,7 @@ import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -17,11 +18,17 @@ public class ClassEnrollment {
     @Id
     private String id;
 
+    // --- Unique Roll Number (auto-generated on APPROVAL) ---
+    @Indexed(unique = true, sparse = true)
+    @Field("roll_no")
+    private String rollNo;
+
     // --- User Link ---
+    @Indexed
     @Field("user_id")
     private String userId;
 
-    // --- Student Contact Info ---
+    // --- Student Contact Info (derived from User) ---
     @Field("student_name")
     private String studentName;
 
@@ -31,7 +38,12 @@ public class ClassEnrollment {
     @Field("student_phone")
     private String studentPhone;
 
+    // --- Address ---
+    @Field("address")
+    private String address;
+
     // --- Class Info ---
+    @Indexed
     @Field("class_id")
     private String classId;
 
@@ -53,6 +65,13 @@ public class ClassEnrollment {
 
     @Field("additional_message")
     private String additionalMessage;
+
+    // --- Emergency Contact ---
+    @Field("emergency_contact_name")
+    private String emergencyContactName;
+
+    @Field("emergency_contact_phone")
+    private String emergencyContactPhone;
 
     // --- Status ---
     @Field("status")

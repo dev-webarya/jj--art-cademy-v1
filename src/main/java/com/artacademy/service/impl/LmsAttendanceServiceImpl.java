@@ -1,6 +1,7 @@
 package com.artacademy.service.impl;
 
 import com.artacademy.dto.request.LmsAttendanceRequestDto;
+import com.artacademy.dto.response.EligibleStudentDto;
 import com.artacademy.dto.response.LmsAttendanceResponseDto;
 import com.artacademy.dto.response.LmsClassSessionResponseDto;
 import com.artacademy.entity.LmsAttendance;
@@ -18,6 +19,7 @@ import com.artacademy.repository.LmsStudentSubscriptionRepository;
 import com.artacademy.repository.UserRepository;
 import com.artacademy.service.LmsAttendanceService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,12 +27,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LmsAttendanceServiceImpl implements LmsAttendanceService {
 
     private final LmsAttendanceRepository attendanceRepository;
@@ -39,6 +43,39 @@ public class LmsAttendanceServiceImpl implements LmsAttendanceService {
     private final UserRepository userRepository;
     private final LmsAttendanceMapper attendanceMapper;
     private final LmsClassSessionMapper sessionMapper;
+
+    @Override
+    public List<EligibleStudentDto> getEligibleStudentsForAttendance() {
+        // Get current month/year
+        LocalDate now = LocalDate.now();
+        int currentMonth = now.getMonthValue();
+        int currentYear = now.getYear();
+
+        // Get all ACTIVE subscriptions for current month
+        List<LmsStudentSubscription> activeSubscriptions = subscriptionRepository
+                .findBySubscriptionMonthAndSubscriptionYear(currentMonth, currentYear)
+                .stream()
+                .filter(sub -> sub.getStatus() == SubscriptionStatus.ACTIVE)
+                .collect(Collectors.toList());
+
+        log.info("Found {} active subscriptions for {}/{}", activeSubscriptions.size(), currentMonth, currentYear);
+
+        return activeSubscriptions.stream()
+                .map(sub -> EligibleStudentDto.builder()
+                        .studentId(sub.getStudentId())
+                        .enrollmentId(sub.getEnrollmentId())
+                        .subscriptionId(sub.getId())
+                        .rollNo(sub.getRollNo())
+                        .studentName(sub.getStudentName())
+                        .studentEmail(sub.getStudentEmail())
+                        .studentPhone(sub.getStudentPhone())
+                        .attendedSessions(sub.getAttendedSessions())
+                        .allowedSessions(sub.getAllowedSessions())
+                        .remainingSessions(sub.getRemainingSessionCount())
+                        .isOverLimit(sub.isOverLimit())
+                        .build())
+                .collect(Collectors.toList());
+    }
 
     @Override
     @Transactional
@@ -58,12 +95,13 @@ public class LmsAttendanceServiceImpl implements LmsAttendanceService {
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "Student not found: " + studentAttendance.getStudentId()));
 
-            // Find active subscription
+            // Find active subscription for this month
             LmsStudentSubscription subscription = subscriptionRepository
                     .findByStudentIdAndStatus(studentAttendance.getStudentId(), SubscriptionStatus.ACTIVE)
                     .orElse(null);
 
             String subscriptionId = subscription != null ? subscription.getId() : null;
+            String rollNo = subscription != null ? subscription.getRollNo() : null;
             int sessionCountThisMonth = 0;
             boolean isOverLimit = false;
 
@@ -96,6 +134,7 @@ public class LmsAttendanceServiceImpl implements LmsAttendanceService {
             attendance.setStudentName(student.getFirstName() + " " + student.getLastName());
             attendance.setStudentEmail(student.getEmail());
             attendance.setSubscriptionId(subscriptionId);
+            attendance.setRollNo(rollNo);
             attendance.setSessionDate(session.getSessionDate());
             attendance.setSessionMonth(month);
             attendance.setSessionYear(year);

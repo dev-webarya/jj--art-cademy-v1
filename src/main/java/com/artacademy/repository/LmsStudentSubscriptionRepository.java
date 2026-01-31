@@ -13,20 +13,27 @@ import java.util.Optional;
 @Repository
 public interface LmsStudentSubscriptionRepository extends MongoRepository<LmsStudentSubscription, String> {
 
-    List<LmsStudentSubscription> findByStudentId(String studentId);
+        // By studentId
+        List<LmsStudentSubscription> findByStudentId(String studentId);
 
-    Optional<LmsStudentSubscription> findByStudentIdAndStatus(String studentId, SubscriptionStatus status);
+        Optional<LmsStudentSubscription> findByStudentIdAndStatus(String studentId, SubscriptionStatus status);
 
-    Optional<LmsStudentSubscription> findByStudentIdAndSubscriptionMonthAndSubscriptionYear(
-            String studentId, Integer month, Integer year);
+        // By enrollmentId
+        List<LmsStudentSubscription> findByEnrollmentId(String enrollmentId);
 
-    Page<LmsStudentSubscription> findByStatus(SubscriptionStatus status, Pageable pageable);
+        Optional<LmsStudentSubscription> findByEnrollmentIdAndSubscriptionMonthAndSubscriptionYear(
+                        String enrollmentId, Integer month, Integer year);
 
-    List<LmsStudentSubscription> findBySubscriptionMonthAndSubscriptionYear(Integer month, Integer year);
+        boolean existsByEnrollmentIdAndSubscriptionMonthAndSubscriptionYear(
+                        String enrollmentId, Integer month, Integer year);
 
-    List<LmsStudentSubscription> findByStatusAndAttendedSessionsGreaterThan(
-            SubscriptionStatus status, Integer allowedSessions);
+        // By status
+        Page<LmsStudentSubscription> findByStatus(SubscriptionStatus status, Pageable pageable);
 
-    boolean existsByStudentIdAndSubscriptionMonthAndSubscriptionYear(
-            String studentId, Integer month, Integer year);
+        // By month/year
+        List<LmsStudentSubscription> findBySubscriptionMonthAndSubscriptionYear(Integer month, Integer year);
+
+        // Over limit
+        List<LmsStudentSubscription> findByStatusAndAttendedSessionsGreaterThan(
+                        SubscriptionStatus status, Integer allowedSessions);
 }

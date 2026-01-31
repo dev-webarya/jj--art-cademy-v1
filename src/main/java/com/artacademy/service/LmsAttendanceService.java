@@ -1,6 +1,7 @@
 package com.artacademy.service;
 
 import com.artacademy.dto.request.LmsAttendanceRequestDto;
+import com.artacademy.dto.response.EligibleStudentDto;
 import com.artacademy.dto.response.LmsAttendanceResponseDto;
 import com.artacademy.dto.response.LmsClassSessionResponseDto;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,13 @@ import java.util.List;
  * Tracks session attendance with over-limit detection.
  */
 public interface LmsAttendanceService {
+
+    /**
+     * Get list of students eligible for attendance.
+     * Returns students with APPROVED enrollment AND active subscription for current
+     * month.
+     */
+    List<EligibleStudentDto> getEligibleStudentsForAttendance();
 
     /**
      * Mark attendance for a session.

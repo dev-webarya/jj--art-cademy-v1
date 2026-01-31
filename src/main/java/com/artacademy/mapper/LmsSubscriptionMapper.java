@@ -11,6 +11,8 @@ import org.mapstruct.MappingTarget;
 public interface LmsSubscriptionMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "rollNo", ignore = true)
+    @Mapping(target = "studentId", ignore = true)
     @Mapping(target = "studentName", ignore = true)
     @Mapping(target = "studentEmail", ignore = true)
     @Mapping(target = "studentPhone", ignore = true)
@@ -27,6 +29,8 @@ public interface LmsSubscriptionMapper {
     LmsSubscriptionResponseDto toResponse(LmsStudentSubscription entity);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "enrollmentId", ignore = true)
+    @Mapping(target = "rollNo", ignore = true)
     @Mapping(target = "studentId", ignore = true)
     @Mapping(target = "studentName", ignore = true)
     @Mapping(target = "studentEmail", ignore = true)

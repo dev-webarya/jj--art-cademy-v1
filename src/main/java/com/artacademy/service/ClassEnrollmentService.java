@@ -7,6 +7,8 @@ import com.artacademy.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface ClassEnrollmentService {
 
     // Student Operations
@@ -20,6 +22,10 @@ public interface ClassEnrollmentService {
     Page<ClassEnrollmentResponseDto> getAllEnrollments(Pageable pageable);
 
     Page<ClassEnrollmentResponseDto> getPendingEnrollments(Pageable pageable);
+
+    Page<ClassEnrollmentResponseDto> getApprovedEnrollments(Pageable pageable);
+
+    List<ClassEnrollmentResponseDto> getApprovedEnrollmentsList();
 
     ClassEnrollmentResponseDto updateEnrollmentStatus(String enrollmentId, EnrollmentStatusUpdateDto request);
 

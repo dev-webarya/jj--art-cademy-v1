@@ -2,15 +2,17 @@ package com.artacademy.service.impl;
 
 import com.artacademy.dto.request.LmsSubscriptionRequestDto;
 import com.artacademy.dto.response.LmsSubscriptionResponseDto;
+import com.artacademy.entity.ClassEnrollment;
 import com.artacademy.entity.LmsStudentSubscription;
-import com.artacademy.entity.User;
+import com.artacademy.enums.EnrollmentStatus;
 import com.artacademy.enums.SubscriptionStatus;
 import com.artacademy.exception.ResourceNotFoundException;
 import com.artacademy.mapper.LmsSubscriptionMapper;
+import com.artacademy.repository.ClassEnrollmentRepository;
 import com.artacademy.repository.LmsStudentSubscriptionRepository;
-import com.artacademy.repository.UserRepository;
 import com.artacademy.service.LmsSubscriptionService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,31 +25,40 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LmsSubscriptionServiceImpl implements LmsSubscriptionService {
 
     private final LmsStudentSubscriptionRepository subscriptionRepository;
-    private final UserRepository userRepository;
+    private final ClassEnrollmentRepository enrollmentRepository;
     private final LmsSubscriptionMapper subscriptionMapper;
 
     @Override
     @Transactional
     public LmsSubscriptionResponseDto create(LmsSubscriptionRequestDto request) {
-        // Check for duplicate subscription
-        if (subscriptionRepository.existsByStudentIdAndSubscriptionMonthAndSubscriptionYear(
-                request.getStudentId(), request.getSubscriptionMonth(), request.getSubscriptionYear())) {
-            throw new IllegalArgumentException("Subscription already exists for this student and month/year");
+        // Validate enrollment exists and is APPROVED
+        ClassEnrollment enrollment = enrollmentRepository.findById(request.getEnrollmentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found: " + request.getEnrollmentId()));
+
+        if (enrollment.getStatus() != EnrollmentStatus.APPROVED) {
+            throw new IllegalArgumentException(
+                    "Only APPROVED enrollments can have subscriptions. Current status: " + enrollment.getStatus());
         }
 
-        // Get student info
-        User student = userRepository.findById(request.getStudentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found: " + request.getStudentId()));
+        // Check for duplicate subscription
+        if (subscriptionRepository.existsByEnrollmentIdAndSubscriptionMonthAndSubscriptionYear(
+                request.getEnrollmentId(), request.getSubscriptionMonth(), request.getSubscriptionYear())) {
+            throw new IllegalArgumentException("Subscription already exists for this enrollment and month/year");
+        }
 
         LmsStudentSubscription subscription = subscriptionMapper.toEntity(request);
 
-        // Set student info
-        subscription.setStudentName(student.getFirstName() + " " + student.getLastName());
-        subscription.setStudentEmail(student.getEmail());
-        subscription.setStudentPhone(student.getPhoneNumber());
+        // Set enrollment info
+        subscription.setEnrollmentId(enrollment.getId());
+        subscription.setRollNo(enrollment.getRollNo());
+        subscription.setStudentId(enrollment.getUserId());
+        subscription.setStudentName(enrollment.getStudentName());
+        subscription.setStudentEmail(enrollment.getStudentEmail());
+        subscription.setStudentPhone(enrollment.getStudentPhone());
 
         // Set date range
         YearMonth yearMonth = YearMonth.of(request.getSubscriptionYear(), request.getSubscriptionMonth());
@@ -58,6 +69,8 @@ public class LmsSubscriptionServiceImpl implements LmsSubscriptionService {
         subscription.setAttendedSessions(0);
 
         LmsStudentSubscription saved = subscriptionRepository.save(subscription);
+        log.info("Created subscription {} for enrollment {} (rollNo: {})", saved.getId(), enrollment.getId(),
+                enrollment.getRollNo());
         return subscriptionMapper.toResponse(saved);
     }
 
@@ -103,11 +116,12 @@ public class LmsSubscriptionServiceImpl implements LmsSubscriptionService {
     }
 
     @Override
-    public LmsSubscriptionResponseDto getByStudentIdAndMonth(String studentId, Integer month, Integer year) {
-        return subscriptionRepository.findByStudentIdAndSubscriptionMonthAndSubscriptionYear(studentId, month, year)
+    public LmsSubscriptionResponseDto getByEnrollmentIdAndMonth(String enrollmentId, Integer month, Integer year) {
+        return subscriptionRepository
+                .findByEnrollmentIdAndSubscriptionMonthAndSubscriptionYear(enrollmentId, month, year)
                 .map(subscriptionMapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "No subscription found for student in " + month + "/" + year));
+                        "No subscription found for enrollment in " + month + "/" + year));
     }
 
     @Override
@@ -125,13 +139,21 @@ public class LmsSubscriptionServiceImpl implements LmsSubscriptionService {
 
     @Override
     @Transactional
-    public LmsSubscriptionResponseDto renewSubscription(String studentId) {
+    public LmsSubscriptionResponseDto renewSubscription(String enrollmentId) {
+        // Validate enrollment exists and is APPROVED
+        ClassEnrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found: " + enrollmentId));
+
+        if (enrollment.getStatus() != EnrollmentStatus.APPROVED) {
+            throw new IllegalArgumentException("Only APPROVED enrollments can be renewed");
+        }
+
         LocalDate now = LocalDate.now();
         int nextMonth = now.getMonthValue() == 12 ? 1 : now.getMonthValue() + 1;
         int year = now.getMonthValue() == 12 ? now.getYear() + 1 : now.getYear();
 
         LmsSubscriptionRequestDto request = LmsSubscriptionRequestDto.builder()
-                .studentId(studentId)
+                .enrollmentId(enrollmentId)
                 .subscriptionMonth(nextMonth)
                 .subscriptionYear(year)
                 .allowedSessions(8)
@@ -163,10 +185,14 @@ public class LmsSubscriptionServiceImpl implements LmsSubscriptionService {
         int currentMonth = now.getMonthValue();
         int currentYear = now.getYear();
 
-        List<LmsStudentSubscription> activeSubscriptions = subscriptionRepository
-                .findBySubscriptionMonthAndSubscriptionYear(currentMonth - 1, currentYear);
+        // Get previous month's subscriptions
+        int prevMonth = currentMonth == 1 ? 12 : currentMonth - 1;
+        int prevYear = currentMonth == 1 ? currentYear - 1 : currentYear;
 
-        for (LmsStudentSubscription sub : activeSubscriptions) {
+        List<LmsStudentSubscription> oldSubscriptions = subscriptionRepository
+                .findBySubscriptionMonthAndSubscriptionYear(prevMonth, prevYear);
+
+        for (LmsStudentSubscription sub : oldSubscriptions) {
             if (sub.getStatus() == SubscriptionStatus.ACTIVE) {
                 sub.setStatus(SubscriptionStatus.EXPIRED);
                 subscriptionRepository.save(sub);

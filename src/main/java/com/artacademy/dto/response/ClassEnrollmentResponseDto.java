@@ -8,12 +8,14 @@ import java.time.Instant;
 public class ClassEnrollmentResponseDto {
 
     private String id;
+    private String rollNo;
     private String userId;
 
     // Student Info
     private String studentName;
     private String studentEmail;
     private String studentPhone;
+    private String address;
 
     // Class Info
     private String classId;
@@ -25,6 +27,10 @@ public class ClassEnrollmentResponseDto {
     private Integer studentAge;
     private String schedule;
     private String additionalMessage;
+
+    // Emergency Contact
+    private String emergencyContactName;
+    private String emergencyContactPhone;
 
     // Status
     private EnrollmentStatus status;

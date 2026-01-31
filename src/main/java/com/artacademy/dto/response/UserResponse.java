@@ -1,6 +1,5 @@
 package com.artacademy.dto.response;
 
-import com.artacademy.enums.ClassSchedule;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +14,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class UserResponse {
     private String id;
-    private String rollNo;
     private String firstName;
     private String lastName;
     private String email;
@@ -25,10 +23,4 @@ public class UserResponse {
     private boolean deleted;
     private Instant createdAt;
     private Instant updatedAt;
-
-    // Student-specific fields
-    private String parentGuardianName;
-    private Integer studentAge;
-    private ClassSchedule preferredSchedule;
-    private String additionalMessage;
 }

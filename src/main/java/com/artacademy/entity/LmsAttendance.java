@@ -40,6 +40,8 @@ public class LmsAttendance {
     @Indexed
     private String subscriptionId;
 
+    private String rollNo;
+
     // Session date info
     private LocalDate sessionDate;
     private Integer sessionMonth; // 1-12

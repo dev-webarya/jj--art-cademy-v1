@@ -1,6 +1,5 @@
 package com.artacademy.entity;
 
-import com.artacademy.enums.ClassSchedule;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -27,10 +26,6 @@ public class User implements UserDetails {
 
     @Id
     private String id;
-
-    // Unique roll number for students (e.g., "AA-0001")
-    @Indexed(unique = true, sparse = true)
-    private String rollNo;
 
     private String firstName;
 
@@ -60,15 +55,6 @@ public class User implements UserDetails {
     // Store role names directly instead of @ManyToMany
     @Builder.Default
     private Set<String> roles = new HashSet<>();
-
-    // Student-specific fields
-    private String parentGuardianName;
-
-    private Integer studentAge;
-
-    private ClassSchedule preferredSchedule;
-
-    private String additionalMessage;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

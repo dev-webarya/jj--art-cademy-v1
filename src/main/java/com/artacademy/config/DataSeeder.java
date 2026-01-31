@@ -1,7 +1,6 @@
 package com.artacademy.config;
 
 import com.artacademy.entity.*;
-import com.artacademy.enums.ClassSchedule;
 import com.artacademy.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -98,9 +97,8 @@ public class DataSeeder implements CommandLineRunner {
         private void seedCustomers(Role customerRole) {
                 log.info("[Phase 3] Onboarding Students...");
 
-                // Student 1 - Child (Kids class)
+                // Student 1
                 userRepository.save(User.builder()
-                                .rollNo("AA-0001")
                                 .firstName("Alice")
                                 .lastName("Artist")
                                 .email("alice@test.com")
@@ -108,15 +106,10 @@ public class DataSeeder implements CommandLineRunner {
                                 .phoneNumber("+911231231234")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
-                                .parentGuardianName("Robert Artist")
-                                .studentAge(10)
-                                .preferredSchedule(ClassSchedule.WEEKEND_MORNING)
-                                .additionalMessage("Interested in watercolor painting")
                                 .build());
 
-                // Student 2 - Teen
+                // Student 2
                 userRepository.save(User.builder()
-                                .rollNo("AA-0002")
                                 .firstName("Bob")
                                 .lastName("Painter")
                                 .email("bob@test.com")
@@ -124,15 +117,10 @@ public class DataSeeder implements CommandLineRunner {
                                 .phoneNumber("+911231231235")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
-                                .parentGuardianName("Sarah Painter")
-                                .studentAge(14)
-                                .preferredSchedule(ClassSchedule.WEEKDAY_EVENING)
-                                .additionalMessage("Wants to learn oil painting")
                                 .build());
 
-                // Student 3 - Child
+                // Student 3
                 userRepository.save(User.builder()
-                                .rollNo("AA-0003")
                                 .firstName("Charlie")
                                 .lastName("Sketcher")
                                 .email("charlie@test.com")
@@ -140,15 +128,10 @@ public class DataSeeder implements CommandLineRunner {
                                 .phoneNumber("+911231231236")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
-                                .parentGuardianName("Michael Sketcher")
-                                .studentAge(8)
-                                .preferredSchedule(ClassSchedule.WEEKEND_AFTERNOON)
-                                .additionalMessage("Beginner, loves drawing cartoons")
                                 .build());
 
-                // Student 4 - Teen
+                // Student 4
                 userRepository.save(User.builder()
-                                .rollNo("AA-0004")
                                 .firstName("Diana")
                                 .lastName("Designer")
                                 .email("diana@test.com")
@@ -156,15 +139,10 @@ public class DataSeeder implements CommandLineRunner {
                                 .phoneNumber("+911231231237")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
-                                .parentGuardianName("Emma Designer")
-                                .studentAge(16)
-                                .preferredSchedule(ClassSchedule.WEEKDAY_MORNING)
-                                .additionalMessage("Interested in digital art and design")
                                 .build());
 
-                // Student 5 - Child
+                // Student 5
                 userRepository.save(User.builder()
-                                .rollNo("AA-0005")
                                 .firstName("Evan")
                                 .lastName("Enthusiast")
                                 .email("evan@test.com")
@@ -172,15 +150,10 @@ public class DataSeeder implements CommandLineRunner {
                                 .phoneNumber("+911231231238")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
-                                .parentGuardianName("Lisa Enthusiast")
-                                .studentAge(12)
-                                .preferredSchedule(ClassSchedule.WEEKEND_MORNING)
-                                .additionalMessage("Has some experience with acrylic painting")
                                 .build());
 
-                // Student 6 - Teen
+                // Student 6
                 userRepository.save(User.builder()
-                                .rollNo("AA-0006")
                                 .firstName("Fiona")
                                 .lastName("FineArt")
                                 .email("fiona@test.com")
@@ -188,10 +161,6 @@ public class DataSeeder implements CommandLineRunner {
                                 .phoneNumber("+911231231239")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
-                                .parentGuardianName("David FineArt")
-                                .studentAge(15)
-                                .preferredSchedule(ClassSchedule.WEEKDAY_EVENING)
-                                .additionalMessage("Looking to prepare for art school portfolio")
                                 .build());
         }
 
