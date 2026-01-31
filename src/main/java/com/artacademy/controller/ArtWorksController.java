@@ -41,7 +41,6 @@ public class ArtWorksController {
     @GetMapping
     @Operation(summary = "Get all ArtWorks")
     public ResponseEntity<Page<ArtWorksResponseDto>> getAll(Pageable pageable) {
-        // Simplified for MongoDB migration - removed Specification
         return ResponseEntity.ok(artWorksService.getAll(pageable));
     }
 

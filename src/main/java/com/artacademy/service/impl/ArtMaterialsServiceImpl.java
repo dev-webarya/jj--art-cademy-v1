@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class ArtMaterialsServiceImpl implements ArtMaterialsService {
     private final ArtMaterialsMapper artMaterialsMapper;
 
     @Override
+    @Transactional
     public ArtMaterialsResponseDto create(ArtMaterialsRequestDto request) {
         log.info("Creating new material: {}", request.getName());
 
@@ -32,11 +34,13 @@ public class ArtMaterialsServiceImpl implements ArtMaterialsService {
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
 
         ArtMaterials material = artMaterialsMapper.toEntity(request);
-        material.setCategoryId(category.getId());
+        // Mapper sets categoryId; we only need to set the denormalized name manually
         material.setCategoryName(category.getName());
+        
         // Default values
-        if (material.getDiscount() == null)
+        if (material.getDiscount() == null) {
             material.setDiscount(0);
+        }
 
         ArtMaterials savedMaterial = artMaterialsRepository.save(material);
         return artMaterialsMapper.toDto(savedMaterial);
@@ -56,16 +60,23 @@ public class ArtMaterialsServiceImpl implements ArtMaterialsService {
     }
 
     @Override
+    @Transactional
     public ArtMaterialsResponseDto update(String id, ArtMaterialsRequestDto request) {
         ArtMaterials material = artMaterialsRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtMaterials", "id", id));
 
+        // 1. Capture the old category ID to detect if it changed
+        String oldCategoryId = material.getCategoryId();
+
+        // 2. Map new values from Request to Entity (this updates categoryId to the new one)
         artMaterialsMapper.updateEntity(request, material);
 
-        if (request.getCategoryId() != null && !request.getCategoryId().equals(material.getCategoryId())) {
+        // 3. If category changed, fetch new category and update the name
+        if (request.getCategoryId() != null && !request.getCategoryId().equals(oldCategoryId)) {
             ArtMaterialsCategory category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
-            material.setCategoryId(category.getId());
+            
+            // Note: Mapper already updated categoryId, we just sync the name
             material.setCategoryName(category.getName());
         }
 
@@ -77,6 +88,7 @@ public class ArtMaterialsServiceImpl implements ArtMaterialsService {
     public void delete(String id) {
         ArtMaterials material = artMaterialsRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtMaterials", "id", id));
+        
         material.setDeleted(true);
         artMaterialsRepository.save(material);
         log.info("Soft deleted material with id: {}", id);

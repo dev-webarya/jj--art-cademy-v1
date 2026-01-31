@@ -5,11 +5,11 @@ import com.artacademy.dto.response.ArtWorksResponseDto;
 import com.artacademy.entity.ArtWorks;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ArtWorksMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "categoryId", ignore = true)
+    @Mapping(target = "categoryName", ignore = true) // Handled manually in Service
     @Mapping(target = "views", constant = "0")
     @Mapping(target = "likes", constant = "0")
     @Mapping(target = "deleted", constant = "false")
@@ -17,11 +17,10 @@ public interface ArtWorksMapper {
     @Mapping(target = "updatedAt", ignore = true)
     ArtWorks toEntity(ArtWorksRequestDto dto);
 
-    // categoryName is populated in the entity by the service, so we map it directly
     ArtWorksResponseDto toDto(ArtWorks entity);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "categoryId", ignore = true)
+    @Mapping(target = "categoryName", ignore = true) // Handled manually in Service
     @Mapping(target = "views", ignore = true)
     @Mapping(target = "likes", ignore = true)
     @Mapping(target = "deleted", ignore = true)

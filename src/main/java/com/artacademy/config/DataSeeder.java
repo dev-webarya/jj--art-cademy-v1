@@ -201,6 +201,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .views(100 + i * 10)
                                         .likes(50 + i * 5)
                                         .categoryId(paintingCat.getId())
+                                        .categoryName(paintingCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Painting+" + i)
                                         .build());
                 });
@@ -210,12 +211,14 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("Modern Sculpture " + i)
                                         .description("Contemporary bronze sculpture with abstract human form #" + i)
                                         .basePrice(BigDecimal.valueOf(3500 + i * 500))
+                                        .discountPrice(BigDecimal.valueOf(3200 + i * 500))
                                         .artistName("David Chen")
                                         .artMedium("Bronze")
                                         .size("12x12x24")
                                         .views(80 + i * 10)
                                         .likes(40 + i * 5)
                                         .categoryId(sculptureCat.getId())
+                                        .categoryName(sculptureCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Sculpture+" + i)
                                         .build());
                 });
@@ -225,12 +228,14 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("Urban Landscape " + i)
                                         .description("Fine art photography capturing city life and architecture #" + i)
                                         .basePrice(BigDecimal.valueOf(800 + i * 150))
+                                        .discountPrice(BigDecimal.valueOf(700 + i * 150))
                                         .artistName("Elena Rodriguez")
                                         .artMedium("Digital Print on Canvas")
                                         .size("20x30")
                                         .views(150 + i * 20)
                                         .likes(75 + i * 10)
                                         .categoryId(photographyCat.getId())
+                                        .categoryName(photographyCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Photography+" + i)
                                         .build());
                 });
@@ -240,12 +245,14 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("Digital Dreams " + i)
                                         .description("AI-enhanced digital artwork exploring surreal landscapes #" + i)
                                         .basePrice(BigDecimal.valueOf(600 + i * 100))
+                                        .discountPrice(BigDecimal.valueOf(500 + i * 100))
                                         .artistName("Alex Kim")
                                         .artMedium("Digital NFT + Print")
                                         .size("4K Resolution")
                                         .views(200 + i * 30)
                                         .likes(100 + i * 15)
                                         .categoryId(digitalArtCat.getId())
+                                        .categoryName(digitalArtCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=DigitalArt+" + i)
                                         .build());
                 });
@@ -255,12 +262,14 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("Collage Composition " + i)
                                         .description("Mixed media collage combining vintage papers and acrylics #" + i)
                                         .basePrice(BigDecimal.valueOf(1200 + i * 200))
+                                        .discountPrice(BigDecimal.valueOf(1000 + i * 200))
                                         .artistName("Sophie Turner")
                                         .artMedium("Mixed Media on Board")
                                         .size("18x24")
                                         .views(60 + i * 10)
                                         .likes(30 + i * 5)
                                         .categoryId(mixedMediaCat.getId())
+                                        .categoryName(mixedMediaCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=MixedMedia+" + i)
                                         .build());
                 });
@@ -270,12 +279,14 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("Limited Edition Print " + i)
                                         .description("Signed and numbered limited edition giclée print #" + i)
                                         .basePrice(BigDecimal.valueOf(350 + i * 50))
+                                        .discountPrice(BigDecimal.valueOf(300 + i * 50))
                                         .artistName("Various Artists")
                                         .artMedium("Giclée on Paper")
                                         .size("16x20")
                                         .views(300 + i * 50)
                                         .likes(150 + i * 25)
                                         .categoryId(printsCat.getId())
+                                        .categoryName(printsCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Print+" + i)
                                         .build());
                 });
@@ -335,6 +346,7 @@ public class DataSeeder implements CommandLineRunner {
                                                                         .stock(BigDecimal.valueOf(50))
                                                                         .build()))
                                         .categoryId(brushCat.getId())
+                                        .categoryName(brushCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Brush+" + i)
                                         .build());
                 });
@@ -347,6 +359,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .discount(5)
                                         .stock(BigDecimal.valueOf(75))
                                         .categoryId(paintCat.getId())
+                                        .categoryName(paintCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Paint+" + i)
                                         .build());
                 });
@@ -359,6 +372,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .discount(0)
                                         .stock(BigDecimal.valueOf(50))
                                         .categoryId(canvasCat.getId())
+                                        .categoryName(canvasCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Canvas+" + i)
                                         .build());
                 });
@@ -371,6 +385,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .discount(15)
                                         .stock(BigDecimal.valueOf(120))
                                         .categoryId(drawingCat.getId())
+                                        .categoryName(drawingCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Pencil+" + i)
                                         .build());
                 });
@@ -383,6 +398,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .discount(0)
                                         .stock(BigDecimal.valueOf(60))
                                         .categoryId(toolsCat.getId())
+                                        .categoryName(toolsCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Tools+" + i)
                                         .build());
                 });
@@ -395,6 +411,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .discount(0)
                                         .stock(BigDecimal.valueOf(90))
                                         .categoryId(paperCat.getId())
+                                        .categoryName(paperCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Paper+" + i)
                                         .build());
                 });
@@ -440,6 +457,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .durationWeeks(2 + i)
                                         .proficiency("Beginner")
                                         .categoryId(workshopCat.getId())
+                                        .categoryName(workshopCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Workshop+" + i)
                                         .build());
                 });
@@ -449,8 +467,11 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("Digital Art Fundamentals " + i)
                                         .description("8-week online course covering digital illustration, tools and techniques")
                                         .basePrice(BigDecimal.valueOf(299 + i * 50))
+                                        .discountPrice(BigDecimal.valueOf(269 + i * 50))
+                                        .durationWeeks(8)
                                         .proficiency("Intermediate")
                                         .categoryId(onlineCat.getId())
+                                        .categoryName(onlineCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Online+" + i)
                                         .build());
                 });
@@ -460,8 +481,11 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("One-on-One Portrait Sessions " + i)
                                         .description("Personalized 2-hour private lessons focused on portrait techniques")
                                         .basePrice(BigDecimal.valueOf(120 + i * 20))
+                                        .discountPrice(BigDecimal.valueOf(100 + i * 20))
+                                        .durationWeeks(4)
                                         .proficiency("All Levels")
                                         .categoryId(privateCat.getId())
+                                        .categoryName(privateCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Private+" + i)
                                         .build());
                 });
@@ -471,8 +495,11 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("Plein Air Painting Group " + i)
                                         .description("Weekly outdoor painting sessions with a group of 8-12 artists")
                                         .basePrice(BigDecimal.valueOf(75 + i * 15))
+                                        .discountPrice(BigDecimal.valueOf(65 + i * 15))
+                                        .durationWeeks(6)
                                         .proficiency("Intermediate")
                                         .categoryId(groupCat.getId())
+                                        .categoryName(groupCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Group+" + i)
                                         .build());
                 });
@@ -482,8 +509,11 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("Oil Painting Masterclass " + i)
                                         .description("Intensive 4-week masterclass with renowned artist, limited to 6 students")
                                         .basePrice(BigDecimal.valueOf(599 + i * 100))
+                                        .discountPrice(BigDecimal.valueOf(549 + i * 100))
+                                        .durationWeeks(4)
                                         .proficiency("Advanced")
                                         .categoryId(masterCat.getId())
+                                        .categoryName(masterCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Master+" + i)
                                         .build());
                 });
@@ -493,8 +523,11 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("Young Artists Program " + i)
                                         .description("Fun and engaging art classes for kids aged 8-15, weekly sessions")
                                         .basePrice(BigDecimal.valueOf(45 + i * 10))
+                                        .discountPrice(BigDecimal.valueOf(40 + i * 10))
+                                        .durationWeeks(10)
                                         .proficiency("Beginner")
                                         .categoryId(kidsCat.getId())
+                                        .categoryName(kidsCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Kids+" + i)
                                         .build());
                 });
@@ -546,6 +579,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .artistCount(12 + i)
                                         .artworksCount(45 + i * 5)
                                         .categoryId(modernCat.getId())
+                                        .categoryName(modernCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Modern+" + i)
                                         .build());
                 });
@@ -560,6 +594,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .artistCount(8 + i)
                                         .artworksCount(30 + i * 3)
                                         .categoryId(classicalCat.getId())
+                                        .categoryName(classicalCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Classical+" + i)
                                         .build());
                 });
@@ -574,6 +609,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .artistCount(20 + i * 2)
                                         .artworksCount(60 + i * 10)
                                         .categoryId(contemporaryCat.getId())
+                                        .categoryName(contemporaryCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Contemporary+" + i)
                                         .build());
                 });
@@ -588,6 +624,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .artistCount(15 + i)
                                         .artworksCount(80 + i * 10)
                                         .categoryId(photographyCat.getId())
+                                        .categoryName(photographyCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Photo+" + i)
                                         .build());
                 });
@@ -602,6 +639,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .artistCount(10 + i)
                                         .artworksCount(25 + i * 5)
                                         .categoryId(sculptureCat.getId())
+                                        .categoryName(sculptureCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Sculpture+" + i)
                                         .build());
                 });
@@ -616,6 +654,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .artistCount(8 + i)
                                         .artworksCount(15 + i * 3)
                                         .categoryId(interactiveCat.getId())
+                                        .categoryName(interactiveCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Digital+" + i)
                                         .build());
                 });
@@ -657,6 +696,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("The Grand Gallery " + i)
                                         .description("Premier art destination in the heart of downtown, featuring world-class exhibitions")
                                         .categoryId(downtownCat.getId())
+                                        .categoryName(downtownCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Downtown+" + i)
                                         .build());
                 });
@@ -666,6 +706,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("Studio Collective " + i)
                                         .description("Artist-run gallery space showcasing emerging and mid-career artists")
                                         .categoryId(artsDistrictCat.getId())
+                                        .categoryName(artsDistrictCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=ArtsDistrict+" + i)
                                         .build());
                 });
@@ -675,6 +716,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("Harbor View Gallery " + i)
                                         .description("Scenic waterfront gallery specializing in marine and landscape art")
                                         .categoryId(waterfrontCat.getId())
+                                        .categoryName(waterfrontCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Waterfront+" + i)
                                         .build());
                 });
@@ -684,6 +726,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("Heritage Art House " + i)
                                         .description("Historic building converted to gallery, focusing on classical and traditional art")
                                         .categoryId(historicCat.getId())
+                                        .categoryName(historicCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Historic+" + i)
                                         .build());
                 });
@@ -693,6 +736,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("Community Arts Center " + i)
                                         .description("Family-friendly gallery with educational programs and local artist showcases")
                                         .categoryId(suburbanCat.getId())
+                                        .categoryName(suburbanCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Suburban+" + i)
                                         .build());
                 });
@@ -702,6 +746,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .name("Campus Art Museum " + i)
                                         .description("University-affiliated museum featuring academic collections and student works")
                                         .categoryId(universityCat.getId())
+                                        .categoryName(universityCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=University+" + i)
                                         .build());
                 });

@@ -1,61 +1,72 @@
 package com.artacademy.entity;
 
-import com.artacademy.enums.ClassSchedule;
 import com.artacademy.enums.EnrollmentStatus;
-import lombok.*;
+import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.Instant;
 
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Document(collection = "enrollments")
-@CompoundIndex(name = "user_class_idx", def = "{'userId': 1, 'artClassId': 1}")
+@Data
+@Document(collection = "class_enrollments")
 public class ClassEnrollment {
 
     @Id
     private String id;
 
-    // The student enrolling (from logged-in user)
-    @Indexed
+    // --- User Link ---
+    @Field("user_id")
     private String userId;
 
-    private String userEmail;
-
-    // The class being enrolled in
-    @Indexed
-    private String classId;
-
-    private String className;
-
-    private String classDescription;
-
+    // --- Student Contact Info ---
+    @Field("student_name")
     private String studentName;
 
+    @Field("student_email")
+    private String studentEmail;
+
+    @Field("student_phone")
+    private String studentPhone;
+
+    // --- Class Info ---
+    @Field("class_id")
+    private String classId;
+
+    @Field("class_name")
+    private String className;
+
+    @Field("class_description")
+    private String classDescription;
+
+    // --- Enrollment Specifics ---
+    @Field("parent_guardian_name")
     private String parentGuardianName;
 
+    @Field("student_age")
     private Integer studentAge;
 
-    private ClassSchedule schedule;
+    @Field("schedule")
+    private String schedule;
 
+    @Field("additional_message")
     private String additionalMessage;
 
-    @Builder.Default
+    // --- Status ---
+    @Field("status")
     private EnrollmentStatus status = EnrollmentStatus.PENDING;
 
+    @Field("admin_notes")
     private String adminNotes;
 
+    // --- Timestamps ---
     @CreatedDate
+    @Field("created_at")
     private Instant createdAt;
 
     @LastModifiedDate
+    @Field("updated_at")
     private Instant updatedAt;
 }

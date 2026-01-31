@@ -7,6 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -19,49 +20,58 @@ import java.time.Instant;
 @Document(collection = "artworks")
 public class ArtWorks {
 
-        @Id
-        private String id;
+    @Id
+    private String id;
 
-        @TextIndexed
-        private String name;
+    @TextIndexed
+    private String name;
 
-        @TextIndexed
-        private String description;
+    @TextIndexed
+    private String description;
 
-        private BigDecimal basePrice;
+    @Field("base_price")
+    private BigDecimal basePrice;
 
-        private BigDecimal discountPrice;
+    @Field("discount_price")
+    private BigDecimal discountPrice;
 
-        @Builder.Default
-        private boolean isActive = true;
+    @Builder.Default
+    @Field("is_active")
+    private boolean isActive = true;
 
-        private String artistName;
+    @Field("artist_name")
+    private String artistName;
 
-        private String artMedium;
+    @Field("art_medium")
+    private String artMedium;
 
-        private String size;
+    private String size;
 
-        @Builder.Default
-        private Integer views = 0;
+    @Builder.Default
+    private Integer views = 0;
 
-        @Builder.Default
-        private Integer likes = 0;
+    @Builder.Default
+    private Integer likes = 0;
 
-        // Soft Delete Flag
-        @Builder.Default
-        private boolean deleted = false;
+    // Soft Delete Flag
+    @Builder.Default
+    private boolean deleted = false;
 
-        @CreatedDate
-        private Instant createdAt;
+    @Indexed
+    @Field("category_id")
+    private String categoryId;
 
-        @LastModifiedDate
-        private Instant updatedAt;
+    @Field("category_name")
+    private String categoryName;
 
-        // Store category ID reference instead of @ManyToOne
-        @Indexed
-        private String categoryId;
+    @Field("image_url")
+    private String imageUrl;
 
-        private String categoryName;
+    @CreatedDate
+    @Field("created_at")
+    private Instant createdAt;
 
-        private String imageUrl;
+    @LastModifiedDate
+    @Field("updated_at")
+    private Instant updatedAt;
 }

@@ -18,8 +18,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -40,12 +38,9 @@ public class ClassEnrollmentServiceImpl implements ClassEnrollmentService {
 
         // Set references
         enrollment.setUserId(user.getId());
-        enrollment.setUserEmail(user.getEmail());
-        // Use provided student name or fallback to user's name
-        if (enrollment.getStudentName() == null || enrollment.getStudentName().isBlank()) {
-            enrollment.setStudentName(user.getFirstName() + " " + user.getLastName());
-        }
-
+        // Note: studentEmail is populated from request via Mapper
+        
+        // Populate class details
         enrollment.setClassId(artClass.getId());
         enrollment.setClassName(artClass.getName());
         enrollment.setClassDescription(artClass.getDescription());

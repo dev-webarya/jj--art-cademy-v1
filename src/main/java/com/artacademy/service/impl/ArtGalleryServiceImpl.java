@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,12 +26,13 @@ public class ArtGalleryServiceImpl implements ArtGalleryService {
     private final ArtGalleryMapper artGalleryMapper;
 
     @Override
+    @Transactional
     public ArtGalleryResponseDto create(ArtGalleryRequestDto request) {
         ArtGalleryCategory category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
 
         ArtGallery gallery = artGalleryMapper.toEntity(request);
-        gallery.setCategoryId(category.getId());
+        // Mapper sets categoryId; we only need to set the denormalized name manually
         gallery.setCategoryName(category.getName());
 
         ArtGallery savedGallery = artGalleryRepository.save(gallery);
@@ -51,16 +53,24 @@ public class ArtGalleryServiceImpl implements ArtGalleryService {
     }
 
     @Override
+    @Transactional
     public ArtGalleryResponseDto update(String id, ArtGalleryRequestDto request) {
         ArtGallery gallery = artGalleryRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtGallery", "id", id));
 
+        // 1. Capture the old category ID to detect if it changed
+        String oldCategoryId = gallery.getCategoryId();
+
+        // 2. Map new values from Request to Entity (this updates categoryId to the new
+        // one)
         artGalleryMapper.updateEntity(request, gallery);
 
-        if (request.getCategoryId() != null && !request.getCategoryId().equals(gallery.getCategoryId())) {
+        // 3. If category changed, fetch new category and update the name
+        if (request.getCategoryId() != null && !request.getCategoryId().equals(oldCategoryId)) {
             ArtGalleryCategory category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
-            gallery.setCategoryId(category.getId());
+
+            // Note: Mapper already updated categoryId, we just sync the name
             gallery.setCategoryName(category.getName());
         }
 
@@ -72,6 +82,7 @@ public class ArtGalleryServiceImpl implements ArtGalleryService {
     public void delete(String id) {
         ArtGallery gallery = artGalleryRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtGallery", "id", id));
+
         gallery.setDeleted(true);
         artGalleryRepository.save(gallery);
         log.info("Soft deleted gallery with id: {}", id);

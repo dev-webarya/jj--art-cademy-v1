@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,19 +26,14 @@ public class ArtExhibitionServiceImpl implements ArtExhibitionService {
     private final ArtExhibitionMapper artExhibitionMapper;
 
     @Override
+    @Transactional
     public ArtExhibitionResponseDto create(ArtExhibitionRequestDto request) {
         ArtExhibitionCategory category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
 
         ArtExhibition exhibition = artExhibitionMapper.toEntity(request);
-        exhibition.setCategoryId(category.getId());
+        // Mapper sets categoryId; we only need to set the denormalized name manually
         exhibition.setCategoryName(category.getName());
-
-        // Defaults
-        if (exhibition.getArtistCount() == null)
-            exhibition.setArtistCount(0);
-        if (exhibition.getArtworksCount() == null)
-            exhibition.setArtworksCount(0);
 
         ArtExhibition savedExhibition = artExhibitionRepository.save(exhibition);
         return artExhibitionMapper.toDto(savedExhibition);
@@ -57,16 +53,23 @@ public class ArtExhibitionServiceImpl implements ArtExhibitionService {
     }
 
     @Override
+    @Transactional
     public ArtExhibitionResponseDto update(String id, ArtExhibitionRequestDto request) {
         ArtExhibition exhibition = artExhibitionRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Exhibition", "id", id));
 
+        // 1. Capture the old category ID to detect if it changed
+        String oldCategoryId = exhibition.getCategoryId();
+
+        // 2. Map new values from Request to Entity (this updates categoryId to the new one)
         artExhibitionMapper.updateEntity(request, exhibition);
 
-        if (request.getCategoryId() != null && !request.getCategoryId().equals(exhibition.getCategoryId())) {
+        // 3. If category changed, fetch new category and update the name
+        if (request.getCategoryId() != null && !request.getCategoryId().equals(oldCategoryId)) {
             ArtExhibitionCategory category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
-            exhibition.setCategoryId(category.getId());
+            
+            // Note: Mapper already updated categoryId, we just sync the name
             exhibition.setCategoryName(category.getName());
         }
 
@@ -78,6 +81,7 @@ public class ArtExhibitionServiceImpl implements ArtExhibitionService {
     public void delete(String id) {
         ArtExhibition exhibition = artExhibitionRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Exhibition", "id", id));
+        
         exhibition.setDeleted(true);
         artExhibitionRepository.save(exhibition);
         log.info("Soft deleted exhibition with id: {}", id);

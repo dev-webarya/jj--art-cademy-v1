@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,12 +26,13 @@ public class ArtClassesServiceImpl implements ArtClassesService {
     private final ArtClassesMapper artClassesMapper;
 
     @Override
+    @Transactional
     public ArtClassesResponseDto create(ArtClassesRequestDto request) {
         ArtClassesCategory category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
 
         ArtClasses artClass = artClassesMapper.toEntity(request);
-        artClass.setCategoryId(category.getId());
+        // Mapper sets categoryId; we only need to set the denormalized name manually
         artClass.setCategoryName(category.getName());
 
         ArtClasses savedClass = artClassesRepository.save(artClass);
@@ -51,16 +53,23 @@ public class ArtClassesServiceImpl implements ArtClassesService {
     }
 
     @Override
+    @Transactional
     public ArtClassesResponseDto update(String id, ArtClassesRequestDto request) {
         ArtClasses artClass = artClassesRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtClass", "id", id));
 
+        // 1. Capture the old category ID to detect if it changed
+        String oldCategoryId = artClass.getCategoryId();
+
+        // 2. Map new values from Request to Entity (this updates categoryId to the new one)
         artClassesMapper.updateEntity(request, artClass);
 
-        if (request.getCategoryId() != null && !request.getCategoryId().equals(artClass.getCategoryId())) {
+        // 3. If category changed, fetch new category and update the name
+        if (request.getCategoryId() != null && !request.getCategoryId().equals(oldCategoryId)) {
             ArtClassesCategory category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
-            artClass.setCategoryId(category.getId());
+            
+            // Note: Mapper already updated categoryId, we just sync the name
             artClass.setCategoryName(category.getName());
         }
 
@@ -71,7 +80,7 @@ public class ArtClassesServiceImpl implements ArtClassesService {
     @Override
     public void delete(String id) {
         ArtClasses artClass = artClassesRepository.findByIdAndDeletedFalse(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ArtClass", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException("ArtClass", "id", id));     
         artClass.setDeleted(true);
         artClassesRepository.save(artClass);
         log.info("Soft deleted class with id: {}", id);

@@ -1,29 +1,29 @@
 package com.artacademy.mapper;
 
+import com.artacademy.dto.request.ClassEnrollmentRequestDto;
 import com.artacademy.dto.response.ClassEnrollmentResponseDto;
 import com.artacademy.entity.ClassEnrollment;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ClassEnrollmentMapper {
 
+    // Request -> Entity
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "userId", ignore = true)
-    @Mapping(target = "userEmail", ignore = true)
-    @Mapping(target = "className", ignore = true)
-    @Mapping(target = "classDescription", ignore = true)
-    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "userId", ignore = true) // Set by Service
+    @Mapping(target = "className", ignore = true) // Set by Service
+    @Mapping(target = "classDescription", ignore = true) // Set by Service
+    @Mapping(target = "status", ignore = true) // Default PENDING
     @Mapping(target = "adminNotes", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    ClassEnrollment toEntity(com.artacademy.dto.request.ClassEnrollmentRequestDto request);
+    ClassEnrollment toEntity(ClassEnrollmentRequestDto request);
 
-    @Mapping(target = "studentEmail", source = "userEmail")
-    @Mapping(target = "studentPhone", ignore = true) // Not in entity
-    @Mapping(target = "scheduleDisplayName", expression = "java(enrollment.getSchedule() != null ? enrollment.getSchedule().getDisplayName() : null)")
+    // Entity -> Response
     ClassEnrollmentResponseDto toDto(ClassEnrollment enrollment);
 
     List<ClassEnrollmentResponseDto> toDtoList(List<ClassEnrollment> enrollments);
