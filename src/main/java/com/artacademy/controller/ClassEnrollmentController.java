@@ -56,6 +56,20 @@ public class ClassEnrollmentController {
 
     // Admin endpoints
 
+    @GetMapping("/pending")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @Operation(summary = "Get pending enrollments (Admin)")
+    public ResponseEntity<Page<ClassEnrollmentResponseDto>> getPendingEnrollments(Pageable pageable) {
+        return ResponseEntity.ok(enrollmentService.getPendingEnrollments(pageable));
+    }
+
+    @GetMapping("/stats/pending-count")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @Operation(summary = "Get count of pending enrollments (Admin)")
+    public ResponseEntity<Long> countPendingEnrollments() {
+        return ResponseEntity.ok(enrollmentService.countPendingEnrollments());
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     @Operation(summary = "Get all enrollments (Admin)")
