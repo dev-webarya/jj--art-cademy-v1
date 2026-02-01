@@ -45,12 +45,6 @@ public class ArtWorksCategoryController {
         return ResponseEntity.ok(categoryService.getAll(pageable));
     }
 
-    @GetMapping("/root")
-    @Operation(summary = "Get all Root Categories")
-    public ResponseEntity<List<ArtWorksCategoryResponseDto>> getAllRootCategories() {
-        return ResponseEntity.ok(categoryService.getAllRootCategories());
-    }
-
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     @Operation(summary = "Update Category")

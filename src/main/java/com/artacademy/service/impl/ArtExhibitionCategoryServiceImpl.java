@@ -26,14 +26,6 @@ public class ArtExhibitionCategoryServiceImpl implements ArtExhibitionCategorySe
     @Override
     public ArtExhibitionCategoryResponseDto create(ArtExhibitionCategoryRequestDto request) {
         ArtExhibitionCategory category = categoryMapper.toEntity(request);
-
-        if (request.getParentId() != null) {
-            ArtExhibitionCategory parent = categoryRepository.findById(request.getParentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category", "parentId", request.getParentId()));
-            category.setParentId(parent.getId());
-            category.setParentName(parent.getName());
-        }
-
         ArtExhibitionCategory savedCategory = categoryRepository.save(category);
         return categoryMapper.toDto(savedCategory);
     }
@@ -52,27 +44,11 @@ public class ArtExhibitionCategoryServiceImpl implements ArtExhibitionCategorySe
     }
 
     @Override
-    public List<ArtExhibitionCategoryResponseDto> getAllRootCategories() {
-        return categoryMapper.toDtoList(categoryRepository.findByParentIdIsNull());
-    }
-
-    @Override
     public ArtExhibitionCategoryResponseDto update(String id, ArtExhibitionCategoryRequestDto request) {
         ArtExhibitionCategory category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
 
         categoryMapper.updateEntity(request, category);
-
-        if (request.getParentId() != null) {
-            ArtExhibitionCategory parent = categoryRepository.findById(request.getParentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category", "parentId", request.getParentId()));
-            category.setParentId(parent.getId());
-            category.setParentName(parent.getName());
-        } else {
-            category.setParentId(null);
-            category.setParentName(null);
-        }
-
         return categoryMapper.toDto(categoryRepository.save(category));
     }
 

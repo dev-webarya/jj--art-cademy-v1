@@ -8,6 +8,4 @@ public class ArtMaterialsCategoryRequestDto {
 
     @NotBlank(message = "Category name is required")
     private String name;
-
-    private String parentId;
 }

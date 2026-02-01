@@ -23,18 +23,6 @@ public class ArtMaterialsCategory {
     @Indexed(unique = true)
     private String name;
 
-    private String description;
-
-    private String imageUrl;
-
-    @Indexed
-    private String parentId;
-
-    private String parentName;
-
-    @Builder.Default
-    private boolean isActive = true;
-
     @CreatedDate
     private Instant createdAt;
 

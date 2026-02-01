@@ -16,9 +16,6 @@ public class ArtWorksCategoryResponseDto {
 
     private String id;
     private String name;
-    private String parentId;
-    private String parentName;
-    private List<ArtWorksCategoryResponseDto> subcategories;
     private Instant createdAt;
     private Instant updatedAt;
 }

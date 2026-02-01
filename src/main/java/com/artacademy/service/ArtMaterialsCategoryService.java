@@ -15,8 +15,6 @@ public interface ArtMaterialsCategoryService {
 
     Page<ArtMaterialsCategoryResponseDto> getAll(Pageable pageable);
 
-    List<ArtMaterialsCategoryResponseDto> getAllRootCategories();
-
     ArtMaterialsCategoryResponseDto update(String id, ArtMaterialsCategoryRequestDto request);
 
     void delete(String id);

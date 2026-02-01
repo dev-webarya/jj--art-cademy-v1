@@ -11,8 +11,4 @@ import java.util.Optional;
 public interface ArtExhibitionCategoryRepository extends MongoRepository<ArtExhibitionCategory, String> {
 
     Optional<ArtExhibitionCategory> findByName(String name);
-
-    List<ArtExhibitionCategory> findByIsActiveTrue();
-
-    List<ArtExhibitionCategory> findByParentIdIsNull();
 }

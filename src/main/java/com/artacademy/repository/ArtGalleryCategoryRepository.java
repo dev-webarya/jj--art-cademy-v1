@@ -11,8 +11,4 @@ import java.util.Optional;
 public interface ArtGalleryCategoryRepository extends MongoRepository<ArtGalleryCategory, String> {
 
     Optional<ArtGalleryCategory> findByName(String name);
-
-    List<ArtGalleryCategory> findByIsActiveTrue();
-
-    List<ArtGalleryCategory> findByParentIdIsNull();
 }

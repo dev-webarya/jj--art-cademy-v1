@@ -16,9 +16,6 @@ public class ArtGalleryCategoryResponseDto {
 
     private String id;
     private String name;
-    private String parentId;
-    private String parentName;
-    private List<ArtGalleryCategoryResponseDto> subcategories;
     private Instant createdAt;
     private Instant updatedAt;
 }
