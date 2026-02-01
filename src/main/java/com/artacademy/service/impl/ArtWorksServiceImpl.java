@@ -37,10 +37,6 @@ public class ArtWorksServiceImpl implements ArtWorksService {
         // Mapper sets categoryId; we only need to set the denormalized name manually
         artWorks.setCategoryName(category.getName());
 
-        // Defaults
-        if (artWorks.getViews() == null) artWorks.setViews(0);
-        if (artWorks.getLikes() == null) artWorks.setLikes(0);
-
         ArtWorks savedArtWorks = artWorksRepository.save(artWorks);
         return artWorksMapper.toDto(savedArtWorks);
     }
@@ -49,10 +45,7 @@ public class ArtWorksServiceImpl implements ArtWorksService {
     public ArtWorksResponseDto getById(String id) {
         ArtWorks artWorks = artWorksRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", id));
-        
-        // Trigger view increment
-        incrementViews(id);
-        
+
         return artWorksMapper.toDto(artWorks);
     }
 
@@ -71,14 +64,15 @@ public class ArtWorksServiceImpl implements ArtWorksService {
         // 1. Capture the old category ID to detect if it changed
         String oldCategoryId = artWorks.getCategoryId();
 
-        // 2. Map new values from Request to Entity (this updates categoryId to the new one)
+        // 2. Map new values from Request to Entity (this updates categoryId to the new
+        // one)
         artWorksMapper.updateEntity(request, artWorks);
 
         // 3. If category changed, fetch new category and update the name
         if (request.getCategoryId() != null && !request.getCategoryId().equals(oldCategoryId)) {
             ArtWorksCategory category = artWorksCategoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
-            
+
             // Note: Mapper already updated categoryId, we just sync the name
             artWorks.setCategoryName(category.getName());
         }
@@ -91,31 +85,9 @@ public class ArtWorksServiceImpl implements ArtWorksService {
     public void delete(String id) {
         ArtWorks artWorks = artWorksRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", id));
-        
+
         artWorks.setDeleted(true);
         artWorksRepository.save(artWorks);
         log.info("Soft deleted artwork with id: {}", id);
-    }
-
-    @Override
-    public ArtWorksResponseDto incrementViews(String id) {
-        ArtWorks artWorks = artWorksRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", id));
-        
-        int currentViews = artWorks.getViews() == null ? 0 : artWorks.getViews();
-        artWorks.setViews(currentViews + 1);
-        
-        return artWorksMapper.toDto(artWorksRepository.save(artWorks));
-    }
-
-    @Override
-    public ArtWorksResponseDto incrementLikes(String id) {
-        ArtWorks artWorks = artWorksRepository.findByIdAndDeletedFalse(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ArtWorks", "id", id));
-        
-        int currentLikes = artWorks.getLikes() == null ? 0 : artWorks.getLikes();
-        artWorks.setLikes(currentLikes + 1);
-        
-        return artWorksMapper.toDto(artWorksRepository.save(artWorks));
     }
 }

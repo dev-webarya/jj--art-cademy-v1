@@ -13,19 +13,16 @@ public class ArtWorksResponseDto {
     private BigDecimal basePrice;
     private BigDecimal discountPrice;
     private boolean isActive;
-    
+
     private String artistName;
     private String artMedium;
     private String size;
-    
-    private Integer views;
-    private Integer likes;
-    
+
     private String categoryId;
     private String categoryName;
-    
+
     private String imageUrl;
-    
+
     private Instant createdAt;
     private Instant updatedAt;
 }

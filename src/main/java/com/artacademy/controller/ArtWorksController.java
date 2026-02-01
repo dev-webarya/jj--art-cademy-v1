@@ -62,15 +62,4 @@ public class ArtWorksController {
         artWorksService.delete(id);
     }
 
-    @PostMapping("/{id}/views")
-    @Operation(summary = "Increment view count")
-    public ResponseEntity<ArtWorksResponseDto> incrementViews(@PathVariable String id) {
-        return ResponseEntity.ok(artWorksService.incrementViews(id));
-    }
-
-    @PostMapping("/{id}/likes")
-    @Operation(summary = "Increment like count")
-    public ResponseEntity<ArtWorksResponseDto> incrementLikes(@PathVariable String id) {
-        return ResponseEntity.ok(artWorksService.incrementLikes(id));
-    }
 }

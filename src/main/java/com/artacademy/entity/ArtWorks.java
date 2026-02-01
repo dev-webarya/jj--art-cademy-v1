@@ -47,12 +47,6 @@ public class ArtWorks {
 
     private String size;
 
-    @Builder.Default
-    private Integer views = 0;
-
-    @Builder.Default
-    private Integer likes = 0;
-
     // Soft Delete Flag
     @Builder.Default
     private boolean deleted = false;
