@@ -95,9 +95,13 @@ public class LmsAttendanceServiceImpl implements LmsAttendanceService {
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "Student not found: " + studentAttendance.getStudentId()));
 
-            // Find active subscription for this month
+            // Find active subscription for this month (avoid non-unique result error)
             LmsStudentSubscription subscription = subscriptionRepository
-                    .findByStudentIdAndStatus(studentAttendance.getStudentId(), SubscriptionStatus.ACTIVE)
+                    .findByStudentIdAndSubscriptionMonthAndSubscriptionYear(
+                            studentAttendance.getStudentId(), month, year)
+                    .stream()
+                    .filter(sub -> sub.getStatus() == SubscriptionStatus.ACTIVE)
+                    .findFirst()
                     .orElse(null);
 
             String subscriptionId = subscription != null ? subscription.getId() : null;

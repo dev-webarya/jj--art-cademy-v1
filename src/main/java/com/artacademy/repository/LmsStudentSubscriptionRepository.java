@@ -33,6 +33,10 @@ public interface LmsStudentSubscriptionRepository extends MongoRepository<LmsStu
         // By month/year
         List<LmsStudentSubscription> findBySubscriptionMonthAndSubscriptionYear(Integer month, Integer year);
 
+        // By student/month/year
+        List<LmsStudentSubscription> findByStudentIdAndSubscriptionMonthAndSubscriptionYear(
+                        String studentId, Integer month, Integer year);
+
         // Over limit
         List<LmsStudentSubscription> findByStatusAndAttendedSessionsGreaterThan(
                         SubscriptionStatus status, Integer allowedSessions);

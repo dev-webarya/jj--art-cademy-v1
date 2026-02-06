@@ -28,4 +28,6 @@ public interface ClassEnrollmentRepository extends MongoRepository<ClassEnrollme
     long countByClassIdAndStatus(String classId, EnrollmentStatus status);
 
     long countByStatus(EnrollmentStatus status);
+
+    boolean existsByUserIdAndClassIdAndStatusIn(String userId, String classId, List<EnrollmentStatus> statuses);
 }

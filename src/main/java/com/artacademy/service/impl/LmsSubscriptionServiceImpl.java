@@ -110,7 +110,11 @@ public class LmsSubscriptionServiceImpl implements LmsSubscriptionService {
 
     @Override
     public LmsSubscriptionResponseDto getActiveByStudentId(String studentId) {
-        return subscriptionRepository.findByStudentIdAndStatus(studentId, SubscriptionStatus.ACTIVE)
+        // Safe implementation to handle multiple active subscriptions (e.g. different
+        // months/classes)
+        return subscriptionRepository.findByStudentId(studentId).stream()
+                .filter(sub -> sub.getStatus() == SubscriptionStatus.ACTIVE)
+                .findFirst()
                 .map(subscriptionMapper::toResponse)
                 .orElse(null);
     }
