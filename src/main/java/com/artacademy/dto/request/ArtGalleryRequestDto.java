@@ -11,8 +11,6 @@ public class ArtGalleryRequestDto {
 
     private String description;
 
-    private boolean isActive = true;
-
     @NotBlank(message = "Category ID is required")
     private String categoryId;
 

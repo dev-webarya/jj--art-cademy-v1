@@ -4,6 +4,7 @@ import com.artacademy.dto.request.ArtGalleryRequestDto;
 import com.artacademy.dto.response.ArtGalleryResponseDto;
 import com.artacademy.entity.ArtGallery;
 import com.artacademy.entity.ArtGalleryCategory;
+import com.artacademy.enums.VerificationStatus;
 import com.artacademy.exception.ResourceNotFoundException;
 import com.artacademy.mapper.ArtGalleryMapper;
 import com.artacademy.repository.ArtGalleryCategoryRepository;
@@ -13,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,8 +35,23 @@ public class ArtGalleryServiceImpl implements ArtGalleryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
 
         ArtGallery gallery = artGalleryMapper.toEntity(request);
-        // Mapper sets categoryId; we only need to set the denormalized name manually
         gallery.setCategoryName(category.getName());
+
+        // Get current user from SecurityContext
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = authentication.getName();
+        gallery.setUserId(userId);
+        gallery.setUserName(userId);
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        // If Admin, APPROVED by default. If Customer, PENDING.
+        if (isAdmin) {
+            gallery.setStatus(VerificationStatus.APPROVED);
+        } else {
+            gallery.setStatus(VerificationStatus.PENDING);
+        }
 
         ArtGallery savedGallery = artGalleryRepository.save(gallery);
         return artGalleryMapper.toDto(savedGallery);
@@ -48,8 +66,27 @@ public class ArtGalleryServiceImpl implements ArtGalleryService {
 
     @Override
     public Page<ArtGalleryResponseDto> getAll(Pageable pageable) {
-        return artGalleryRepository.findByDeletedFalse(pageable)
-                .map(artGalleryMapper::toDto);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            return artGalleryRepository.findByDeletedFalse(pageable)
+                    .map(artGalleryMapper::toDto);
+        } else {
+            return artGalleryRepository.findByStatusAndDeletedFalse(VerificationStatus.APPROVED, pageable)
+                    .map(artGalleryMapper::toDto);
+        }
+    }
+
+    @Override
+    public ArtGalleryResponseDto verifyGallery(String id, VerificationStatus status) {
+        ArtGallery gallery = artGalleryRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ArtGallery", "id", id));
+
+        gallery.setStatus(status);
+        ArtGallery savedGallery = artGalleryRepository.save(gallery);
+        return artGalleryMapper.toDto(savedGallery);
     }
 
     @Override
@@ -86,5 +123,21 @@ public class ArtGalleryServiceImpl implements ArtGalleryService {
         gallery.setDeleted(true);
         artGalleryRepository.save(gallery);
         log.info("Soft deleted gallery with id: {}", id);
+    }
+
+    @Override
+    public Page<ArtGalleryResponseDto> getMyGalleries(Pageable pageable) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = authentication.getName();
+        return artGalleryRepository.findByUserIdAndDeletedFalse(userId, pageable)
+                .map(artGalleryMapper::toDto);
+    }
+
+    @Override
+    public Page<ArtGalleryResponseDto> getMyGalleriesByStatus(VerificationStatus status, Pageable pageable) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = authentication.getName();
+        return artGalleryRepository.findByUserIdAndStatusAndDeletedFalse(userId, status, pageable)
+                .map(artGalleryMapper::toDto);
     }
 }

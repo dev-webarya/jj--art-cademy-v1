@@ -1,5 +1,6 @@
 package com.artacademy.entity;
 
+import com.artacademy.enums.VerificationStatus;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -26,8 +27,8 @@ public class ArtGallery {
     private String description;
 
     @Builder.Default
-    @Field("is_active")
-    private boolean isActive = true;
+    @Field("status")
+    private VerificationStatus status = VerificationStatus.PENDING;
 
     // Soft Delete Flag
     @Builder.Default
@@ -42,6 +43,13 @@ public class ArtGallery {
 
     @Field("image_url")
     private String imageUrl;
+
+    @Indexed
+    @Field("user_id")
+    private String userId;
+
+    @Field("user_name")
+    private String userName;
 
     @CreatedDate
     @Field("created_at")

@@ -13,20 +13,22 @@ import java.util.Optional;
 @Repository
 public interface LmsAttendanceRepository extends MongoRepository<LmsAttendance, String> {
 
-    List<LmsAttendance> findBySessionId(String sessionId);
+        List<LmsAttendance> findBySessionId(String sessionId);
 
-    Page<LmsAttendance> findByStudentId(String studentId, Pageable pageable);
+        Page<LmsAttendance> findByStudentId(String studentId, Pageable pageable);
 
-    Optional<LmsAttendance> findBySessionIdAndStudentId(String sessionId, String studentId);
+        List<LmsAttendance> findByStudentIdOrderBySessionDateDesc(String studentId);
 
-    List<LmsAttendance> findByStudentIdAndSessionMonthAndSessionYear(
-            String studentId, Integer month, Integer year);
+        Optional<LmsAttendance> findBySessionIdAndStudentId(String sessionId, String studentId);
 
-    List<LmsAttendance> findBySessionMonthAndSessionYearAndIsOverLimitTrue(
-            Integer month, Integer year);
+        List<LmsAttendance> findByStudentIdAndSessionMonthAndSessionYear(
+                        String studentId, Integer month, Integer year);
 
-    long countByStudentIdAndSessionMonthAndSessionYearAndStatus(
-            String studentId, Integer month, Integer year, AttendanceStatus status);
+        List<LmsAttendance> findBySessionMonthAndSessionYearAndIsOverLimitTrue(
+                        Integer month, Integer year);
 
-    boolean existsBySessionIdAndStudentId(String sessionId, String studentId);
+        long countByStudentIdAndSessionMonthAndSessionYearAndStatus(
+                        String studentId, Integer month, Integer year, AttendanceStatus status);
+
+        boolean existsBySessionIdAndStudentId(String sessionId, String studentId);
 }

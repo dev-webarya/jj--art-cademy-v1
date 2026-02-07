@@ -212,6 +212,19 @@ public class LmsAttendanceServiceImpl implements LmsAttendanceService {
         return attendanceMapper.toResponse(records.get(records.size() - 1));
     }
 
+    @Override
+    public List<LmsAttendanceResponseDto> getStudentAttendanceLogs(String studentId, Integer month, Integer year) {
+        List<LmsAttendance> records;
+
+        if (month != null && year != null) {
+            records = attendanceRepository.findByStudentIdAndSessionMonthAndSessionYear(studentId, month, year);
+        } else {
+            records = attendanceRepository.findByStudentIdOrderBySessionDateDesc(studentId);
+        }
+
+        return attendanceMapper.toResponseList(records);
+    }
+
     private String getCurrentUserId() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return user.getId();

@@ -82,6 +82,16 @@ public class LmsAttendanceController {
         return ResponseEntity.ok(attendanceService.getByStudentId(studentId, pageable));
     }
 
+    @GetMapping("/student/{studentId}/logs")
+    @AdminOnly
+    @Operation(summary = "Get full attendance logs for a student (Admin)")
+    public ResponseEntity<List<LmsAttendanceResponseDto>> getStudentAttendanceLogs(
+            @PathVariable String studentId,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year) {
+        return ResponseEntity.ok(attendanceService.getStudentAttendanceLogs(studentId, month, year));
+    }
+
     @GetMapping("/over-limit/{year}/{month}")
     @AdminOnly
     @Operation(summary = "Get students over session limit (Admin)")

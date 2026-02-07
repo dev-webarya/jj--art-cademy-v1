@@ -38,6 +38,16 @@ public class ClassEnrollmentServiceImpl implements ClassEnrollmentService {
         ArtClasses artClass = classRepository.findByIdAndDeletedFalse(request.getClassId())
                 .orElseThrow(() -> new ResourceNotFoundException("ArtClass", "id", request.getClassId()));
 
+        // Check for duplicate enrollment
+        boolean alreadyEnrolled = enrollmentRepository.existsByUserIdAndClassIdAndStatusIn(
+                user.getId(),
+                request.getClassId(),
+                List.of(EnrollmentStatus.PENDING, EnrollmentStatus.APPROVED));
+
+        if (alreadyEnrolled) {
+            throw new IllegalStateException("You are already enrolled or have a pending request for this class.");
+        }
+
         ClassEnrollment enrollment = enrollmentMapper.toEntity(request);
 
         // Set references

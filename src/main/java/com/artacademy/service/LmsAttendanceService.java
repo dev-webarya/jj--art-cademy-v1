@@ -52,4 +52,9 @@ public interface LmsAttendanceService {
      * Get monthly attendance summary for a student.
      */
     LmsAttendanceResponseDto getStudentMonthlyAttendance(String studentId, Integer month, Integer year);
+
+    /**
+     * Get full attendance logs for a student, optionally filtered by month/year.
+     */
+    List<LmsAttendanceResponseDto> getStudentAttendanceLogs(String studentId, Integer month, Integer year);
 }

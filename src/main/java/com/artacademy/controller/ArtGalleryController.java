@@ -2,6 +2,7 @@ package com.artacademy.controller;
 
 import com.artacademy.dto.request.ArtGalleryRequestDto;
 import com.artacademy.dto.response.ArtGalleryResponseDto;
+import com.artacademy.enums.VerificationStatus;
 import com.artacademy.service.ArtGalleryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,7 +26,7 @@ public class ArtGalleryController {
     private final ArtGalleryService artGalleryService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     @Operation(summary = "Create ArtGallery")
     public ResponseEntity<ArtGalleryResponseDto> create(@Valid @RequestBody ArtGalleryRequestDto request) {
         return new ResponseEntity<>(artGalleryService.create(request), HttpStatus.CREATED);
@@ -44,7 +45,7 @@ public class ArtGalleryController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update ArtGallery")
     public ResponseEntity<ArtGalleryResponseDto> update(@PathVariable String id,
             @Valid @RequestBody ArtGalleryRequestDto request) {
@@ -57,5 +58,25 @@ public class ArtGalleryController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable String id) {
         artGalleryService.delete(id);
+    }
+
+    @PutMapping("/{id}/verify")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Verify ArtGallery (Approve/Reject)")
+    public ResponseEntity<ArtGalleryResponseDto> verify(@PathVariable String id,
+            @RequestParam VerificationStatus status) {
+        return ResponseEntity.ok(artGalleryService.verifyGallery(id, status));
+    }
+
+    @GetMapping("/my")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
+    @Operation(summary = "Get user's own galleries with optional status filter")
+    public ResponseEntity<Page<ArtGalleryResponseDto>> getMyGalleries(
+            @RequestParam(required = false) VerificationStatus status,
+            Pageable pageable) {
+        if (status != null) {
+            return ResponseEntity.ok(artGalleryService.getMyGalleriesByStatus(status, pageable));
+        }
+        return ResponseEntity.ok(artGalleryService.getMyGalleries(pageable));
     }
 }
