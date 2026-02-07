@@ -19,11 +19,14 @@ public class ClassEnrollmentRequestDto {
     @NotBlank(message = "Student phone is required")
     private String studentPhone;
 
+    @NotBlank(message = "Address is required")
+    private String address;
+
     @NotBlank(message = "Parent/Guardian name is required")
     private String parentGuardianName;
 
     @NotNull(message = "Student age is required")
-    @Min(value = 5, message = "Student must be at least 5 years old")
+    @Min(value = 3, message = "Student must be at least 3 years old")
     @Max(value = 100, message = "Invalid age")
     private Integer studentAge;
 
@@ -31,4 +34,11 @@ public class ClassEnrollmentRequestDto {
     private String schedule;
 
     private String additionalMessage;
+
+    // Emergency Contact
+    @NotBlank(message = "Emergency contact name is required")
+    private String emergencyContactName;
+
+    @NotBlank(message = "Emergency contact phone is required")
+    private String emergencyContactPhone;
 }

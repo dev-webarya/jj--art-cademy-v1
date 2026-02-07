@@ -12,11 +12,14 @@ import com.artacademy.mapper.ClassEnrollmentMapper;
 import com.artacademy.repository.ArtClassesRepository;
 import com.artacademy.repository.ClassEnrollmentRepository;
 import com.artacademy.service.ClassEnrollmentService;
+import com.artacademy.service.SequenceGeneratorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,7 @@ public class ClassEnrollmentServiceImpl implements ClassEnrollmentService {
     private final ClassEnrollmentRepository enrollmentRepository;
     private final ArtClassesRepository classRepository;
     private final ClassEnrollmentMapper enrollmentMapper;
+    private final SequenceGeneratorService sequenceGeneratorService;
 
     @Override
     public ClassEnrollmentResponseDto enroll(ClassEnrollmentRequestDto request, User user) {
@@ -38,8 +42,7 @@ public class ClassEnrollmentServiceImpl implements ClassEnrollmentService {
 
         // Set references
         enrollment.setUserId(user.getId());
-        // Note: studentEmail is populated from request via Mapper
-        
+
         // Populate class details
         enrollment.setClassId(artClass.getId());
         enrollment.setClassName(artClass.getName());
@@ -91,6 +94,12 @@ public class ClassEnrollmentServiceImpl implements ClassEnrollmentService {
         ClassEnrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment", "id", enrollmentId));
 
+        // Generate rollNo on APPROVAL if not already set
+        if (request.getStatus() == EnrollmentStatus.APPROVED && enrollment.getRollNo() == null) {
+            enrollment.setRollNo(sequenceGeneratorService.generateRollNo());
+            log.info("Generated rollNo {} for enrollment {}", enrollment.getRollNo(), enrollmentId);
+        }
+
         enrollment.setStatus(request.getStatus());
         if (request.getAdminNotes() != null) {
             enrollment.setAdminNotes(request.getAdminNotes());
@@ -117,5 +126,17 @@ public class ClassEnrollmentServiceImpl implements ClassEnrollmentService {
     @Override
     public long countPendingEnrollments() {
         return enrollmentRepository.countByStatus(EnrollmentStatus.PENDING);
+    }
+
+    @Override
+    public Page<ClassEnrollmentResponseDto> getApprovedEnrollments(Pageable pageable) {
+        return enrollmentRepository.findByStatus(EnrollmentStatus.APPROVED, pageable)
+                .map(enrollmentMapper::toDto);
+    }
+
+    @Override
+    public List<ClassEnrollmentResponseDto> getApprovedEnrollmentsList() {
+        return enrollmentMapper.toDtoList(
+                enrollmentRepository.findByStatus(EnrollmentStatus.APPROVED));
     }
 }

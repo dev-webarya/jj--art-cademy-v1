@@ -95,63 +95,70 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         private void seedCustomers(Role customerRole) {
-                log.info("[Phase 3] Onboarding Customers...");
+                log.info("[Phase 3] Onboarding Students...");
+
+                // Student 1
                 userRepository.save(User.builder()
                                 .firstName("Alice")
                                 .lastName("Artist")
                                 .email("alice@test.com")
                                 .password(passwordEncoder.encode("Password@123"))
-                                .phoneNumber("1231231234")
+                                .phoneNumber("+911231231234")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
                                 .build());
 
+                // Student 2
                 userRepository.save(User.builder()
                                 .firstName("Bob")
-                                .lastName("Collector")
+                                .lastName("Painter")
                                 .email("bob@test.com")
                                 .password(passwordEncoder.encode("Password@123"))
-                                .phoneNumber("1231231235")
+                                .phoneNumber("+911231231235")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
                                 .build());
 
+                // Student 3
                 userRepository.save(User.builder()
                                 .firstName("Charlie")
-                                .lastName("Critic")
+                                .lastName("Sketcher")
                                 .email("charlie@test.com")
                                 .password(passwordEncoder.encode("Password@123"))
-                                .phoneNumber("1231231236")
+                                .phoneNumber("+911231231236")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
                                 .build());
 
+                // Student 4
                 userRepository.save(User.builder()
                                 .firstName("Diana")
                                 .lastName("Designer")
                                 .email("diana@test.com")
                                 .password(passwordEncoder.encode("Password@123"))
-                                .phoneNumber("1231231237")
+                                .phoneNumber("+911231231237")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
                                 .build());
 
+                // Student 5
                 userRepository.save(User.builder()
                                 .firstName("Evan")
                                 .lastName("Enthusiast")
                                 .email("evan@test.com")
                                 .password(passwordEncoder.encode("Password@123"))
-                                .phoneNumber("1231231238")
+                                .phoneNumber("+911231231238")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
                                 .build());
 
+                // Student 6
                 userRepository.save(User.builder()
                                 .firstName("Fiona")
                                 .lastName("FineArt")
                                 .email("fiona@test.com")
                                 .password(passwordEncoder.encode("Password@123"))
-                                .phoneNumber("1231231239")
+                                .phoneNumber("+911231231239")
                                 .roles(new HashSet<>(Set.of(customerRole.getName())))
                                 .isEnabled(true)
                                 .build());
@@ -163,29 +170,35 @@ public class DataSeeder implements CommandLineRunner {
                         return;
 
                 // Create 6 categories for ArtWorks
-                ArtWorksCategory paintingCat = artWorksCategoryRepository.save(ArtWorksCategory.builder()
-                                .name("Paintings")
-                                .build());
+                ArtWorksCategory paintingCat = artWorksCategoryRepository.findByName("Paintings")
+                                .orElseGet(() -> artWorksCategoryRepository.save(ArtWorksCategory.builder()
+                                                .name("Paintings")
+                                                .build()));
 
-                ArtWorksCategory sculptureCat = artWorksCategoryRepository.save(ArtWorksCategory.builder()
-                                .name("Sculptures")
-                                .build());
+                ArtWorksCategory sculptureCat = artWorksCategoryRepository.findByName("Sculptures")
+                                .orElseGet(() -> artWorksCategoryRepository.save(ArtWorksCategory.builder()
+                                                .name("Sculptures")
+                                                .build()));
 
-                ArtWorksCategory photographyCat = artWorksCategoryRepository.save(ArtWorksCategory.builder()
-                                .name("Photography")
-                                .build());
+                ArtWorksCategory photographyCat = artWorksCategoryRepository.findByName("Photography")
+                                .orElseGet(() -> artWorksCategoryRepository.save(ArtWorksCategory.builder()
+                                                .name("Photography")
+                                                .build()));
 
-                ArtWorksCategory digitalArtCat = artWorksCategoryRepository.save(ArtWorksCategory.builder()
-                                .name("Digital Art")
-                                .build());
+                ArtWorksCategory digitalArtCat = artWorksCategoryRepository.findByName("Digital Art")
+                                .orElseGet(() -> artWorksCategoryRepository.save(ArtWorksCategory.builder()
+                                                .name("Digital Art")
+                                                .build()));
 
-                ArtWorksCategory mixedMediaCat = artWorksCategoryRepository.save(ArtWorksCategory.builder()
-                                .name("Mixed Media")
-                                .build());
+                ArtWorksCategory mixedMediaCat = artWorksCategoryRepository.findByName("Mixed Media")
+                                .orElseGet(() -> artWorksCategoryRepository.save(ArtWorksCategory.builder()
+                                                .name("Mixed Media")
+                                                .build()));
 
-                ArtWorksCategory printsCat = artWorksCategoryRepository.save(ArtWorksCategory.builder()
-                                .name("Prints & Editions")
-                                .build());
+                ArtWorksCategory printsCat = artWorksCategoryRepository.findByName("Prints & Editions")
+                                .orElseGet(() -> artWorksCategoryRepository.save(ArtWorksCategory.builder()
+                                                .name("Prints & Editions")
+                                                .build()));
 
                 // Seed 6 artworks per category
                 IntStream.rangeClosed(1, 6).forEach(i -> {
@@ -198,8 +211,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .artistName("Maria Santos")
                                         .artMedium("Oil on Canvas")
                                         .size("24x36")
-                                        .views(100 + i * 10)
-                                        .likes(50 + i * 5)
+
                                         .categoryId(paintingCat.getId())
                                         .categoryName(paintingCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Painting+" + i)
@@ -215,8 +227,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .artistName("David Chen")
                                         .artMedium("Bronze")
                                         .size("12x12x24")
-                                        .views(80 + i * 10)
-                                        .likes(40 + i * 5)
+
                                         .categoryId(sculptureCat.getId())
                                         .categoryName(sculptureCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Sculpture+" + i)
@@ -232,8 +243,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .artistName("Elena Rodriguez")
                                         .artMedium("Digital Print on Canvas")
                                         .size("20x30")
-                                        .views(150 + i * 20)
-                                        .likes(75 + i * 10)
+
                                         .categoryId(photographyCat.getId())
                                         .categoryName(photographyCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Photography+" + i)
@@ -249,8 +259,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .artistName("Alex Kim")
                                         .artMedium("Digital NFT + Print")
                                         .size("4K Resolution")
-                                        .views(200 + i * 30)
-                                        .likes(100 + i * 15)
+
                                         .categoryId(digitalArtCat.getId())
                                         .categoryName(digitalArtCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=DigitalArt+" + i)
@@ -266,8 +275,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .artistName("Sophie Turner")
                                         .artMedium("Mixed Media on Board")
                                         .size("18x24")
-                                        .views(60 + i * 10)
-                                        .likes(30 + i * 5)
+
                                         .categoryId(mixedMediaCat.getId())
                                         .categoryName(mixedMediaCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=MixedMedia+" + i)
@@ -283,8 +291,7 @@ public class DataSeeder implements CommandLineRunner {
                                         .artistName("Various Artists")
                                         .artMedium("Giclée on Paper")
                                         .size("16x20")
-                                        .views(300 + i * 50)
-                                        .likes(150 + i * 25)
+
                                         .categoryId(printsCat.getId())
                                         .categoryName(printsCat.getName())
                                         .imageUrl("https://via.placeholder.com/300?text=Print+" + i)
@@ -298,29 +305,35 @@ public class DataSeeder implements CommandLineRunner {
                         return;
 
                 // Create 6 categories for ArtMaterials
-                ArtMaterialsCategory brushCat = artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
-                                .name("Brushes")
-                                .build());
+                ArtMaterialsCategory brushCat = artMaterialsCategoryRepository.findByName("Brushes")
+                                .orElseGet(() -> artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
+                                                .name("Brushes")
+                                                .build()));
 
-                ArtMaterialsCategory paintCat = artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
-                                .name("Paints")
-                                .build());
+                ArtMaterialsCategory paintCat = artMaterialsCategoryRepository.findByName("Paints")
+                                .orElseGet(() -> artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
+                                                .name("Paints")
+                                                .build()));
 
-                ArtMaterialsCategory canvasCat = artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
-                                .name("Canvases & Surfaces")
-                                .build());
+                ArtMaterialsCategory canvasCat = artMaterialsCategoryRepository.findByName("Canvases & Surfaces")
+                                .orElseGet(() -> artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
+                                                .name("Canvases & Surfaces")
+                                                .build()));
 
-                ArtMaterialsCategory drawingCat = artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
-                                .name("Drawing Supplies")
-                                .build());
+                ArtMaterialsCategory drawingCat = artMaterialsCategoryRepository.findByName("Drawing Supplies")
+                                .orElseGet(() -> artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
+                                                .name("Drawing Supplies")
+                                                .build()));
 
-                ArtMaterialsCategory toolsCat = artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
-                                .name("Art Tools & Accessories")
-                                .build());
+                ArtMaterialsCategory toolsCat = artMaterialsCategoryRepository.findByName("Art Tools & Accessories")
+                                .orElseGet(() -> artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
+                                                .name("Art Tools & Accessories")
+                                                .build()));
 
-                ArtMaterialsCategory paperCat = artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
-                                .name("Paper & Sketchbooks")
-                                .build());
+                ArtMaterialsCategory paperCat = artMaterialsCategoryRepository.findByName("Paper & Sketchbooks")
+                                .orElseGet(() -> artMaterialsCategoryRepository.save(ArtMaterialsCategory.builder()
+                                                .name("Paper & Sketchbooks")
+                                                .build()));
 
                 // Seed 2 materials per category = 12 total
                 IntStream.rangeClosed(1, 2).forEach(i -> {
@@ -423,29 +436,35 @@ public class DataSeeder implements CommandLineRunner {
                         return;
 
                 // Create 6 categories for ArtClasses
-                ArtClassesCategory workshopCat = artClassesCategoryRepository.save(ArtClassesCategory.builder()
-                                .name("Workshops")
-                                .build());
+                ArtClassesCategory workshopCat = artClassesCategoryRepository.findByName("Workshops")
+                                .orElseGet(() -> artClassesCategoryRepository.save(ArtClassesCategory.builder()
+                                                .name("Workshops")
+                                                .build()));
 
-                ArtClassesCategory onlineCat = artClassesCategoryRepository.save(ArtClassesCategory.builder()
-                                .name("Online Courses")
-                                .build());
+                ArtClassesCategory onlineCat = artClassesCategoryRepository.findByName("Online Courses")
+                                .orElseGet(() -> artClassesCategoryRepository.save(ArtClassesCategory.builder()
+                                                .name("Online Courses")
+                                                .build()));
 
-                ArtClassesCategory privateCat = artClassesCategoryRepository.save(ArtClassesCategory.builder()
-                                .name("Private Lessons")
-                                .build());
+                ArtClassesCategory privateCat = artClassesCategoryRepository.findByName("Private Lessons")
+                                .orElseGet(() -> artClassesCategoryRepository.save(ArtClassesCategory.builder()
+                                                .name("Private Lessons")
+                                                .build()));
 
-                ArtClassesCategory groupCat = artClassesCategoryRepository.save(ArtClassesCategory.builder()
-                                .name("Group Sessions")
-                                .build());
+                ArtClassesCategory groupCat = artClassesCategoryRepository.findByName("Group Sessions")
+                                .orElseGet(() -> artClassesCategoryRepository.save(ArtClassesCategory.builder()
+                                                .name("Group Sessions")
+                                                .build()));
 
-                ArtClassesCategory masterCat = artClassesCategoryRepository.save(ArtClassesCategory.builder()
-                                .name("Masterclasses")
-                                .build());
+                ArtClassesCategory masterCat = artClassesCategoryRepository.findByName("Masterclasses")
+                                .orElseGet(() -> artClassesCategoryRepository.save(ArtClassesCategory.builder()
+                                                .name("Masterclasses")
+                                                .build()));
 
-                ArtClassesCategory kidsCat = artClassesCategoryRepository.save(ArtClassesCategory.builder()
-                                .name("Kids & Teen Classes")
-                                .build());
+                ArtClassesCategory kidsCat = artClassesCategoryRepository.findByName("Kids & Teen Classes")
+                                .orElseGet(() -> artClassesCategoryRepository.save(ArtClassesCategory.builder()
+                                                .name("Kids & Teen Classes")
+                                                .build()));
 
                 // Seed 2 classes per category = 12 total
                 IntStream.rangeClosed(1, 2).forEach(i -> {
@@ -539,34 +558,45 @@ public class DataSeeder implements CommandLineRunner {
                         return;
 
                 // Create 6 categories for ArtExhibitions
-                ArtExhibitionCategory modernCat = artExhibitionCategoryRepository.save(ArtExhibitionCategory.builder()
-                                .name("Modern Art")
-                                .build());
+                ArtExhibitionCategory modernCat = artExhibitionCategoryRepository.findByName("Modern Art")
+                                .orElseGet(() -> artExhibitionCategoryRepository.save(ArtExhibitionCategory.builder()
+                                                .name("Modern Art")
+                                                .build()));
 
                 ArtExhibitionCategory classicalCat = artExhibitionCategoryRepository
-                                .save(ArtExhibitionCategory.builder()
-                                                .name("Classical Art")
-                                                .build());
+                                .findByName("Classical Art")
+                                .orElseGet(() -> artExhibitionCategoryRepository
+                                                .save(ArtExhibitionCategory.builder()
+                                                                .name("Classical Art")
+                                                                .build()));
 
                 ArtExhibitionCategory contemporaryCat = artExhibitionCategoryRepository
-                                .save(ArtExhibitionCategory.builder()
-                                                .name("Contemporary")
-                                                .build());
+                                .findByName("Contemporary")
+                                .orElseGet(() -> artExhibitionCategoryRepository
+                                                .save(ArtExhibitionCategory.builder()
+                                                                .name("Contemporary")
+                                                                .build()));
 
                 ArtExhibitionCategory photographyCat = artExhibitionCategoryRepository
-                                .save(ArtExhibitionCategory.builder()
-                                                .name("Photography")
-                                                .build());
+                                .findByName("Photography")
+                                .orElseGet(() -> artExhibitionCategoryRepository
+                                                .save(ArtExhibitionCategory.builder()
+                                                                .name("Photography")
+                                                                .build()));
 
                 ArtExhibitionCategory sculptureCat = artExhibitionCategoryRepository
-                                .save(ArtExhibitionCategory.builder()
-                                                .name("Sculpture")
-                                                .build());
+                                .findByName("Sculpture")
+                                .orElseGet(() -> artExhibitionCategoryRepository
+                                                .save(ArtExhibitionCategory.builder()
+                                                                .name("Sculpture")
+                                                                .build()));
 
                 ArtExhibitionCategory interactiveCat = artExhibitionCategoryRepository
-                                .save(ArtExhibitionCategory.builder()
-                                                .name("Interactive & Digital")
-                                                .build());
+                                .findByName("Interactive & Digital")
+                                .orElseGet(() -> artExhibitionCategoryRepository
+                                                .save(ArtExhibitionCategory.builder()
+                                                                .name("Interactive & Digital")
+                                                                .build()));
 
                 // Seed 2 exhibitions per category = 12 total
                 IntStream.rangeClosed(1, 2).forEach(i -> {
@@ -666,29 +696,35 @@ public class DataSeeder implements CommandLineRunner {
                         return;
 
                 // Create 6 categories for ArtGalleries
-                ArtGalleryCategory downtownCat = artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
-                                .name("Downtown")
-                                .build());
+                ArtGalleryCategory downtownCat = artGalleryCategoryRepository.findByName("Downtown")
+                                .orElseGet(() -> artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
+                                                .name("Downtown")
+                                                .build()));
 
-                ArtGalleryCategory artsDistrictCat = artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
-                                .name("Arts District")
-                                .build());
+                ArtGalleryCategory artsDistrictCat = artGalleryCategoryRepository.findByName("Arts District")
+                                .orElseGet(() -> artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
+                                                .name("Arts District")
+                                                .build()));
 
-                ArtGalleryCategory waterfrontCat = artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
-                                .name("Waterfront")
-                                .build());
+                ArtGalleryCategory waterfrontCat = artGalleryCategoryRepository.findByName("Waterfront")
+                                .orElseGet(() -> artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
+                                                .name("Waterfront")
+                                                .build()));
 
-                ArtGalleryCategory historicCat = artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
-                                .name("Historic Quarter")
-                                .build());
+                ArtGalleryCategory historicCat = artGalleryCategoryRepository.findByName("Historic Quarter")
+                                .orElseGet(() -> artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
+                                                .name("Historic Quarter")
+                                                .build()));
 
-                ArtGalleryCategory suburbanCat = artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
-                                .name("Suburban")
-                                .build());
+                ArtGalleryCategory suburbanCat = artGalleryCategoryRepository.findByName("Suburban")
+                                .orElseGet(() -> artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
+                                                .name("Suburban")
+                                                .build()));
 
-                ArtGalleryCategory universityCat = artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
-                                .name("University District")
-                                .build());
+                ArtGalleryCategory universityCat = artGalleryCategoryRepository.findByName("University District")
+                                .orElseGet(() -> artGalleryCategoryRepository.save(ArtGalleryCategory.builder()
+                                                .name("University District")
+                                                .build()));
 
                 // Seed 2 galleries per category = 12 total
                 IntStream.rangeClosed(1, 2).forEach(i -> {

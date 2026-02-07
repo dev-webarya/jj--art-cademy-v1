@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.util.Set;
 
 @Data
@@ -18,4 +19,8 @@ public class UserResponse {
     private String email;
     private String phoneNumber;
     private Set<String> roles;
+    private boolean isEnabled;
+    private boolean deleted;
+    private Instant createdAt;
+    private Instant updatedAt;
 }

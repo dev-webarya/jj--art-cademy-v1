@@ -10,8 +10,7 @@ public interface ArtWorksMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "categoryName", ignore = true) // Handled manually in Service
-    @Mapping(target = "views", constant = "0")
-    @Mapping(target = "likes", constant = "0")
+
     @Mapping(target = "deleted", constant = "false")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -21,8 +20,7 @@ public interface ArtWorksMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "categoryName", ignore = true) // Handled manually in Service
-    @Mapping(target = "views", ignore = true)
-    @Mapping(target = "likes", ignore = true)
+
     @Mapping(target = "deleted", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

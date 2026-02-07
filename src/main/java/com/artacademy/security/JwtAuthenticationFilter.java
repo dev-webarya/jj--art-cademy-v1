@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         final String requestURI = request.getRequestURI();
-        log.info("--- JwtAuthenticationFilter for URI: {} ---", requestURI);
+        log.debug("--- JwtAuthenticationFilter for URI: {} ---", requestURI);
 
         final String authHeader = request.getHeader("Authorization");
 
@@ -47,10 +47,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             final String jti = jwtService.extractJti(jwt);
-            log.info("FILTER: Checking token with JTI: {}", jti);
+            log.debug("FILTER: Checking token with JTI: {}", jti);
 
             boolean isTokenDenied = tokenDenyListRepository.existsByJti(jti);
-            log.info("FILTER: Is token JTI in deny list? -> {}", isTokenDenied);
+            log.debug("FILTER: Is token JTI in deny list? -> {}", isTokenDenied);
 
             if (jti != null && isTokenDenied) {
                 log.warn("FILTER: ACCESS DENIED. Token with JTI {} is on the deny list.", jti);
@@ -72,9 +72,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authToken.setDetails(
                             new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    log.info("FILTER: Successfully authenticated user '{}'", username);
+                    log.debug("FILTER: Successfully authenticated user '{}'", username);
                 }
             }
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            log.debug("FILTER: Token expired: {}", e.getMessage());
         } catch (Exception e) {
             log.error("FILTER: Cannot set user authentication: {}", e.getMessage());
         }

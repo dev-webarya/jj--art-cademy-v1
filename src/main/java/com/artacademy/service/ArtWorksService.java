@@ -16,7 +16,4 @@ public interface ArtWorksService {
 
     void delete(String id);
 
-    ArtWorksResponseDto incrementViews(String id);
-
-    ArtWorksResponseDto incrementLikes(String id);
 }

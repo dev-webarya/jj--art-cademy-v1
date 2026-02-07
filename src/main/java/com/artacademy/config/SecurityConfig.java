@@ -87,6 +87,16 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.GET, "/api/v1/art-materials-categories/**")
                                                 .permitAll()
 
+                                                // LMS Public Endpoints
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/lms/events/public")
+                                                .permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/lms/events/upcoming")
+                                                .permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/lms/gallery/public")
+                                                .permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/lms/gallery/featured")
+                                                .permitAll()
+
                                                 // All other authorization is handled by @PreAuthorize annotations in
                                                 // controllers
                                                 // This provides better flexibility, maintainability, and co-location of

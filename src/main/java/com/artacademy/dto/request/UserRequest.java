@@ -20,7 +20,7 @@ public class UserRequest {
     @Email(message = "Invalid email format")
     private String email;
 
-    @Pattern(regexp = "^\\d{10}$", message = "Phone number must be 10 digits")
+    @Pattern(regexp = "^\\+?\\d{10,15}$", message = "Phone number must be 10-15 digits")
     private String phoneNumber;
 
     @Size(min = 6, message = "Password must be at least 6 characters long")

@@ -15,8 +15,6 @@ public interface ArtExhibitionCategoryService {
 
     Page<ArtExhibitionCategoryResponseDto> getAll(Pageable pageable);
 
-    List<ArtExhibitionCategoryResponseDto> getAllRootCategories();
-
     ArtExhibitionCategoryResponseDto update(String id, ArtExhibitionCategoryRequestDto request);
 
     void delete(String id);
